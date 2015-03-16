@@ -1,0 +1,5 @@
+* Quickmsg
+
+Quickmsg is meant to be a thin application utility layer on top of Zyre/ZeroMQ and MessagePack, supporting simple group messaging. The primary message type (for now) is a JSON string, transformed to a compact binary format using MessagePack before transmission to a Zyre group. The API is being initially developed in C++, and is intended to be wrapped using a tool such as SWIG for use by multiple target languages. 
+
+Almost nothing is actually implemented yet. More to come...
