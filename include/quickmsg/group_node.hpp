@@ -5,44 +5,51 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <tbb/concurrent_unordered_map.h>
 #include <type_traits>
+#include <stdexcept>
+#include <atomic>
+#include <thread>
 
 namespace quickmsg {
 
   class Peer 
   {
   public:
-    Peer(const std::string uuid);
+    Peer(const std::string& uuid, const std::string& desc);
     virtual ~Peer();
     
     std::string uuid();
     std::string description(); // no condition on uniqueness!
   private:    
+    std::string uuid_;
+    std::string desc_;
   };
   typedef boost::shared_ptr<Peer> PeerPtr;
   typedef std::list<PeerPtr> PeerList;
   typedef boost::shared_ptr<PeerList> PeerListPtr;
 
-  void _handle_message(const std::string& msg);
-  
-  typedef std::add_pointer<decltype(_handle_message)> MessageCallback;
+  typedef std::add_pointer<void(const MessagePtr&,void*)>::type MessageCallback;
 
   class GroupNode 
   {
-  public:
-    GroupNode();
+  public:    
+    GroupNode(const std::string& description = "", bool promiscuous=false);
     virtual ~GroupNode();
     
     void join(const std::string& group);
     void leave(const std::string& group);
     
-    void register_handler(const std::string& group, MessageCallback cb);
+    void register_handler(const std::string& group, MessageCallback cb, void* args);
+    void register_whispers(MessageCallback cb, void* args);
 
     void shout(const std::string& group, const std::string& msg);
-    void whisper(const Peer* peer, const std::string& msg);
+    void whisper(const PeerPtr peer, const std::string& msg);
 
-    PeerListPtr peers() const;
-    PeerListPtr peers_by_description(const std::string& desc) const;
+    // return a snapshot of the peers on the network
+    void peers(PeerList& ps) const;
+    // return a snapshot of the peers with the given description
+    void peers_by_description(PeerList& ps, const std::string& desc) const;
 
     /** \brief Terminate any processing for this node.
 	Terminate any processing for this node, non-recoverable (for now).
@@ -66,10 +73,34 @@ namespace quickmsg {
 	network.
     */
     void async_spin();
+
+    static std::string name();
+
+  protected:
+    void handle_whisper(const std::string& uuid, zmsg_t* msg);
+    void handle_shout(const std::string& group, zmsg_t* msg);
+
   private:
+    bool spin_once();
+    
     zyre_t* node_;
-    PeerListPtr peers_;
-    std::map<std::string,PeerListPtr> peers_by_desc_;
+    PeerPtr self_;
+    //PeerListPtr peers_;
+    //std::map<std::string,PeerListPtr> peers_by_desc_;
+    std::thread* event_thread_;
+    
+
+    // topic -> handler
+    typedef tbb::concurrent_unordered_multimap<std::string,
+					       std::pair<MessageCallback,void*> > handlers_t;
+    // typedef std::map<std::string,std::pair<MessageCallback,void*> > handlers_t;
+    handlers_t handlers_;
+    std::pair<MessageCallback,void*> whisper_handler_;
+
+    //static std::mutex  name_mutex_;
+    static std::string name_;
+    static std::atomic_bool running_;
   };
+
   
 }

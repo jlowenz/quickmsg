@@ -66,4 +66,10 @@ namespace quickmsg {
   {
     return "";
   }
+
+  Time time_now()
+  {
+    Time t;
+    return t;
+  }
 }
