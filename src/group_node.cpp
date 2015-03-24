@@ -47,6 +47,8 @@ namespace quickmsg {
     zyre_set_header(node_, "desc", "%s", desc.c_str());
     // access our uuid
     std::string uuid = zyre_uuid(node_);
+    // access our name
+    node_name_ = zyre_name(node_);
     // start the node
     if (zyre_start(node_)) {
       throw std::runtime_error("Could not start the zyre node");
@@ -62,12 +64,19 @@ namespace quickmsg {
     zyre_destroy(&node_);
   }
     
-  void   
+  void    
   GroupNode::join(const std::string& group)
   {
     if (zyre_join(node_, group.c_str())) {
       throw std::runtime_error("Error joining group: " + group);
     }
+  }
+
+  void
+  GroupNode::wait_join(const std::string& group)
+  {
+    // how do we wait for joins? we should receive at least one join message
+    // but we MAY have received it in the PAST! 
   }
   
   void
@@ -152,7 +161,6 @@ namespace quickmsg {
     msg->header.stamp = time_now();
     msg->header.context = uuid;
     msg->msg = zmsg_popstr(zmsg);
-    zmsg_destroy(&zmsg);
     whisper_handler_.first(msg, whisper_handler_.second);
   }
 
@@ -165,41 +173,101 @@ namespace quickmsg {
     char* a_str = zmsg_popstr(zmsg);
     msg->msg = a_str;
     free(a_str);
-    zmsg_destroy(&zmsg);
+    //zmsg_destroy(&zmsg);
     auto range = handlers_.equal_range(group);
     std::for_each(range.first,range.second,
 		  [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});
   }
 
+  class ScopedEvent
+  {
+  public:
+    ScopedEvent(zyre_event_t* e)
+      : e_(e)
+    {
+    }
+
+    ~ScopedEvent() 
+    {
+      zyre_event_destroy(&e_);
+    }
+
+    bool valid() const {
+      return e_ != NULL;
+    }
+
+    zyre_event_type_t type() const {
+      return zyre_event_type(e_);
+    }
+
+    std::string peer_uuid() const {
+      return std::string(zyre_event_sender(e_));
+    }
+
+    std::string peer_name() const {
+      return std::string(zyre_event_name(e_));
+    }
+    
+    std::string group() const {
+      return std::string(zyre_event_group(e_));
+    }
+    
+    zmsg_t* message() const {
+      return zyre_event_msg(e_);
+    }
+
+  private:
+    zyre_event_t* e_;
+  };
+
   bool 
   GroupNode::spin_once()
   {
     // read a new event from the zyre node, interrupt
-    zyre_event_t* e = zyre_event_new(node_);
-    if (e != NULL) {
-      zyre_event_type_t t = zyre_event_type(e);
+    ScopedEvent e(zyre_event_new(node_)); 
+    // will be destroyed at the end of the function
+    if (e.valid() && !zsys_interrupted) {
+      zyre_event_type_t t = e.type();
       switch (t) {
       case ZYRE_EVENT_WHISPER: {
-	std::string peer_uuid = zyre_event_sender(e);
-	zmsg_t* msg = zyre_event_msg(e);
+	std::string name = e.peer_name();
+	std::cerr << name << " whispers -> " << node_name_ << std::endl;
+	std::string peer_uuid = e.peer_uuid();
+	zmsg_t* msg = e.message();
 	handle_whisper(peer_uuid, msg); }
 	break;
       case ZYRE_EVENT_SHOUT: {
-	std::string group_id = zyre_event_group(e);
-	zmsg_t* msg = zyre_event_msg(e);
+	std::string group_id = e.group();
+	std::cerr << e.peer_name() << " " << group_id 
+		  << " shouts ->" << node_name_ << std::endl;
+	zmsg_t* msg = e.message();
 	handle_shout(group_id, msg); }
 	break;
-	case ZYRE_EVENT_ENTER:
-	  break;
-	case ZYRE_EVENT_JOIN:
-	  break;
-	case ZYRE_EVENT_LEAVE:
-	  break;
-	case ZYRE_EVENT_EXIT:
-	  break;
-	case ZYRE_EVENT_STOP:
-	  return false;
+      case ZYRE_EVENT_ENTER: {
+	std::string name = e.peer_name();
+	std::cerr << name << " enters | " << node_name_ << std::endl; }
+	break;
+      case ZYRE_EVENT_JOIN: {
+	std::string group_id = e.group();
+	std::cerr << e.peer_name() << " joins " << group_id << " | " 
+		  << node_name_ << std::endl;
+	joins_[group_id]++; }
+	break; 
+      case ZYRE_EVENT_LEAVE: {
+	std::string group_id = e.group();
+	std::cerr << e.peer_name() << " leaves " << group_id << " | " 
+		  << node_name_ << std::endl;
+	joins_[group_id]--; }
+	break;
+      case ZYRE_EVENT_EXIT: {
+	std::cerr << e.peer_name() << " exits | " << node_name_ << std::endl; }
+	break;
+      case ZYRE_EVENT_STOP: {
+	std::cerr << e.peer_name() << " stops | " << node_name_ << std::endl; }
+	return false;
       }
+    } else {
+      return false;
     }
     return true;
   }

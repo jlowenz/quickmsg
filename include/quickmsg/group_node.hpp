@@ -38,6 +38,7 @@ namespace quickmsg {
     virtual ~GroupNode();
     
     void join(const std::string& group);
+    void wait_join(const std::string& group);
     void leave(const std::string& group);
     
     void register_handler(const std::string& group, MessageCallback cb, void* args);
@@ -84,11 +85,14 @@ namespace quickmsg {
     bool spin_once();
     
     zyre_t* node_;
+    std::string node_name_;
     PeerPtr self_;
     //PeerListPtr peers_;
     //std::map<std::string,PeerListPtr> peers_by_desc_;
     std::thread* event_thread_;
     
+    typedef std::map<std::string,size_t> join_map_t;
+    join_map_t joins_;
 
     // topic -> handler
     typedef tbb::concurrent_unordered_multimap<std::string,
@@ -100,6 +104,9 @@ namespace quickmsg {
     //static std::mutex  name_mutex_;
     static std::string name_;
     static std::atomic_bool running_;
+
+    friend void init(const std::string&);
+    friend void shutdown(const std::string&);
   };
 
   

@@ -7,6 +7,7 @@ include(FindPkgConfig)
 pkg_check_modules(LIB_ZMQ "libzmq")
 pkg_check_modules(LIB_CZMQ "libczmq")
 pkg_check_modules(LIB_ZYRE "libzyre")
+pkg_check_modules(TBB "tbb")
 
 find_package(Boost REQUIRED COMPONENTS date_time system thread)
 
@@ -28,5 +29,12 @@ add_library(${PROJECT_NAME} SHARED
   src/publisher.cpp
   src/subscriber.cpp
   src/client.cpp
-  src/service.cpp)
+  src/service.cpp
+  src/quickmsg.cpp)
+target_link_libraries(${PROJECT_NAME} tbb zyre)
 
+add_executable(test_pub src/test_pub.cpp)
+target_link_libraries(test_pub ${PROJECT_NAME})
+
+add_executable(test_sub src/test_sub.cpp)
+target_link_libraries(test_sub ${PROJECT_NAME})

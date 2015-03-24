@@ -14,6 +14,7 @@ namespace quickmsg {
     void publish(const std::string& msg);
 
   private:
+    std::string topic_;
     GroupNode* node_;
   };
 

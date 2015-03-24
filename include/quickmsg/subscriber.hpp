@@ -11,7 +11,6 @@ namespace quickmsg {
   
   class Subscriber
   {
-    friend void subscriber_handler(const MessagePtr& msg, void* args);
   public:    
     Subscriber(const std::string& topic, size_t queue_size = 10);
     virtual ~Subscriber();
@@ -23,6 +22,11 @@ namespace quickmsg {
     MsgListPtr messages();
     
   private:
+    /**
+     * \internal C wrapper function to call the subscribers message handler
+     */
+    friend void subscriber_handler(const MessagePtr& msg, void* args); 
+
     void handle_message(const MessagePtr& msg);
 
     std::string topic_;

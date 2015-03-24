@@ -3,6 +3,9 @@
 
 namespace quickmsg {
 
+  /**
+   * \internal 
+   */
   void subscriber_handler(const MessagePtr& msg, void* args)
   {
     static_cast<Subscriber*>(args)->handle_message(msg);
@@ -17,7 +20,6 @@ namespace quickmsg {
     // create the group node
     std::string name("S/");
     node_ = new GroupNode(name + topic);
-    node_ = new GroupNode("subscriber");
     // join the correct group (topic)
     node_->join(topic_);
     // register the message handler for the group
@@ -58,7 +60,7 @@ namespace quickmsg {
     : topic_(topic)
   {
     // create the group node
-    std::string name("AS:");
+    std::string name("AS/");
     node_ = new GroupNode(name + topic);
     // join the correct group (topic)
     node_->join(topic_);

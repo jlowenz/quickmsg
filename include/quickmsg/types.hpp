@@ -63,4 +63,5 @@ namespace quickmsg {
 
   typedef std::list<MessagePtr> MsgList;
   typedef boost::shared_ptr<MsgList> MsgListPtr;
+  
 }
