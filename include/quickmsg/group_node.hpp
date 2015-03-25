@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <stdexcept>
 #include <atomic>
+#include <condition_variable>
 #include <thread>
 
 namespace quickmsg {
@@ -91,12 +92,15 @@ namespace quickmsg {
     //std::map<std::string,PeerListPtr> peers_by_desc_;
     std::thread* event_thread_;
     
-    typedef std::map<std::string,size_t> join_map_t;
+    typedef std::unique_lock<std::mutex> basic_lock;
+    typedef std::map<std::string,uint> join_map_t;
     join_map_t joins_;
+    // should wrap these in a more useful class!
+    std::condition_variable join_cond_;
+    std::mutex join_mutex_;
 
     // topic -> handler
-    typedef tbb::concurrent_unordered_multimap<std::string,
-					       std::pair<MessageCallback,void*> > handlers_t;
+    typedef tbb::concurrent_unordered_multimap<std::string,std::pair<MessageCallback,void*> > handlers_t;
     // typedef std::map<std::string,std::pair<MessageCallback,void*> > handlers_t;
     handlers_t handlers_;
     std::pair<MessageCallback,void*> whisper_handler_;

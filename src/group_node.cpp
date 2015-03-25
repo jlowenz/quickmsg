@@ -69,7 +69,7 @@ namespace quickmsg {
   {
     if (zyre_join(node_, group.c_str())) {
       throw std::runtime_error("Error joining group: " + group);
-    }
+    }    
   }
 
   void
@@ -77,6 +77,11 @@ namespace quickmsg {
   {
     // how do we wait for joins? we should receive at least one join message
     // but we MAY have received it in the PAST! 
+    basic_lock lk(join_mutex_); 
+    if (joins_[group] > 0) return;
+    else {
+      join_cond_.wait(lk, [&](){ return joins_[group] > 0; });
+    }
   }
   
   void
@@ -251,7 +256,11 @@ namespace quickmsg {
 	std::string group_id = e.group();
 	std::cerr << e.peer_name() << " joins " << group_id << " | " 
 		  << node_name_ << std::endl;
-	joins_[group_id]++; }
+	{
+	  basic_lock lk(join_mutex_);
+	  joins_[group_id]++; 
+	}
+	join_cond_.notify_all(); }
 	break; 
       case ZYRE_EVENT_LEAVE: {
 	std::string group_id = e.group();
