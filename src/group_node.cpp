@@ -39,7 +39,7 @@ namespace quickmsg {
     return desc_;
   }
 
-  GroupNode::GroupNode(const std::string& desc, bool promiscuous)    
+  GroupNode::GroupNode(const std::string& desc, bool promiscuous)
   {
     // create the zyre node
     node_ = zyre_new((GroupNode::name() + "/" + desc).c_str());
@@ -54,7 +54,7 @@ namespace quickmsg {
       throw std::runtime_error("Could not start the zyre node");
     }
     GroupNode::running_ = true;
-
+    interrupted_ = false;
     // create our self peer
     self_.reset(new Peer(uuid, desc));
   }
@@ -118,7 +118,15 @@ namespace quickmsg {
   }
 
   void 
-  GroupNode::whisper(const PeerPtr peer, const std::string& msg)
+  GroupNode::whisper(const std::string& peer_uuid, const std::string& msg)
+  {
+    if (zyre_whispers(node_, peer_uuid.c_str(), "%s", msg.c_str())) {
+      throw std::runtime_error("Error sending message to peer: " + peer_uuid);
+    }
+  }
+
+  void 
+  GroupNode::whisper(const PeerPtr& peer, const std::string& msg)
   {
     if (zyre_whispers(node_, peer->uuid().c_str(), "%s", msg.c_str())) {
       throw std::runtime_error("Error sending message to peer: " + peer->uuid());
@@ -165,16 +173,20 @@ namespace quickmsg {
     MessagePtr msg(new Message);
     msg->header.stamp = time_now();
     msg->header.context = uuid;
-    msg->msg = zmsg_popstr(zmsg);
+    msg->header.src_uuid = uuid;
+    char* a_str = zmsg_popstr(zmsg);
+    msg->msg = a_str;
+    free(a_str);
     whisper_handler_.first(msg, whisper_handler_.second);
   }
 
   void 
-  GroupNode::handle_shout(const std::string& group, zmsg_t* zmsg)
+  GroupNode::handle_shout(const std::string& group, const std::string& uuid, zmsg_t* zmsg)
   {
     MessagePtr msg(new Message);
     msg->header.stamp = time_now();
     msg->header.context = group;
+    msg->header.src_uuid = uuid;
     char* a_str = zmsg_popstr(zmsg);
     msg->msg = a_str;
     free(a_str);
@@ -226,54 +238,66 @@ namespace quickmsg {
   };
 
   bool 
+  GroupNode::interrupted()
+  {
+    return interrupted_.load();
+  }
+
+  bool 
   GroupNode::spin_once()
   {
     // read a new event from the zyre node, interrupt
-    ScopedEvent e(zyre_event_new(node_)); 
+    interrupted_ = zsys_interrupted;
+    if (interrupted_.load()) return false;
+
+    ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
     // will be destroyed at the end of the function
-    if (e.valid() && !zsys_interrupted) {
+    if (e.valid()) {
       zyre_event_type_t t = e.type();
       switch (t) {
       case ZYRE_EVENT_WHISPER: {
-	std::string name = e.peer_name();
-	std::cerr << name << " whispers -> " << node_name_ << std::endl;
-	std::string peer_uuid = e.peer_uuid();
-	zmsg_t* msg = e.message();
-	handle_whisper(peer_uuid, msg); }
-	break;
+        std::string name = e.peer_name();
+        std::cerr << name << " whispers -> " << node_name_ << std::endl;
+        std::string peer_uuid = e.peer_uuid();
+        std::cerr << " peer id " << peer_uuid << std::endl;
+        zmsg_t* msg = e.message();
+        handle_whisper(peer_uuid, msg); }
+        break;
       case ZYRE_EVENT_SHOUT: {
-	std::string group_id = e.group();
-	std::cerr << e.peer_name() << " " << group_id 
-		  << " shouts ->" << node_name_ << std::endl;
-	zmsg_t* msg = e.message();
-	handle_shout(group_id, msg); }
-	break;
+        std::string group_id = e.group();
+        std::cerr << e.peer_name() << " " << group_id 
+        	  << " shouts ->" << node_name_ << std::endl;
+        std::string peer_uuid = e.peer_uuid();
+        std::cerr << " peer id " << peer_uuid << std::endl;
+        zmsg_t* msg = e.message();
+        handle_shout(group_id, peer_uuid, msg); }
+        break;
       case ZYRE_EVENT_ENTER: {
-	std::string name = e.peer_name();
-	std::cerr << name << " enters | " << node_name_ << std::endl; }
-	break;
+        std::string name = e.peer_name();
+        std::cerr << name << " enters | " << node_name_ << std::endl; }
+        break;
       case ZYRE_EVENT_JOIN: {
-	std::string group_id = e.group();
-	std::cerr << e.peer_name() << " joins " << group_id << " | " 
-		  << node_name_ << std::endl;
-	{
-	  basic_lock lk(join_mutex_);
-	  joins_[group_id]++; 
-	}
-	join_cond_.notify_all(); }
-	break; 
+        std::string group_id = e.group();
+        std::cerr << e.peer_name() << " joins " << group_id << " | " 
+        	  << node_name_ << std::endl;
+        {
+          basic_lock lk(join_mutex_);
+          joins_[group_id]++; 
+        }
+        join_cond_.notify_all(); }
+        break; 
       case ZYRE_EVENT_LEAVE: {
-	std::string group_id = e.group();
-	std::cerr << e.peer_name() << " leaves " << group_id << " | " 
-		  << node_name_ << std::endl;
-	joins_[group_id]--; }
-	break;
+        std::string group_id = e.group();
+        std::cerr << e.peer_name() << " leaves " << group_id << " | " 
+        	  << node_name_ << std::endl;
+        joins_[group_id]--; }
+        break;
       case ZYRE_EVENT_EXIT: {
-	std::cerr << e.peer_name() << " exits | " << node_name_ << std::endl; }
-	break;
+        std::cerr << e.peer_name() << " exits | " << node_name_ << std::endl; }
+        break;
       case ZYRE_EVENT_STOP: {
-	std::cerr << e.peer_name() << " stops | " << node_name_ << std::endl; }
-	return false;
+        std::cerr << e.peer_name() << " stops | " << node_name_ << std::endl; }
+        return false;
       }
     } else {
       return false;
@@ -311,5 +335,12 @@ namespace quickmsg {
   {    
     // start a thread to call the event handlers
     event_thread_ = new std::thread(std::mem_fun(&GroupNode::spin), this);
+    //    event_thread_->detach();
+  }
+
+  void 
+  GroupNode::join()    
+  {    
+    event_thread_->join();
   }
 }

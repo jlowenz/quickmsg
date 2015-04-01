@@ -38,6 +38,7 @@ namespace quickmsg {
   public:
     Time stamp;
     std::string context;
+    std::string src_uuid;
 
     Header() {}
   };

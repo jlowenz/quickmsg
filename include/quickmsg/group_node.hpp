@@ -46,7 +46,8 @@ namespace quickmsg {
     void register_whispers(MessageCallback cb, void* args);
 
     void shout(const std::string& group, const std::string& msg);
-    void whisper(const PeerPtr peer, const std::string& msg);
+    void whisper(const PeerPtr& peer, const std::string& msg);
+    void whisper(const std::string& peer_uuid, const std::string& msg);
 
     // return a snapshot of the peers on the network
     void peers(PeerList& ps) const;
@@ -76,11 +77,16 @@ namespace quickmsg {
     */
     void async_spin();
 
+    // return whether node has been interrupted
+    bool interrupted();
+    void join();
+
+
     static std::string name();
 
   protected:
     void handle_whisper(const std::string& uuid, zmsg_t* msg);
-    void handle_shout(const std::string& group, zmsg_t* msg);
+    void handle_shout(const std::string& group, const std::string& uuid, zmsg_t* msg);
 
   private:
     bool spin_once();
@@ -108,6 +114,7 @@ namespace quickmsg {
     //static std::mutex  name_mutex_;
     static std::string name_;
     static std::atomic_bool running_;
+    std::atomic_bool interrupted_;
 
     friend void init(const std::string&);
     friend void shutdown(const std::string&);

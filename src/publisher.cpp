@@ -20,6 +20,18 @@ namespace quickmsg {
     delete node_;
   }
 
+  bool
+  Publisher::interrupted()
+  {
+    return node_->interrupted();
+  }
+
+  void 
+  Publisher::join()
+  {
+    node_->join();
+  }
+
   void 
   Publisher::publish(const std::string& msg)
   {

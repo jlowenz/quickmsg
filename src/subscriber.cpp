@@ -34,6 +34,16 @@ namespace quickmsg {
     node_->stop();
     delete node_;
   }
+
+  bool Subscriber::interrupted()
+  {
+    return node_->interrupted();
+  }
+
+  void Subscriber::join()
+  {
+    node_->join();
+  }
     
   void Subscriber::handle_message(const MessagePtr& msg)
   {
@@ -72,6 +82,11 @@ namespace quickmsg {
     node_->leave(topic_);
     node_->stop();
     delete node_;
+  }
+
+  bool AsyncSubscriber::interrupted()
+  {
+    return node_->interrupted();
   }
    
   void AsyncSubscriber::spin()

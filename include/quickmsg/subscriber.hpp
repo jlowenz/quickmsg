@@ -20,7 +20,8 @@ namespace quickmsg {
 	\return a list of messages
      */
     MsgListPtr messages();
-    
+    bool interrupted();
+    void join();
   private:
     /**
      * \internal C wrapper function to call the subscribers message handler
@@ -39,7 +40,7 @@ namespace quickmsg {
   public:
     AsyncSubscriber(const std::string& topic, MessageCallback cb, void* args=NULL);
     virtual ~AsyncSubscriber();
-        
+    bool interrupted();        
     void spin();
     void async_spin();
   private:

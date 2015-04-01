@@ -20,6 +20,5 @@ main(int argc, char** argv)
     std::cout << ss.str();
     sleep(1);
   }
-  
   return 0;
 }

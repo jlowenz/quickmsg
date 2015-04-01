@@ -31,10 +31,16 @@ add_library(${PROJECT_NAME} SHARED
   src/client.cpp
   src/service.cpp
   src/quickmsg.cpp)
-target_link_libraries(${PROJECT_NAME} tbb zyre)
+target_link_libraries(${PROJECT_NAME} tbb zyre czmq json_spirit)
 
 add_executable(test_pub src/test_pub.cpp)
 target_link_libraries(test_pub ${PROJECT_NAME})
 
 add_executable(test_sub src/test_sub.cpp)
 target_link_libraries(test_sub ${PROJECT_NAME})
+
+add_executable(test_service src/test_service.cpp)
+target_link_libraries(test_service ${PROJECT_NAME})
+
+add_executable(test_client src/test_client.cpp)
+target_link_libraries(test_client ${PROJECT_NAME})
