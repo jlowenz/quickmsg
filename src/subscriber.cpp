@@ -48,6 +48,7 @@ namespace quickmsg {
   void Subscriber::handle_message(const MessagePtr& msg)
   {
     // if the queue is full, too bad!
+    std::cout << "Received message "<< msg->msg<<std::endl;
     msgs_.try_push(msg);
   }
 

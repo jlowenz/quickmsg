@@ -29,23 +29,26 @@ namespace quickmsg {
     delete node_;
   }
   
-  void
+  std::string
   Client::call_srv(const std::string& req, double timeout_s)
   {
     wait_for_response_ = true;
+    response_ = std::string("");
     node_->shout(srv_name_, req);
     double start_t = clock();
-    while ( wait_for_response_.load() && !interrupted() &&
+    while ( wait_for_response_ && !interrupted() &&
             ((clock()-start_t) / (double)CLOCKS_PER_SEC) < timeout_s )
     {
       sleep(1);
     }
+    return response_;
   }
 
   void 
   Client::handle_response(const MessagePtr& resp)
   {
     std::cout << "received response\n" << resp->msg << std::endl;
+    response_ = resp->msg;
     wait_for_response_ = false;
   }
 
