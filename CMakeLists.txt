@@ -75,3 +75,6 @@ target_link_libraries(test_service ${PROJECT_NAME})
 
 add_executable(test_client src/test_client.cpp)
 target_link_libraries(test_client ${PROJECT_NAME})
+
+
+# TODO: Add install directives!
