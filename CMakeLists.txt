@@ -46,7 +46,6 @@ include(${SWIG_USE_FILE})
 find_package(PythonLibs)
 include_directories(${PYTHON_INCLUDE_PATH})
 
-
 set(CMAKE_SWIG_FLAGS "")
 
 # function for setting source properties

@@ -3,8 +3,8 @@
 import sys
 import json
 
-sys.path.append('/home/phil/devel/quickmsg/build')
-sys.path.append('/home/phil/devel/quickmsg/build/swig')
+sys.path.append('../../build')
+sys.path.append('../../build/swig')
 import quickmsg
 
 if __name__=='__main__':

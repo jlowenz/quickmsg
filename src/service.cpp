@@ -9,12 +9,11 @@ namespace quickmsg {
     static_cast<Service*>(args)->handle_request(msg);
   }
 
-  Service::Service(const std::string& srv_name, ServiceImpl impl, 
+  Service::Service(const std::string& srv_name,
                    const std::string& promisc_topic, size_t queue_size)
     : promisc_topic_(promisc_topic), srv_name_(srv_name)
   {
     reqs_.set_capacity(queue_size);
-    impl_ = impl;
     std::string name("Srv/");
     node_ = new GroupNode(name + srv_name);
     node_->join(srv_name);
@@ -40,9 +39,16 @@ namespace quickmsg {
     // if the queue is full, too bad!
     reqs_.try_push(req);
 
-    std::string resp_str = impl_(req);
+    std::string resp_str = service_impl(req->msg);
     std::cout << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     node_->whisper(req->header.src_uuid, resp_str);
+  }
+
+  std::string 
+  Service::service_impl(const std::string &req)
+  {
+    std::cout << " Default service impl (echo request) " << std::endl;
+    return req;
   }
 
   void 
