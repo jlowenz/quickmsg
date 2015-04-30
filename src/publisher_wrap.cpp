@@ -5,15 +5,10 @@ using namespace quickmsg;
 
 extern "C" {
 
-int 
-fact(int n) 
-{
-  return n*10;
-}
-
 qmg_publisher_t *
-qmg_publisher_new (const std::string& topic) 
+qmg_publisher_new (const char* topic) 
 {
+  std::cout<<" Creating publisher with topic "<<topic<<std::endl;
   Publisher* pub = new Publisher(topic);
   return reinterpret_cast<qmg_publisher_t*>(pub);
 } 
@@ -26,7 +21,7 @@ qmg_publisher_destroy(qmg_publisher_t *self_p)
 }
 
 void 
-qmg_publish(qmg_publisher_t *self_p, const std::string& msg)
+qmg_publish(qmg_publisher_t *self_p, const char* msg)
 {
   Publisher* pub = reinterpret_cast<Publisher*>(self_p);
   pub->publish(msg);

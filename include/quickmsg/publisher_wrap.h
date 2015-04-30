@@ -9,13 +9,13 @@ extern "C" {
 typedef struct _qmg_publisher_t qmg_publisher_t;
 
 qmg_publisher_t *
-qmg_publisher_new (const std::string& topic);
+qmg_publisher_new (const char* topic);
 
 void
 qmg_publisher_destroy (qmg_publisher_t *self_p);
 
 void 
-qmg_publish(qmg_publisher_t *self_p, const std::string& msg);
+qmg_publish(qmg_publisher_t *self_p, const char* msg);
 
 //  Self test of this class
 void

@@ -9,6 +9,7 @@ namespace qs = quickmsg;
 struct ServiceImpl : public qs::Service
 {
   using qs::Service::Service; // Inherit ctor
+  virtual ~ServiceImpl() {}
   virtual std::string service_impl(const std::string &req)
   {
     qs::AddNInts add_ints;
@@ -20,7 +21,8 @@ int
 main(int argc, char** argv)
 {
   qs::init("test_service");
-  ServiceImpl svc("add", std::string("promisc"), 20);
+  ServiceImpl svc("add", std::string("promisc"), 20); // overridden svc impl
+  //qs::Service svc("add", std::string("promisc"), 20); // default svc impl (echo)
   svc.spin();
   return 0;
 }
