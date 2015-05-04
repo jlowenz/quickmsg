@@ -1,4 +1,4 @@
-%module quickmsg
+%module(directors="1") quickmsg
 %include "swig_includes.i"
 
 %{
@@ -9,9 +9,11 @@
 using namespace quickmsg;
 %}
 
+%feature("director") Service;
+
 %include "quickmsg/publisher.hpp"
 %include "quickmsg/subscriber.hpp"
- //%include "quickmsg/service.hpp"
+%include "quickmsg/service.hpp"
 %include "quickmsg/client.hpp"
 %include "quickmsg/types.hpp"
 

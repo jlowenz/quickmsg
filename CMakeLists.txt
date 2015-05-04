@@ -36,7 +36,12 @@ add_library(${PROJECT_NAME} SHARED
   src/subscriber.cpp
   src/client.cpp
   src/service.cpp
-  src/quickmsg.cpp)
+  src/quickmsg.cpp
+  src/quickmsg_wrap.cpp
+  src/publisher_wrap.cpp
+  src/subscriber_wrap.cpp
+  src/client_wrap.cpp
+  src/service_wrap.cpp)
 target_link_libraries(${PROJECT_NAME} tbb zyre czmq json_spirit)
 
 # SWIG
@@ -45,7 +50,6 @@ include(${SWIG_USE_FILE})
 
 find_package(PythonLibs)
 include_directories(${PYTHON_INCLUDE_PATH})
-
 
 set(CMAKE_SWIG_FLAGS "")
 

@@ -7,19 +7,29 @@
 
 namespace quickmsg {
 
-  std::string _service_impl(const MessagePtr& request);
+  //  std::string _service_impl(const MessagePtr& request);
 
-  typedef std::add_pointer<decltype(_service_impl)>::type ServiceImpl;
+  //  std::string default_echo(const std::string& req);
+
+  const char* default_echo(const char* req);
+
+  typedef std::add_pointer<decltype(default_echo)>::type ServiceImpl;
 
   class Service
   {
   public:
-    Service(const std::string& srv_name, ServiceImpl impl, 
+    Service(const std::string& srv_name,
+            const ServiceImpl& impl,
             const std::string& promisc_topic=std::string("promisc"),
             size_t queue_size=10);
+    Service(const std::string& srv_name,
+            const std::string& promisc_topic=std::string("promisc"),
+            size_t queue_size=10);
+    void init(size_t queue_size);
     virtual ~Service();
     
     void handle_request(const MessagePtr& req);
+    virtual std::string service_impl(const std::string &req);
     void publish(const std::string& msg);
     void respond(const PeerPtr& peer, const std::string& resp);
     bool interrupted();
@@ -29,8 +39,8 @@ namespace quickmsg {
   private:
     std::string srv_name_;
     std::string promisc_topic_;
-    GroupNode* node_;
     ServiceImpl impl_;
+    GroupNode* node_;
     tbb::concurrent_bounded_queue<MessagePtr> reqs_;
   };
   

@@ -25,6 +25,7 @@ namespace quickmsg {
     // register the message handler for the group
     node_->register_handler(topic_, &subscriber_handler, (void*)this);
     // start spinning asynchronously, returns immediately
+    std::cout<<"Subscribing on topic "<<topic<<std::endl;
     node_->async_spin();
   }
   
