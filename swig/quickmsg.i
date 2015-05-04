@@ -10,6 +10,8 @@ using namespace quickmsg;
 %}
 
 %feature("director") Service;
+%feature("director") Subscriber;
+%feature("director") AsyncSubscriber;
 
 %include "quickmsg/publisher.hpp"
 %include "quickmsg/subscriber.hpp"

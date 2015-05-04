@@ -7,29 +7,27 @@
 #include <list>
 
 namespace quickmsg {
-  
+
+  void default_cb(const char* msg);
+
+  typedef std::add_pointer<decltype(default_cb)>::type SubscriberImpl;  
   
   class Subscriber
   {
   public:    
-    Subscriber(const std::string& topic, size_t queue_size = 10);
+    Subscriber(const std::string& topic, const SubscriberImpl& impl, size_t queue_size=10);
+    Subscriber(const std::string& topic, size_t queue_size=10);
+    virtual void init(size_t queue_size);
     virtual ~Subscriber();
     
-    /** \brief Return messages that have arrived since the last call.
-	
-	\return a list of messages
-     */
+    virtual void handle_message(const MessagePtr& msg);
+    virtual void subscriber_impl(const std::string &msg);
     MsgListPtr messages();
     bool interrupted();
     void join();
   private:
-    /**
-     * \internal C wrapper function to call the subscribers message handler
-     */
-    friend void subscriber_handler(const MessagePtr& msg, void* args); 
-
-    void handle_message(const MessagePtr& msg);
-
+    friend void subscriber_handler(const MessagePtr& msg, void* args);
+    SubscriberImpl impl_;
     std::string topic_;
     GroupNode* node_;
     tbb::concurrent_bounded_queue<MessagePtr> msgs_;
@@ -38,13 +36,18 @@ namespace quickmsg {
   class AsyncSubscriber
   {
   public:
-    AsyncSubscriber(const std::string& topic, MessageCallback cb, void* args=NULL);
+    //    AsyncSubscriber(const std::string& topic, MessageCallback cb, void* args=NULL);
+    AsyncSubscriber(const std::string& topic, const SubscriberImpl& impl);
+    AsyncSubscriber(const std::string& topic);
+    void init();
     virtual ~AsyncSubscriber();
     bool interrupted();        
     void spin();
     void async_spin();
+    virtual void subscriber_impl(const std::string &msg);
+    virtual void handle_message(const MessagePtr& msg);
   private:
-    void handle_message(const MessagePtr& msg);
+    SubscriberImpl impl_;
     std::string topic_;
     GroupNode* node_;
   };  

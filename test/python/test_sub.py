@@ -9,12 +9,17 @@ sys.path.append('../../build')
 sys.path.append('../../build/swig')
 import quickmsg
 
-if __name__=='__main__':
-    msg_queue_sz = 20
-    s = quickmsg.Subscriber('chatter', msg_queue_sz)
-    print 'entering main loop'
+class SubscriberImpl(quickmsg.AsyncSubscriber):
+    def __init__(self, *args, **kwargs):
+        super(SubscriberImpl, self).__init__(*args, **kwargs)
 
-    while True:
-        time.sleep(1)
+    def subscriber_impl(self, msg):
+        print 'Python inherited subscriber callback'
+        # msg=json.loads(msg)
+        print 'got message', msg
+
+if __name__=='__main__':
+    s = SubscriberImpl('chatter')
+    s.spin()
     
 

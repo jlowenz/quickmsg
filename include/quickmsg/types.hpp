@@ -4,6 +4,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace quickmsg {
 
@@ -13,6 +14,7 @@ namespace quickmsg {
     Time();
     explicit Time(double time);
     Time(uint32_t secs, uint32_t micro);
+    Time(const boost::posix_time::ptime& t);
     Time(const Time& t);
     ~Time();
 
@@ -50,6 +52,15 @@ namespace quickmsg {
     std::string msg;
 
     Message() {}
+
+    double get_stamp();
+    std::string get_context();
+    std::string get_src();
+    std::string get_msg();
+
+    void set_stamp_now();
+    void set_context(const std::string& ctx);
+    void set_msg(const std::string& msg_str);
   };
   typedef boost::shared_ptr<Message> MessagePtr;
 
