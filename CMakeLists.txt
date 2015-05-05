@@ -30,6 +30,9 @@ if (DOXYGEN_FOUND)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API docs with Doxygen" VERBATIM)
 endif()
 
+# configure the PkgConfig file
+configure_file(${PROJECT_SOURCE_DIR}/quickmsg.pc.in ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.pc @ONLY)
+
 add_library(${PROJECT_NAME} SHARED
   src/types.cpp
   src/group_node.cpp 
@@ -91,3 +94,7 @@ target_link_libraries(test_sub ${PROJECT_NAME})
 
 # installation
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
+install(DIRECTORY include/${PROJECT_NAME}
+  DESTINATION include
+  PATTERN "*~" EXCLUDE)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.pc DESTINATION lib/pkgconfig)
