@@ -1,5 +1,4 @@
 #include <quickmsg/service.hpp>
-#include <quickmsg/add_n_ints.hpp>
 #include <type_traits>
 
 namespace quickmsg {
