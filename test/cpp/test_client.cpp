@@ -1,10 +1,10 @@
 #include <quickmsg/quickmsg.hpp>
-#include <quickmsg/add_n_ints.hpp>
 #include <iostream>
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <zyre.h>
+#include "add_n_ints.hpp"
 
 namespace qs = quickmsg;
 
