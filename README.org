@@ -2,4 +2,17 @@
 
 Quickmsg is meant to be a thin application utility layer on top of Zyre/ZeroMQ and MessagePack, supporting simple group messaging. The primary message type (for now) is a JSON string, transformed to a compact binary format using MessagePack before transmission to a Zyre group. The API is being initially developed in C++, and is intended to be wrapped using a tool such as SWIG for use by multiple target languages. 
 
-Almost nothing is actually implemented yet. More to come...
+The following components have initial implementations:
+
+- *Publisher*: publishes messages to a topic
+- *Subscriber*: receives messages from a topic (can be used synchronously and asynchronously / with a callback)
+- *Service*: provide an RPC-like service interface for...
+- *Client*: issues requests to a Service and blocks for a reply
+
+* SWIG Wrapping
+
+SWIG is a tool to generate wrappers for C/C++ code to a variety of high-level langauges, including Python, Java and Common Lisp. 
+
+We have an initial Python wrapping, but the Service is not yet functional due to the required callback mechanism (i.e. we'd like to be able to implement a service callback in the target language!). This task is currently in progress.
+
+See the [[test/python]] directory for example Python code, and the [[src/test_pub.cpp]] and [[src/test_sub.cpp]] for C++ usage examples. 

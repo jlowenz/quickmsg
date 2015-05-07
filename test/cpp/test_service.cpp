@@ -1,8 +1,8 @@
 #include <quickmsg/quickmsg.hpp>
-#include <quickmsg/add_n_ints.hpp>
 #include <quickmsg/types.hpp>
 #include <sstream>
 #include <iostream>
+#include "add_n_ints.hpp"
 
 namespace qs = quickmsg;
 

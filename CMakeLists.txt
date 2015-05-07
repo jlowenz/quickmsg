@@ -15,6 +15,7 @@ pkg_check_modules(LIB_ZMQ "libzmq")
 pkg_check_modules(LIB_CZMQ "libczmq")
 pkg_check_modules(LIB_ZYRE "libzyre")
 pkg_check_modules(TBB "tbb")
+pkg_check_modules(LIB_JSONCPP "jsoncpp")
 
 find_package(Boost REQUIRED COMPONENTS date_time system thread)
 find_package(Java REQUIRED COMPONENTS Runtime Development)
@@ -23,7 +24,7 @@ find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${LIB_ZYRE_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC")
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
@@ -31,6 +32,9 @@ if (DOXYGEN_FOUND)
   add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile 
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API docs with Doxygen" VERBATIM)
 endif()
+
+# configure the PkgConfig file
+configure_file(${PROJECT_SOURCE_DIR}/quickmsg.pc.in ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.pc @ONLY)
 
 add_library(${PROJECT_NAME} SHARED
   src/types.cpp
@@ -45,7 +49,7 @@ add_library(${PROJECT_NAME} SHARED
   src/subscriber_wrap.cpp
   src/client_wrap.cpp
   src/service_wrap.cpp)
-target_link_libraries(${PROJECT_NAME} tbb zyre czmq json_spirit)
+target_link_libraries(${PROJECT_NAME} tbb zyre czmq)
 
 # SWIG
 find_package(SWIG REQUIRED)
@@ -71,18 +75,34 @@ swig_cpp("${SWIG_FILES}")
 swig_add_module(quickmsg_py python swig/quickmsg_py.i)
 swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(test_pub src/test_pub.cpp)
-target_link_libraries(test_pub ${PROJECT_NAME})
-
-add_executable(test_sub src/test_sub.cpp)
-target_link_libraries(test_sub ${PROJECT_NAME})
-
-add_executable(test_service src/test_service.cpp)
-target_link_libraries(test_service ${PROJECT_NAME})
-
-add_executable(test_client src/test_client.cpp)
-target_link_libraries(test_client ${PROJECT_NAME})
-
 swig_add_module(quickmsg_java java swig/quickmsg_java.i)
 swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
+
+if (LIB_JSONCPP_FOUND)
+  message("jsoncpp found, building service/client test")
+  include_directories(${LIB_JSONCPP_INCLUDE_DIRS})
+
+  add_executable(test_service test/cpp/test_service.cpp)
+  target_link_libraries(test_service ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
+
+  add_executable(test_client test/cpp/test_client.cpp)
+  target_link_libraries(test_client ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
+else()
+  message("jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' to install")
+endif()
+  
+add_executable(test_pub test/cpp/test_pub.cpp)
+target_link_libraries(test_pub ${PROJECT_NAME})
+
+add_executable(test_sub test/cpp/test_sub.cpp)
+target_link_libraries(test_sub ${PROJECT_NAME})
+
+
+# installation
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
+
+install(DIRECTORY include/${PROJECT_NAME}
+  DESTINATION include
+  PATTERN "*~" EXCLUDE)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.pc DESTINATION lib/pkgconfig)
 
