@@ -17,7 +17,10 @@ pkg_check_modules(LIB_ZYRE "libzyre")
 pkg_check_modules(TBB "tbb")
 
 find_package(Boost REQUIRED COMPONENTS date_time system thread)
+find_package(Java REQUIRED COMPONENTS Runtime Development)
+find_package(JNI REQUIRED)
 
+include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${LIB_ZYRE_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
@@ -62,11 +65,11 @@ function(swig_cpp files)
   endforeach(f)
 endfunction(swig_cpp)
 
-set(SWIG_FILES swig/swig_interfaces.i
-  swig/quickmsg.i)
+set(SWIG_FILES swig/swig_interfaces.i swig/quickmsg_py.i swig/quickmsg_java.i)
 swig_cpp("${SWIG_FILES}")
-swig_add_module(quickmsg python swig/quickmsg.i)
-swig_link_libraries(quickmsg ${PYTHON_LIBRARIES} ${PROJECT_NAME})
+
+swig_add_module(quickmsg_py python swig/quickmsg_py.i)
+swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_pub src/test_pub.cpp)
 target_link_libraries(test_pub ${PROJECT_NAME})
@@ -79,3 +82,7 @@ target_link_libraries(test_service ${PROJECT_NAME})
 
 add_executable(test_client src/test_client.cpp)
 target_link_libraries(test_client ${PROJECT_NAME})
+
+swig_add_module(quickmsg_java java swig/quickmsg_java.i)
+swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
+

@@ -134,4 +134,18 @@ namespace quickmsg {
   {
     msg=msg_str;
   }
+
+  std::ostream& operator<<(std::ostream& os, const Time& t)
+  {
+    os << t.secs() << "." << t.microsecs();
+    return os;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const Message& m)
+  {
+    os << "src: " << m.header.src_uuid << std::endl;
+    os << "stamp: " << m.header.stamp << std::endl;
+    os << "msg: " << m.msg << std::endl;
+    return os;
+  }
 }

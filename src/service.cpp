@@ -17,10 +17,10 @@ namespace quickmsg {
   // }
 
   const char*
-  default_echo(const char* req)
+  default_echo(const Message* req)
   {
     std::cout << " Default service impl (echo request) " << std::endl;
-    return req;
+    return req->msg.c_str();
   }
 
   Service::Service(const std::string& srv_name, const ServiceImpl& impl,
@@ -66,15 +66,15 @@ namespace quickmsg {
     // if the queue is full, too bad!
     reqs_.try_push(req);
 
-    std::string resp_str = service_impl(req->msg);
+    std::string resp_str = service_impl(req.get());
     std::cout << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     node_->whisper(req->header.src_uuid, resp_str);
   }
 
   std::string 
-  Service::service_impl(const std::string &req)
+  Service::service_impl(const Message* req)
   {
-    return impl_(req.c_str());
+    return std::string(impl_(req));
   }
 
   void 

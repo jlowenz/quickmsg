@@ -8,7 +8,9 @@
 
 namespace quickmsg {
 
-  void default_cb(const char* msg);
+  //  void default_cb(const char* msg);
+
+  void default_cb(const Message* msg);
 
   typedef std::add_pointer<decltype(default_cb)>::type SubscriberImpl;  
   
@@ -21,7 +23,7 @@ namespace quickmsg {
     virtual ~Subscriber();
     
     virtual void handle_message(const MessagePtr& msg);
-    virtual void subscriber_impl(const std::string &msg);
+    virtual void subscriber_impl(const Message* msg);
     MsgListPtr messages();
     bool interrupted();
     void join();
@@ -41,11 +43,11 @@ namespace quickmsg {
     AsyncSubscriber(const std::string& topic);
     void init();
     virtual ~AsyncSubscriber();
-    bool interrupted();        
+    bool interrupted();
     void spin();
     void async_spin();
-    virtual void subscriber_impl(const std::string &msg);
     virtual void handle_message(const MessagePtr& msg);
+    virtual void subscriber_impl(const Message* msg);
   private:
     SubscriberImpl impl_;
     std::string topic_;

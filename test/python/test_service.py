@@ -7,15 +7,16 @@ import time
 
 sys.path.append('../../build')
 sys.path.append('../../build/swig')
-import quickmsg
+import quickmsg_py
 
-class ServiceImpl(quickmsg.Service):
+class ServiceImpl(quickmsg_py.Service):
     def __init__(self, *args, **kwargs):
         super(ServiceImpl, self).__init__(*args, **kwargs)
 
     def service_impl(self, req):
         print 'Python inherited service callback'
-        msg=json.loads(req)
+        print 'req', req
+        msg=json.loads(req.msg)
         print 'got request', msg
         result = np.sum(msg['ints_to_add'])
         return json.dumps({'ints_to_add:' : msg['ints_to_add'], 

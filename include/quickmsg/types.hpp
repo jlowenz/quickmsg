@@ -43,6 +43,7 @@ namespace quickmsg {
     std::string src_uuid;
 
     Header() {}
+    friend std::ostream& operator<<(std::ostream& os, const Time& t);
   };
 
   class Message
@@ -52,6 +53,7 @@ namespace quickmsg {
     std::string msg;
 
     Message() {}
+    virtual ~Message() {}
 
     double get_stamp();
     std::string get_context();
@@ -61,6 +63,7 @@ namespace quickmsg {
     void set_stamp_now();
     void set_context(const std::string& ctx);
     void set_msg(const std::string& msg_str);
+    friend std::ostream& operator<<(std::ostream& os, const Message& m);
   };
   typedef boost::shared_ptr<Message> MessagePtr;
 
@@ -68,7 +71,8 @@ namespace quickmsg {
   class ServiceReply : public Message
   {
   public:
-    ServiceReply() {}    
+    ServiceReply() {}
+    virtual ~ServiceReply() {}
     bool successful;
   };
   typedef boost::shared_ptr<ServiceReply> ServiceReplyPtr;

@@ -11,7 +11,7 @@ namespace quickmsg {
 
   //  std::string default_echo(const std::string& req);
 
-  const char* default_echo(const char* req);
+  const char* default_echo(const Message* req);
 
   typedef std::add_pointer<decltype(default_echo)>::type ServiceImpl;
 
@@ -28,8 +28,8 @@ namespace quickmsg {
     void init(size_t queue_size);
     virtual ~Service();
     
-    void handle_request(const MessagePtr& req);
-    virtual std::string service_impl(const std::string &req);
+    virtual void handle_request(const MessagePtr& req);
+    virtual std::string service_impl(const Message* req);
     void publish(const std::string& msg);
     void respond(const PeerPtr& peer, const std::string& resp);
     bool interrupted();

@@ -1,4 +1,6 @@
 %include "typemaps.i"
+%include "cpointer.i" 
+%include "boost_shared_ptr.i"
 %include "stdint.i"
 %include "std_string.i"
 %include "std_map.i"

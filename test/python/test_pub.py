@@ -7,10 +7,10 @@ import time
 
 sys.path.append('../../build')
 sys.path.append('../../build/swig')
-import quickmsg
+import quickmsg_py
 
 if __name__=='__main__':
-    p = quickmsg.Publisher('chatter')
+    p = quickmsg_py.Publisher('chatter')
 
     for i in range(10):
         some_msg = json.dumps({'important_matrix':np.random.rand(4,4).tolist()})

@@ -4,10 +4,10 @@
 namespace quickmsg {
 
   void
-  default_cb(const char* msg)
+  default_cb(const Message* msg)
   {
     std::cout << " Default subscriber impl (echo) " << std::endl;
-    std::cout << msg << std::endl;
+    std::cout << (*msg) << std::endl;
   }
 
   /**
@@ -74,13 +74,13 @@ namespace quickmsg {
   {
     // if the queue is full, too bad!
     std::cout << "Received message "<< msg->msg<<std::endl;
-    subscriber_impl(msg->msg);
+    subscriber_impl(msg.get());
     msgs_.try_push(msg);
   }
 
-  void Subscriber::subscriber_impl(const std::string &msg)
+  void Subscriber::subscriber_impl(const Message* msg)
   {
-    impl_(msg.c_str());
+    impl_(msg);
   }
 
   /** \brief Return messages that have arrived since the last call.
@@ -97,18 +97,6 @@ namespace quickmsg {
     }
     return mlist;
   }
-
-  // AsyncSubscriber::AsyncSubscriber(const std::string& topic, MessageCallback cb, void* args)
-  //   : topic_(topic)
-  // {
-  //   // create the group node
-  //   std::string name("AS/");
-  //   node_ = new GroupNode(name + topic);
-  //   // join the correct group (topic)
-  //   node_->join(topic_);
-  //   // register the message handler for the group
-  //   node_->register_handler(topic_, cb, args);
-  // }
 
   AsyncSubscriber::AsyncSubscriber(const std::string& topic, const SubscriberImpl& impl)
     : topic_(topic), impl_(impl)
@@ -131,21 +119,8 @@ namespace quickmsg {
     // join the correct group (topic)
     node_->join(topic_);
     // register the message handler for the group
-    std::cout<<"Subscribing on topic "<<topic_<<std::endl;
+    std::cout<<"Async Subscribing on topic "<<topic_<<std::endl;
     node_->register_handler(topic_, &async_subscriber_handler, (void*)this);
-
-    // // set the size of our bounded queue
-    // msgs_.set_capacity(queue_size);
-    // // create the group node
-    // std::string name("S/");
-    // node_ = new GroupNode(name + topic_);
-    // // join the correct group (topic)
-    // node_->join(topic_);
-    // // register the message handler for the group
-    // node_->register_handler(topic_, &subscriber_handler, (void*)this);
-    // // start spinning asynchronously, returns immediately
-    // std::cout<<"Subscribing on topic "<<topic_<<std::endl;
-    // node_->async_spin();
   }
   AsyncSubscriber::~AsyncSubscriber()
   {
@@ -154,15 +129,15 @@ namespace quickmsg {
     delete node_;
   }
 
-  void AsyncSubscriber::subscriber_impl(const std::string &msg)
-  {
-    impl_(msg.c_str());
-  }
-
   void AsyncSubscriber::handle_message(const MessagePtr& msg)
   {
     std::cout << "Received message "<< msg->msg<<std::endl;
-    subscriber_impl(msg->msg);
+    subscriber_impl(msg.get());
+  }
+
+  void AsyncSubscriber::subscriber_impl(const Message* msg)
+  {
+    impl_(msg);
   }
 
   bool AsyncSubscriber::interrupted()

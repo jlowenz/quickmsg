@@ -12,12 +12,24 @@
 
 (cffi:defcfun "qmg_subscriber_new" :pointer 
   (topic :string)
-  (queue_sz :int))
+  (impl :pointer))
 
 (cffi:defcfun "qmg_subscriber_destroy" :void
   (self_p :pointer))
 
-(defparameter *sub* (qmg-subscriber-new "chatter" 10))
+(cffi:defcfun "qmg_message_get_stamp" :double
+  (self_p :pointer))
+
+(cffi:defcfun "qmg_message_get_msg_str" :string
+  (self_p :pointer))
+
+(cffi:defcallback echo-msg :string ((msg :pointer))
+  (print "LISP subscriber callback")
+  (format t "Message stamp:~% ~S ~%    contents:~% ~S" 
+          (qmg-message-get-stamp msg)
+          (qmg-message-get-msg-str msg)))
+
+(defparameter *sub* (qmg-subscriber-new "chatter" (cffi:callback echo-msg)))
 
 (loop (sleep 1))
 

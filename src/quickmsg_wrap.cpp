@@ -1,5 +1,6 @@
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
+#include <quickmsg/quickmsg_wrap.h>
 
 using namespace quickmsg;
 
@@ -17,19 +18,25 @@ qmg_shutdown(const std::string& reason)
   shutdown(reason);
 }
 
-// qmg_message_t *
-// qmg_message_new () 
-// {
-//   std::cout<<" Creating message with topic "<<topic<<std::endl;
-//   Message* msg = new Message();
-//   return reinterpret_cast<qmg_subscriber_t*>(sub);
-// }
+double
+qmg_message_get_stamp(qmg_message_t *self_p)
+{
+  Message* msg = reinterpret_cast<Message*>(self_p);
+  return msg->get_stamp();
+}
 
-// void 
-// qmg_message_destroy(qmg_message_t *self_p)
-// {
-//   Message* msg = reinterpret_cast<Message*>(self_p);
-//   delete msg;
-// }
+const char* 
+qmg_message_get_src(qmg_message_t *self_p)
+{
+  Message* msg = reinterpret_cast<Message*>(self_p);
+  return msg->get_src().c_str();
+}
+
+const char* 
+qmg_message_get_msg_str(qmg_message_t *self_p)
+{
+  Message* msg = reinterpret_cast<Message*>(self_p);
+  return msg->get_msg().c_str();
+}
 
 }
