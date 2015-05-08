@@ -15,9 +15,7 @@ namespace quickmsg {
 
     std::string call_srv(const std::string& req, double timeout_s=10.0);
     void handle_response(const MessagePtr& resp);
-    bool interrupted();
     void spin();
-
   private:
     std::string srv_name_;
     std::string response_;

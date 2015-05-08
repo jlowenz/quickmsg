@@ -4,15 +4,15 @@
 #include <iostream>
 #include "add_n_ints.hpp"
 
-namespace qs = quickmsg;
+namespace qm = quickmsg;
 
-struct ServiceImpl : public qs::Service
+struct ServiceImpl : public qm::Service
 {
-  using qs::Service::Service; // Inherit ctor
+  using qm::Service::Service; // Inherit ctor
   virtual ~ServiceImpl() {}
   virtual std::string service_impl(const std::string &req)
   {
-    qs::AddNInts add_ints;
+    qm::AddNInts add_ints;
     return add_ints.create_resp(req);
   }
 };
@@ -20,9 +20,9 @@ struct ServiceImpl : public qs::Service
 int
 main(int argc, char** argv)
 {
-  qs::init("test_service");
+  qm::init("test_service");
   ServiceImpl svc("add", std::string("promisc"), 20); // overridden svc impl
-  //qs::Service svc("add", std::string("promisc"), 20); // default svc impl (echo)
+  //qm::Service svc("add", std::string("promisc"), 20); // default svc impl (echo)
   svc.spin();
   return 0;
 }

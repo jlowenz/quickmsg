@@ -13,5 +13,6 @@ namespace quickmsg {
    */
   void init(const std::string& name);
   void shutdown(const std::string& reason = "");
+  bool ok();
 
 }

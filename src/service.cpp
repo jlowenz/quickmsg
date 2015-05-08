@@ -89,12 +89,6 @@ namespace quickmsg {
     //    node_->whisper(peer, resp);
   }
 
-  bool
-  Service::interrupted()
-  {
-    return node_->interrupted();
-  }
-
   void 
   Service::spin()
   {

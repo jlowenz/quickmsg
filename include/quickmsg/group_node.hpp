@@ -114,7 +114,6 @@ namespace quickmsg {
     //static std::mutex  name_mutex_;
     static std::string name_;
     static std::atomic_bool running_;
-    std::atomic_bool interrupted_;
 
     friend void init(const std::string&);
     friend void shutdown(const std::string&);

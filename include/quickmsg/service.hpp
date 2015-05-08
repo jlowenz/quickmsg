@@ -32,7 +32,6 @@ namespace quickmsg {
     virtual std::string service_impl(const Message* req);
     void publish(const std::string& msg);
     void respond(const PeerPtr& peer, const std::string& resp);
-    bool interrupted();
     void spin();
     void async_spin();
 

@@ -21,12 +21,6 @@ namespace quickmsg {
     delete node_;
   }
 
-  bool
-  Publisher::interrupted()
-  {
-    return node_->interrupted();
-  }
-
   void 
   Publisher::join()
   {

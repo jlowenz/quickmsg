@@ -6,20 +6,20 @@ extern "C" {
 #endif
 
 //  Opaque class structure
-typedef struct _qmg_publisher_t qmg_publisher_t;
+typedef struct _qm_publisher_t qm_publisher_t;
 
-qmg_publisher_t *
-qmg_publisher_new (const char* topic);
+qm_publisher_t *
+qm_publisher_new (const char* topic);
 
 void
-qmg_publisher_destroy (qmg_publisher_t *self_p);
+qm_publisher_destroy (qm_publisher_t *self_p);
 
 void 
-qmg_publish(qmg_publisher_t *self_p, const char* msg);
+qm_publish(qm_publisher_t *self_p, const char* msg);
 
 //  Self test of this class
 void
-qmg_publisher_test (bool verbose);
+qm_publisher_test (bool verbose);
 
 
 #ifdef __cplusplus

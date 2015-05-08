@@ -60,11 +60,6 @@ namespace quickmsg {
     delete node_;
   }
 
-  bool Subscriber::interrupted()
-  {
-    return node_->interrupted();
-  }
-
   void Subscriber::join()
   {
     node_->join();
@@ -138,11 +133,6 @@ namespace quickmsg {
   void AsyncSubscriber::subscriber_impl(const Message* msg)
   {
     impl_(msg);
-  }
-
-  bool AsyncSubscriber::interrupted()
-  {
-    return node_->interrupted();
   }
    
   void AsyncSubscriber::spin()

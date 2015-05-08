@@ -25,7 +25,6 @@ namespace quickmsg {
     virtual void handle_message(const MessagePtr& msg);
     virtual void subscriber_impl(const Message* msg);
     MsgListPtr messages();
-    bool interrupted();
     void join();
   private:
     friend void subscriber_handler(const MessagePtr& msg, void* args);
@@ -43,7 +42,6 @@ namespace quickmsg {
     AsyncSubscriber(const std::string& topic);
     void init();
     virtual ~AsyncSubscriber();
-    bool interrupted();
     void spin();
     void async_spin();
     virtual void handle_message(const MessagePtr& msg);

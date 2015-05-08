@@ -4,14 +4,14 @@
 #include <czmq.h>
 #include <zyre.h>
 
-namespace qs = quickmsg;
+namespace qm = quickmsg;
 
-class SubImpl : public qs::Subscriber
+class SubImpl : public qm::Subscriber
 {
 public:
-  SubImpl(const std::string& topic, const qs::SubscriberImpl& impl, size_t queue_size=10)
-    : qs::Subscriber(topic, impl, queue_size) {}
-  SubImpl(const std::string& topic, size_t queue_size=10) : qs::Subscriber(topic, queue_size) {}
+  SubImpl(const std::string& topic, const qm::SubscriberImpl& impl, size_t queue_size=10)
+    : qm::Subscriber(topic, impl, queue_size) {}
+  SubImpl(const std::string& topic, size_t queue_size=10) : qm::Subscriber(topic, queue_size) {}
   virtual ~SubImpl() {}
   virtual void subscriber_impl(const std::string &msg)
   {
@@ -20,7 +20,7 @@ public:
 };
 
 void
-handler(const qs::MessagePtr& msg, void* args)
+handler(const qm::MessagePtr& msg, void* args)
 {
   std::cout << "Message received: " << msg->msg << std::endl;
 }
@@ -28,12 +28,12 @@ handler(const qs::MessagePtr& msg, void* args)
 int
 main(int argc, char** argv)
 {
-  qs::init("test_sub");
-  //  qs::AsyncSubscriber async_sub("chatter", &handler, NULL);  
+  qm::init("test_sub");
+  //  qm::AsyncSubscriber async_sub("chatter", &handler, NULL);  
   //  async_sub.spin();
-  //  qs::Subscriber sub("chatter", 20);
+  //  qm::Subscriber sub("chatter", 20);
   SubImpl sub("chatter", 20);
-  while (!zsys_interrupted)
+  while (qm::ok())
   {
     sleep(1);
   }

@@ -4,16 +4,17 @@
 #include <cstdio>
 #include <cstdlib>
 
-namespace qs = quickmsg;
+namespace qm = quickmsg;
 
 int
 main(int argc, char** argv)
 {
-  qs::init("test_pub");
+  qm::init("test_pub");
   
-  qs::Publisher pub("chatter");
+  qm::Publisher pub("chatter");
   
-  for (int i = 0; i < 20; ++i) {    
+  for (int i = 0; i < 20; ++i) {
+    if (!qm::ok()) break;
     std::stringstream ss;  
     ss << "Hello world: " << i << std::endl;
     pub.publish(ss.str());    

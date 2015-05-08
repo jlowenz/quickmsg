@@ -36,7 +36,7 @@ namespace quickmsg {
     response_ = std::string("");
     node_->shout(srv_name_, req);
     double start_t = clock();
-    while ( wait_for_response_ && !interrupted() &&
+    while ( wait_for_response_ && !zsys_interrupted &&
             ((clock()-start_t) / (double)CLOCKS_PER_SEC) < timeout_s )
     {
       sleep(1);
@@ -50,12 +50,6 @@ namespace quickmsg {
     std::cout << "received response\n" << resp->msg << std::endl;
     response_ = resp->msg;
     wait_for_response_ = false;
-  }
-
-  bool
-  Client::interrupted()
-  {
-    return node_->interrupted();
   }
 
   void 

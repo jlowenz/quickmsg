@@ -12,7 +12,6 @@ namespace quickmsg {
     virtual ~Publisher();
 
     void publish(const std::string& msg);
-    bool interrupted();
     void join();
   private:
     std::string topic_;

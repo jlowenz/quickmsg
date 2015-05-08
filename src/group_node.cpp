@@ -54,7 +54,6 @@ namespace quickmsg {
       throw std::runtime_error("Could not start the zyre node");
     }
     GroupNode::running_ = true;
-    interrupted_ = false;
     // create our self peer
     self_.reset(new Peer(uuid, desc));
   }
@@ -238,17 +237,10 @@ namespace quickmsg {
   };
 
   bool 
-  GroupNode::interrupted()
-  {
-    return interrupted_.load();
-  }
-
-  bool 
   GroupNode::spin_once()
   {
     // read a new event from the zyre node, interrupt
-    interrupted_ = zsys_interrupted;
-    if (interrupted_.load()) return false;
+    if (zsys_interrupted) return false;
 
     ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
     // will be destroyed at the end of the function
@@ -318,7 +310,7 @@ namespace quickmsg {
   {
     event_thread_ = NULL;
     bool continue_spinning = true;
-    while (GroupNode::running_.load() && continue_spinning) {
+    while (!zsys_interrupted && GroupNode::running_.load() && continue_spinning) {
       continue_spinning = spin_once();
     }
   }

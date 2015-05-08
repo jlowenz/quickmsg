@@ -6,28 +6,25 @@ extern "C" {
 #endif
 
 //  Opaque class structure
-typedef struct _qmg_message_t qmg_message_t;
+typedef struct _qm_message_t qm_message_t;
 
 void 
-qmg_init(const std::string& name);
+qm_init(const std::string& name);
 
 void 
-qmg_shutdown(const std::string& reason);
+qm_shutdown(const std::string& reason);
 
-/* qmg_message_t *  */ // Dont actually need to create messages
-/* qmg_message_new(); */
-
-/* void  */
-/* qmg_message_destroy(qmg_message_t *self_p); */
+bool
+qm_ok();
 
 double
-qmg_message_get_stamp(qmg_message_t *self_p);
+qm_get_msg_stamp(qm_message_t *self_p);
 
 const char* 
-qmg_message_get_src(qmg_message_t *self_p);
+qm_get_msg_src(qm_message_t *self_p);
 
 const char* 
-qmg_message_get_msg_str(qmg_message_t *self_p);
+qm_get_msg_str(qm_message_t *self_p);
 
 #ifdef __cplusplus
 }
