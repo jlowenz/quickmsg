@@ -39,7 +39,7 @@ public class test_sub {
 
     public static void main(String[] argv) {
         SubscriberImpl sub = new SubscriberImpl("chatter");
-        while(true) {
+        while(quickmsg_java.ok()) {
             try{
                 Thread.sleep(100);
             } catch(InterruptedException e){

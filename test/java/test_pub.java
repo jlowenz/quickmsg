@@ -13,6 +13,9 @@ public class test_pub {
         Publisher p = new Publisher("chatter");
         String s = "Java Publisher Hello!";
         for (int i=0; i < 10; i++) {
+            if (!quickmsg_java.ok()) {
+                break;
+            }
             System.out.println("Publishing"+s);
             p.publish(s);
             try{

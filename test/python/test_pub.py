@@ -13,6 +13,8 @@ if __name__=='__main__':
     p = quickmsg_py.Publisher('chatter')
 
     for i in range(10):
+        if not quickmsg_py.ok():
+            break
         some_msg = json.dumps({'important_matrix':np.random.rand(4,4).tolist()})
         print 'publishing', some_msg
         p.publish(some_msg)
