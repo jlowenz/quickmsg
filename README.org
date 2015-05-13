@@ -13,6 +13,14 @@ The following components have initial implementations:
 
 SWIG is a tool to generate wrappers for C/C++ code to a variety of high-level langauges, including Python, Java and Common Lisp. 
 
-We have an initial Python wrapping, but the Service is not yet functional due to the required callback mechanism (i.e. we'd like to be able to implement a service callback in the target language!). This task is currently in progress.
+Although there are [[http://www.swig.org/Doc3.0/Allegrocl.html][pages]] indicating SWIG support for Common Lisp, there is contrary [[https://github.com/swig/swig/issues/384#issuecomment-100715041][evidence]] that in fact Common Lisp support is not active or maintained.
 
-See the [[test/python]] directory for example Python code, and the [[src/test_pub.cpp]] and [[src/test_sub.cpp]] for C++ usage examples. 
+Therefore, we do not use SWIG to generate the Common Lisp bindings, but instead implement a simple C wrapper that can be called directly with [[https://common-lisp.net/project/cffi/][CFFI]].
+
+See the [[test]] directory for language tests and usage examples for C++, Python, Java, and Common Lisp. 
+
+The Common Lisp examples were tested with sbcl. The required common lisp packages, such as [[https://common-lisp.net/project/cl-json/][cl-json]], were installed using [[https://www.quicklisp.org/beta/][quicklsip]]
+
+The Java examples require that you have installed [[https://code.google.com/p/json-simple/][json-simple]], and that your CLASSPATH is updated to include the =build/swig= directory as well as the installation JAR for json-simple-java.
+
+
