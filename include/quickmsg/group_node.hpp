@@ -97,6 +97,8 @@ namespace quickmsg {
     //PeerListPtr peers_;
     //std::map<std::string,PeerListPtr> peers_by_desc_;
     std::thread* event_thread_;
+
+    bool promiscuous_;
     
     typedef std::unique_lock<std::mutex> basic_lock;
     typedef std::map<std::string,uint> join_map_t;

@@ -40,6 +40,7 @@ namespace quickmsg {
   }
 
   GroupNode::GroupNode(const std::string& desc, bool promiscuous)
+    : promiscuous_(promiscuous)
   {
     // create the zyre node
     node_ = zyre_new((GroupNode::name() + "/" + desc).c_str());
@@ -193,6 +194,13 @@ namespace quickmsg {
     auto range = handlers_.equal_range(group);
     std::for_each(range.first,range.second,
 		  [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});
+
+    // handle promiscuity
+    if (promiscuous_ && range.first != range.second) {
+      range = handlers_.equal_range("*");
+      std::for_each(range.first, range.second,
+		    [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});
+    }
   }
 
   class ScopedEvent
