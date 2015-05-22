@@ -1,4 +1,4 @@
-(load "../../src/quickmsg.cl")
+(load "../../src/lisp/quickmsg.lisp")
 
 (defpackage :qm_sub
   (:use :common-lisp :cffi :cl-json :iterate))
