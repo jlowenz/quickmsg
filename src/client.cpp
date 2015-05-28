@@ -1,5 +1,7 @@
 #include <glog/logging.h>
 #include <quickmsg/client.hpp>
+#include <quickmsg/quickmsg.hpp>
+#include <chrono>
 
 namespace quickmsg {
 
@@ -11,7 +13,7 @@ namespace quickmsg {
   Client::Client(const std::string& srv_name) : 
     srv_name_(srv_name)
   {
-    wait_for_response_=false;
+    message_received_ = false;
     // create the group node
     std::string name("C/");
     node_ = new GroupNode(name + srv_name);
@@ -31,26 +33,32 @@ namespace quickmsg {
   }
   
   std::string
-  Client::call_srv(const std::string& req, double timeout_s)
+  Client::call_srv(const std::string& req, int timeout_s)
   {
-    wait_for_response_ = true;
+    message_received_.store(false);
     response_ = std::string("");
     node_->shout(srv_name_, req);
     double start_t = clock();
-    while ( wait_for_response_ && !zsys_interrupted &&
-            ((clock()-start_t) / (double)CLOCKS_PER_SEC) < timeout_s )
-    {
-      sleep(1);
+
+    { 
+      // wait for the response
+      std::unique_lock<std::mutex> lock(response_mutex_);
+      response_cond_.wait_for(lock, std::chrono::seconds(timeout_s), 
+			      [&]{ return message_received_.load(); });
     }
+    
+    if (!message_received_.load()) throw ServiceCallTimeout();
+
     return response_;
   }
 
   void 
   Client::handle_response(const MessagePtr& resp)
   {
-    std::cout << "received response\n" << resp->msg << std::endl;
+    DLOG(INFO) << "received response\n" << resp->msg << std::endl;
     response_ = resp->msg;
-    wait_for_response_ = false;
+    message_received_.store(true);
+    response_cond_.notify_one();
   }
 
   void 
