@@ -109,3 +109,13 @@ install(DIRECTORY include/${PROJECT_NAME}
   PATTERN "*~" EXCLUDE)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.pc DESTINATION lib/pkgconfig)
 
+
+# install Python components
+install(FILES 
+  ${CMAKE_CURRENT_BINARY_DIR}/_quickmsg_py.so
+  ${CMAKE_CURRENT_BINARY_DIR}/swig/quickmsg_py.py
+  DESTINATION lib/python2.7/dist-packages)
+
+# install Java components
+
+# install Common Lisp components
