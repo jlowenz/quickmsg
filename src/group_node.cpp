@@ -219,7 +219,7 @@ namespace quickmsg {
 		  [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});
 
     // handle promiscuity
-    if (promiscuous_ && range.first != range.second) {
+    if (promiscuous_ && range.first == range.second) {
       range = handlers_.equal_range("*");
       std::for_each(range.first, range.second,
 		    [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});

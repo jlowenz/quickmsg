@@ -67,6 +67,7 @@ namespace quickmsg {
     std::string resp_str = service_impl(req.get());
     DLOG(INFO) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     node_->whisper(req->header.src_uuid, resp_str);
+    // TODO: are we going to should the response to the promiscuous group too?
   }
 
   std::string 
