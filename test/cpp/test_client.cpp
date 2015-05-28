@@ -18,12 +18,13 @@ main(int argc, char** argv)
   add_ints_vec.push_back(1);
   add_ints_vec.push_back(22);
   add_ints_vec.push_back(99);
+  qm::AddNInts add_ints;
   for (int i = 0; i < 5; ++i) {
     if (!qm::ok()) break;    
-    qm::AddNInts add_ints;
     std::string req_str = add_ints.create_req(add_ints_vec);
     std::cout << "client request\n" << req_str << std::endl;
-    client.call_srv(req_str);
+    std::string resp = client.call_srv(req_str);
+    std::cout << "response: " << add_ints.result_from_resp(resp) << std::endl;
     sleep(1);
   }
   

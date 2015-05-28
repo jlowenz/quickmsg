@@ -35,6 +35,21 @@ namespace quickmsg {
   class GroupNode 
   {
   public:    
+
+    /** \brief Construct a new GroupNode for implementing group
+	communication over multiple topics.
+	
+	Construct a new GroupNode. A GroupNode allows the owner to
+	send string-based messages to groups that it has joined. A
+	promiscuous GroupNode pays attention to all groups on the
+	network, and joins every known group in order to report
+	"off-group" communications to a specified handler. The
+	promiscuous group "*" is reserved for handlers that need
+	access to any known group's messages.
+
+	\param description A string that describes this node, given as the peer name. 
+	\param promiscuous Specify whether this groupnode should listen to everyone.
+    */
     GroupNode(const std::string& description = "", bool promiscuous=false);
     virtual ~GroupNode();
     
@@ -44,6 +59,8 @@ namespace quickmsg {
     
     void register_handler(const std::string& group, MessageCallback cb, void* args);
     void register_whispers(MessageCallback cb, void* args);
+
+    // TODO: what about de-registering the handlers???
 
     void shout(const std::string& group, const std::string& msg);
     void whisper(const PeerPtr& peer, const std::string& msg);
@@ -90,6 +107,7 @@ namespace quickmsg {
 
   private:
     bool spin_once();
+    void update_groups();
     
     zyre_t* node_;
     std::string node_name_;
@@ -97,6 +115,7 @@ namespace quickmsg {
     //PeerListPtr peers_;
     //std::map<std::string,PeerListPtr> peers_by_desc_;
     std::thread* event_thread_;
+    std::thread* prom_thread_;
 
     bool promiscuous_;
     
@@ -111,7 +130,7 @@ namespace quickmsg {
     typedef tbb::concurrent_unordered_multimap<std::string,std::pair<MessageCallback,void*> > handlers_t;
     // typedef std::map<std::string,std::pair<MessageCallback,void*> > handlers_t;
     handlers_t handlers_;
-    std::pair<MessageCallback,void*> whisper_handler_;
+    handlers_t whisper_handlers_;
 
     //static std::mutex  name_mutex_;
     static std::string name_;

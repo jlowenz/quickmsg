@@ -16,6 +16,7 @@ pkg_check_modules(LIB_CZMQ "libczmq")
 pkg_check_modules(LIB_ZYRE "libzyre")
 pkg_check_modules(TBB "tbb")
 pkg_check_modules(LIB_JSONCPP "jsoncpp")
+pkg_check_modules(LIB_GLOG "libglog")
 
 find_package(Boost REQUIRED COMPONENTS date_time system thread)
 find_package(Java REQUIRED COMPONENTS Runtime Development)
@@ -23,6 +24,7 @@ find_package(JNI REQUIRED)
 
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${LIB_ZYRE_INCLUDE_DIRS})
+include_directories(${LIB_GLOG_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC")
 
@@ -49,7 +51,8 @@ add_library(${PROJECT_NAME} SHARED
   src/subscriber_wrap.cpp
   src/client_wrap.cpp
   src/service_wrap.cpp)
-target_link_libraries(${PROJECT_NAME} tbb zyre czmq)
+# TODO: hmmm should tbb/zyre/czmq be in variables?
+target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES})
 
 # SWIG
 find_package(SWIG REQUIRED)

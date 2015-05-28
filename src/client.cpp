@@ -1,3 +1,4 @@
+#include <glog/logging.h>
 #include <quickmsg/client.hpp>
 
 namespace quickmsg {
@@ -16,9 +17,9 @@ namespace quickmsg {
     node_ = new GroupNode(name + srv_name);
     node_->join(srv_name_);
     node_->async_spin();
-    std::cout << "waiting for server" << std::endl;
+    DLOG(INFO) << "waiting for server" << std::endl;
     node_->wait_join(srv_name_); // wait for service
-    std::cout << "server joined group" << std::endl;
+    DLOG(INFO) << "server joined group" << std::endl;
     node_->register_whispers(&client_handler, (void*)this);
   }
 

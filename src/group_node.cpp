@@ -1,8 +1,13 @@
+#include <glog/logging.h>
+#include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
 #include <iterator> 
 #include <thread>
+#include <chrono>
 #include <functional>
 #include <algorithm>
+
+#define DEBUG
 
 namespace quickmsg {
 
@@ -40,7 +45,7 @@ namespace quickmsg {
   }
 
   GroupNode::GroupNode(const std::string& desc, bool promiscuous)
-    : promiscuous_(promiscuous)
+    : promiscuous_(promiscuous), event_thread_(NULL), prom_thread_(NULL)
   {
     // create the zyre node
     node_ = zyre_new((GroupNode::name() + "/" + desc).c_str());
@@ -57,11 +62,27 @@ namespace quickmsg {
     GroupNode::running_ = true;
     // create our self peer
     self_.reset(new Peer(uuid, desc));
+
+    /* we want to minimize the groups joined and messages sent -
+       especially by other non-promiscuous components; in order to do
+       so, we need to periodically join all the known groups.
+     */
+    if (promiscuous_) {
+      prom_thread_ = new std::thread(&GroupNode::update_groups, this);
+      DLOG(INFO) << "Started promiscuous group thread..." << std::endl;
+    }
   }
   
   GroupNode::~GroupNode()
   {    
     zyre_destroy(&node_);
+    if (prom_thread_) {
+      prom_thread_->join();
+      delete prom_thread_;
+    }
+    if (event_thread_) {
+      delete event_thread_;
+    }
   }
     
   void    
@@ -102,8 +123,8 @@ namespace quickmsg {
   void 
   GroupNode::register_whispers(MessageCallback cb, void* args)
   {
-    // add to the handlers
-    whisper_handler_ = std::make_pair(cb,args);
+    // add to the handlers   
+    whisper_handlers_.insert(std::make_pair("w",std::make_pair(cb,args)));
   }
 
 
@@ -177,7 +198,9 @@ namespace quickmsg {
     char* a_str = zmsg_popstr(zmsg);
     msg->msg = a_str;
     free(a_str);
-    whisper_handler_.first(msg, whisper_handler_.second);
+    auto range = whisper_handlers_.equal_range("w");
+    std::for_each(range.first, range.second,
+		  [&](handlers_t::value_type& c){c.second.first(msg, c.second.second);});
   }
 
   void 
@@ -257,29 +280,29 @@ namespace quickmsg {
       switch (t) {
       case ZYRE_EVENT_WHISPER: {
         std::string name = e.peer_name();
-        std::cerr << name << " whispers -> " << node_name_ << std::endl;
+        DLOG(INFO) << name << " whispers -> " << node_name_ << std::endl;
         std::string peer_uuid = e.peer_uuid();
-        std::cerr << " peer id " << peer_uuid << std::endl;
+        DLOG(INFO) << " peer id " << peer_uuid << std::endl;
         zmsg_t* msg = e.message();
         handle_whisper(peer_uuid, msg); }
         break;
       case ZYRE_EVENT_SHOUT: {
         std::string group_id = e.group();
-        std::cerr << e.peer_name() << " " << group_id 
-        	  << " shouts ->" << node_name_ << std::endl;
+        DLOG(INFO) << e.peer_name() << " " << group_id 
+		   << " shouts ->" << node_name_ << std::endl;
         std::string peer_uuid = e.peer_uuid();
-        std::cerr << " peer id " << peer_uuid << std::endl;
+        DLOG(INFO) << " peer id " << peer_uuid << std::endl;
         zmsg_t* msg = e.message();
         handle_shout(group_id, peer_uuid, msg); }
         break;
       case ZYRE_EVENT_ENTER: {
         std::string name = e.peer_name();
-        std::cerr << name << " enters | " << node_name_ << std::endl; }
+        DLOG(INFO) << name << " enters | " << node_name_ << std::endl; }
         break;
       case ZYRE_EVENT_JOIN: {
         std::string group_id = e.group();
-        std::cerr << e.peer_name() << " joins " << group_id << " | " 
-        	  << node_name_ << std::endl;
+        DLOG(INFO) << e.peer_name() << " joins " << group_id << " | " 
+		   << node_name_ << std::endl;
         {
           basic_lock lk(join_mutex_);
           joins_[group_id]++; 
@@ -288,15 +311,18 @@ namespace quickmsg {
         break; 
       case ZYRE_EVENT_LEAVE: {
         std::string group_id = e.group();
-        std::cerr << e.peer_name() << " leaves " << group_id << " | " 
-        	  << node_name_ << std::endl;
-        joins_[group_id]--; }
+        DLOG(INFO) << e.peer_name() << " leaves " << group_id << " | " 
+		   << node_name_ << std::endl;
+	{
+	  basic_lock lk(join_mutex_);
+	  joins_[group_id]--; 
+	}}
         break;
       case ZYRE_EVENT_EXIT: {
-        std::cerr << e.peer_name() << " exits | " << node_name_ << std::endl; }
+        DLOG(INFO) << e.peer_name() << " exits | " << node_name_ << std::endl; }
         break;
       case ZYRE_EVENT_STOP: {
-        std::cerr << e.peer_name() << " stops | " << node_name_ << std::endl; }
+        DLOG(INFO) << e.peer_name() << " stops | " << node_name_ << std::endl; }
         return false;
       }
     } else {
@@ -305,6 +331,25 @@ namespace quickmsg {
     return true;
   }
 
+  void
+  GroupNode::update_groups()
+  {
+    // called by a thread in an infinite loop at a fixed rate (i.e. 1s)    
+    while (ok()) {
+      auto start = std::chrono::high_resolution_clock::now();
+      zlist_t* all_groups = zyre_peer_groups(node_);
+      void* item = zlist_first(all_groups);
+      while (item != NULL) {
+	char* grp = static_cast<char*>(item);
+	// zyre only joins the group if we are not ALREADY in the group
+	// so it does a hash lookup - we would be duplicating work 
+	zyre_join(node_, grp);
+	item = zlist_next(all_groups);
+      }
+      std::chrono::duration<double,std::milli> period(1000);
+      std::this_thread::sleep_until(start + period);
+    }
+  }
 
   /** \brief Start the listener. This method does not return.
       
@@ -341,6 +386,6 @@ namespace quickmsg {
   void 
   GroupNode::join()    
   {    
-    event_thread_->join();
+    event_thread_->join();    
   }
 }

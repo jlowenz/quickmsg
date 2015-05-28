@@ -12,7 +12,7 @@ typedef struct _qm_service_t qm_service_t;
 
 qm_service_t *
 qm_service_new (const char* srv_name, 
-                 const char* (*impl)(const quickmsg::Message* req));
+		const char* (*impl)(const quickmsg::Message* req));
 
 void
 qm_service_destroy (qm_service_t *self_p);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glog/logging.h>
 #include <json/json.h>
 #include <algorithm>
 #include <sstream>
@@ -46,6 +47,8 @@ namespace quickmsg {
     std::for_each(ints_to_add.begin(), ints_to_add.end(), [&](int i){ints.append(i);});
     obj["result"] = result;
     std::ostringstream ss; ss << obj;
+    DLOG(INFO) << "result: " << result << std::endl;
+    DLOG(INFO) << "constructed response: " << ss.str() << std::endl;
     return ss.str();
   }
 

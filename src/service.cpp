@@ -1,3 +1,4 @@
+#include <glog/logging.h>
 #include <quickmsg/service.hpp>
 #include <type_traits>
 
@@ -18,20 +19,20 @@ namespace quickmsg {
   const char*
   default_echo(const Message* req)
   {
-    std::cout << " Default service impl (echo request) " << std::endl;
+    DLOG(INFO) << " Default service impl (echo request) " << std::endl;
     return req->msg.c_str();
   }
 
   Service::Service(const std::string& srv_name, const ServiceImpl& impl,
-                   const std::string& promisc_topic, size_t queue_size)
-    : promisc_topic_(promisc_topic), srv_name_(srv_name), impl_(impl)
+		   size_t queue_size)
+    : srv_name_(srv_name), impl_(impl)
   {
     init(queue_size);
   }
 
   Service::Service(const std::string& srv_name,
-                   const std::string& promisc_topic, size_t queue_size)
-    : promisc_topic_(promisc_topic), srv_name_(srv_name)
+                   size_t queue_size)
+    : srv_name_(srv_name)
   {
     impl_=default_echo;
     init(queue_size);
@@ -43,7 +44,6 @@ namespace quickmsg {
     std::string name("Srv/");
     node_ = new GroupNode(name + srv_name_);
     node_->join(srv_name_);
-    node_->join(promisc_topic_);
 
     // Server will sub on svc_topic, whisper to client on svc_topic, pub on prom_topic
     node_->register_handler(srv_name_, &service_handler, (void*)this);
@@ -53,7 +53,6 @@ namespace quickmsg {
 
   Service::~Service()
   {
-    node_->leave(promisc_topic_);
     node_->leave(srv_name_);
     node_->stop();
     delete node_;
@@ -66,7 +65,7 @@ namespace quickmsg {
     reqs_.try_push(req);
 
     std::string resp_str = service_impl(req.get());
-    std::cout << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
+    DLOG(INFO) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     node_->whisper(req->header.src_uuid, resp_str);
   }
 

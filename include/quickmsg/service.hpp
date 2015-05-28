@@ -20,10 +20,8 @@ namespace quickmsg {
   public:
     Service(const std::string& srv_name,
             const ServiceImpl& impl,
-            const std::string& promisc_topic=std::string("promisc"),
             size_t queue_size=10);
     Service(const std::string& srv_name,
-            const std::string& promisc_topic=std::string("promisc"),
             size_t queue_size=10);
     void init(size_t queue_size);
     virtual ~Service();
