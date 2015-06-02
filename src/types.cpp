@@ -93,6 +93,11 @@ namespace quickmsg {
     return t;
   }
 
+  Message::Message(const Message& m)
+    : header(m.header), msg(m.msg)
+  {    
+  }
+
   double 
   Message::get_stamp()
   {
@@ -134,6 +139,17 @@ namespace quickmsg {
   {
     msg=msg_str;
   }
+
+  ServiceReply::ServiceReply(const ServiceReply& r)
+    : Message(r), successful(r.successful)
+  {
+  }
+
+  ServiceReply::ServiceReply(const Message& r, bool success)
+    : Message(r), successful(success)
+  {
+  }
+
 
   std::ostream& operator<<(std::ostream& os, const Time& t)
   {

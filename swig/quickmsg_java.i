@@ -5,7 +5,6 @@
 //%shared_ptr(quickmsg::ServiceReply)
 
 %feature("director") Service;
-%feature("director") Subscriber;
 %feature("director") AsyncSubscriber;
 
 // support for shared pointers
@@ -29,7 +28,8 @@ using namespace quickmsg;
 %shared_ptr(quickmsg::ServiceReply);
 %shared_ptr(quickmsg::PeerList);
 %shared_ptr(quickmsg::MsgList);
-%template(MessagePtrVec) std::vector<boost::shared_ptr<quickmsg::Message> >;
+%template(MessageVec) std::vector<quickmsg::Message*>;
+%template(PeerVec) std::vector<quickmsg::Peer*>;
 
 /* typedef boost::shared_ptr<quickmsg::Message> quickmsg::MessagePtr; */
 /* typedef boost::shared_ptr<quickmsg::ServiceReply> quickmsg::ServiceReplyPtr; */

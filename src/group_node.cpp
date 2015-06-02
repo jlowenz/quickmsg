@@ -200,7 +200,7 @@ namespace quickmsg {
     free(a_str);
     auto range = whisper_handlers_.equal_range("w");
     std::for_each(range.first, range.second,
-		  [&](handlers_t::value_type& c){c.second.first(msg, c.second.second);});
+		  [&](handlers_t::value_type& c){c.second.first(msg.get(), c.second.second);});
   }
 
   void 
@@ -216,13 +216,13 @@ namespace quickmsg {
     //zmsg_destroy(&zmsg);
     auto range = handlers_.equal_range(group);
     std::for_each(range.first,range.second,
-		  [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});
+		  [&](handlers_t::value_type& x){x.second.first(msg.get(), x.second.second);});
 
     // handle promiscuity
     if (promiscuous_ && range.first == range.second) {
       range = handlers_.equal_range("*");
       std::for_each(range.first, range.second,
-		    [&](handlers_t::value_type& x){x.second.first(msg, x.second.second);});
+		    [&](handlers_t::value_type& x){x.second.first(msg.get(), x.second.second);});
     }
   }
 

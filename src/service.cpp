@@ -4,7 +4,7 @@
 
 namespace quickmsg {
 
-  void service_handler(const MessagePtr& msg, void* args)
+  void service_handler(const Message* msg, void* args)
   {
     static_cast<Service*>(args)->handle_request(msg);
   }
@@ -17,15 +17,15 @@ namespace quickmsg {
   // }
 
   const char*
-  default_echo(const Message* req)
+  default_echo(const Message* req, void*)
   {
     DLOG(INFO) << " Default service impl (echo request) " << std::endl;
     return req->msg.c_str();
   }
 
-  Service::Service(const std::string& srv_name, const ServiceImpl& impl,
-		   size_t queue_size)
-    : srv_name_(srv_name), impl_(impl)
+  Service::Service(const std::string& srv_name, const ServiceCallback& impl,
+		   void* args, size_t queue_size)
+    : srv_name_(srv_name), impl_(impl), args_(args)
   {
     init(queue_size);
   }
@@ -59,13 +59,15 @@ namespace quickmsg {
   }
 
   void 
-  Service::handle_request(const MessagePtr& req)
+  Service::handle_request(const Message* req)
   {
     // if the queue is full, too bad!
-    reqs_.try_push(req);
+    //MessagePtr msg(new Message(*req));
+    //reqs_.try_push(msg);
 
-    std::string resp_str = service_impl(req.get());
+    std::string resp_str = service_impl(req);
     DLOG(INFO) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
+    // whisper the response back
     node_->whisper(req->header.src_uuid, resp_str);
     // TODO: are we going to should the response to the promiscuous group too?
   }
@@ -73,20 +75,7 @@ namespace quickmsg {
   std::string 
   Service::service_impl(const Message* req)
   {
-    return std::string(impl_(req));
-  }
-
-  void 
-  Service::publish(const std::string& msg)
-  {
-    //    node_->shout(promisc_topic_, msg);
-  }
-
-  // Make response message
-  void 
-  Service::respond(const PeerPtr& peer, const std::string& resp)
-  {
-    //    node_->whisper(peer, resp);
+    return std::string(impl_(req, args_));
   }
 
   void 

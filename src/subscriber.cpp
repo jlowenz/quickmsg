@@ -1,10 +1,11 @@
+#include <glog/logging.h>
 #include <quickmsg/subscriber.hpp>
 #include <type_traits>
 
 namespace quickmsg {
 
   void
-  default_cb(const Message* msg)
+  default_cb(const Message* msg, void*)
   {
     std::cout << " Default subscriber impl (echo) " << std::endl;
     std::cout << (*msg) << std::endl;
@@ -13,21 +14,14 @@ namespace quickmsg {
   /**
    * \internal 
    */
-  void subscriber_handler(const MessagePtr& msg, void* args)
+  void subscriber_handler(const Message* msg, void* args)
   {
     static_cast<Subscriber*>(args)->handle_message(msg);
   }
 
-  void async_subscriber_handler(const MessagePtr& msg, void* args)
+  void async_subscriber_handler(const Message* msg, void* args)
   {
     static_cast<AsyncSubscriber*>(args)->handle_message(msg);
-  }
-
-  Subscriber::Subscriber(const std::string& topic, const SubscriberImpl& impl,
-                         size_t queue_size)
-    : topic_(topic), impl_(impl)
-  {
-    init(queue_size);
   }
 
   Subscriber::Subscriber(const std::string& topic, size_t queue_size)
@@ -65,36 +59,33 @@ namespace quickmsg {
     node_->join();
   }
     
-  void Subscriber::handle_message(const MessagePtr& msg)
+  void Subscriber::handle_message(const Message* msg)
   {
     // if the queue is full, too bad!
-    std::cout << "Received message "<< msg->msg<<std::endl;
-    subscriber_impl(msg.get());
-    msgs_.try_push(msg);
+    DLOG(INFO) << "Received message "<< msg->msg<<std::endl;
+    msgs_.try_push(new Message(*msg));
   }
 
-  void Subscriber::subscriber_impl(const Message* msg)
-  {
-    impl_(msg);
-  }
 
   /** \brief Return messages that have arrived since the last call.
       
       \return a list of messages
   */
-  MsgListPtr
+  MsgList
   Subscriber::messages()
   {
-    MsgListPtr mlist = boost::make_shared<MsgList>();
-    MessagePtr m;
+    MsgList mlist;
+    Message* m;
     while (msgs_.try_pop(m)) { // terminates when there are no more elements in the queue
-      mlist->push_back(m);
+      mlist.push_back(m);
     }
     return mlist;
   }
 
-  AsyncSubscriber::AsyncSubscriber(const std::string& topic, const SubscriberImpl& impl)
-    : topic_(topic), impl_(impl)
+  AsyncSubscriber::AsyncSubscriber(const std::string& topic, 
+				   MessageCallback impl, 
+				   void* args)
+    : topic_(topic), impl_(impl), args_(args)
   {
     init();
   }
@@ -117,6 +108,7 @@ namespace quickmsg {
     std::cout<<"Async Subscribing on topic "<<topic_<<std::endl;
     node_->register_handler(topic_, &async_subscriber_handler, (void*)this);
   }
+
   AsyncSubscriber::~AsyncSubscriber()
   {
     node_->leave(topic_);
@@ -124,15 +116,10 @@ namespace quickmsg {
     delete node_;
   }
 
-  void AsyncSubscriber::handle_message(const MessagePtr& msg)
+  void AsyncSubscriber::handle_message(const Message* msg)
   {
-    std::cout << "Received message "<< msg->msg<<std::endl;
-    subscriber_impl(msg.get());
-  }
-
-  void AsyncSubscriber::subscriber_impl(const Message* msg)
-  {
-    impl_(msg);
+    DLOG(INFO) << "Received message "<< msg->msg <<std::endl;
+    impl_(msg, args_);
   }
    
   void AsyncSubscriber::spin()

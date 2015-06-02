@@ -27,9 +27,6 @@ namespace quickmsg {
   };
   typedef boost::shared_ptr<Peer> PeerPtr;
   typedef std::vector<PeerPtr> PeerList;
-  typedef boost::shared_ptr<PeerList> PeerListPtr;
-
-  typedef std::add_pointer<void(const MessagePtr&,void*)>::type MessageCallback;
 
   class GroupNode 
   {
@@ -111,8 +108,6 @@ namespace quickmsg {
     zyre_t* node_;
     std::string node_name_;
     PeerPtr self_;
-    //PeerListPtr peers_;
-    //std::map<std::string,PeerListPtr> peers_by_desc_;
     std::thread* event_thread_;
     std::thread* prom_thread_;
 

@@ -23,7 +23,7 @@ main(int argc, char** argv)
     if (!qm::ok()) break;    
     std::string req_str = add_ints.create_req(add_ints_vec);
     std::cout << "client request\n" << req_str << std::endl;
-    std::string resp = client.call_srv(req_str);
+    std::string resp = client.calls(req_str);
     std::cout << "response: " << add_ints.result_from_resp(resp) << std::endl;
     sleep(1);
   }

@@ -5,7 +5,7 @@
 
 namespace quickmsg {
 
-  void client_handler(const MessagePtr& msg, void* args)
+  void client_handler(const Message* msg, void* args)
   {
     static_cast<Client*>(args)->handle_response(msg);
   }
@@ -31,12 +31,20 @@ namespace quickmsg {
     node_->stop();
     delete node_;
   }
-  
+
+
   std::string
-  Client::call_srv(const std::string& req, int timeout_s)
+  Client::calls(const std::string& msg, int timeout_s)
+  {
+    ServiceReplyPtr resp = call(msg, timeout_s);    
+    return resp->msg;
+  }
+  
+  ServiceReplyPtr
+  Client::call(const std::string& req, int timeout_s)
   {
     message_received_.store(false);
-    response_ = std::string("");
+    response_.reset();
     node_->shout(srv_name_, req);
     double start_t = clock();
 
@@ -52,25 +60,16 @@ namespace quickmsg {
     return response_;
   }
 
+  // TODO: shouldn't this be a ServiceReply? how else is failure indicated?
   void 
-  Client::handle_response(const MessagePtr& resp)
+  Client::handle_response(const Message* resp)
   {
     DLOG(INFO) << "received response\n" << resp->msg << std::endl;
-    response_ = resp->msg;
+    ServiceReplyPtr rep(new ServiceReply(*resp, true));
+    response_ = rep;
     message_received_.store(true);
     response_cond_.notify_one();
   }
 
-  void 
-  Client::spin()
-  {
-    node_->spin();
-  }
-
-  ServiceReplyPtr
-  Client::call(const std::string& msg)
-  {
-    return boost::make_shared<ServiceReply>();
-  }
 
 }

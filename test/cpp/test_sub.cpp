@@ -6,16 +6,16 @@
 
 namespace qm = quickmsg;
 
-class SubImpl : public qm::Subscriber
+class SubImpl : public qm::AsyncSubscriber
 {
 public:
-  SubImpl(const std::string& topic, const qm::SubscriberImpl& impl, size_t queue_size=10)
-    : qm::Subscriber(topic, impl, queue_size) {}
-  SubImpl(const std::string& topic, size_t queue_size=10) : qm::Subscriber(topic, queue_size) {}
+
+  SubImpl(const std::string& topic) : qm::AsyncSubscriber(topic) {}
   virtual ~SubImpl() {}
-  virtual void subscriber_impl(const std::string &msg)
+  virtual void handle_message(const qm::Message* msg)
   {
     std::cout<<"inherited impl"<<std::endl;
+    std::cout << "msg: " << msg->msg << std::endl;
   }
 };
 
@@ -32,7 +32,7 @@ main(int argc, char** argv)
   //  qm::AsyncSubscriber async_sub("chatter", &handler, NULL);  
   //  async_sub.spin();
   //  qm::Subscriber sub("chatter", 20);
-  SubImpl sub("chatter", 20);
+  SubImpl sub("chatter");
   while (qm::ok())
   {
     sleep(1);

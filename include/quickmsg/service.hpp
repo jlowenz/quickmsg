@@ -7,38 +7,58 @@
 
 namespace quickmsg {
 
-  //  std::string _service_impl(const MessagePtr& request);
-
-  //  std::string default_echo(const std::string& req);
-
-  const char* default_echo(const Message* req);
-
-  typedef std::add_pointer<decltype(default_echo)>::type ServiceImpl;
+  const char* default_echo(const Message* req, void* data);
 
   class Service
   {
+    friend void service_handler(const Message*, void*);
   public:
     Service(const std::string& srv_name,
-            const ServiceImpl& impl,
             size_t queue_size=10);
+
     Service(const std::string& srv_name,
+            const ServiceCallback& impl,
+	    void* args=NULL,
             size_t queue_size=10);
-    void init(size_t queue_size);
     virtual ~Service();
     
-    virtual void handle_request(const MessagePtr& req);
+    /**
+     * Override this method to implement how the service responds to
+     * the request. By default, this method will call the
+     * ServiceCallback given in the constructor, or will call the
+     * default "echo" service implementation, which simply returns the
+     * request as the reply.
+     */
     virtual std::string service_impl(const Message* req);
-    void publish(const std::string& msg);
-    void respond(const PeerPtr& peer, const std::string& resp);
+
+    /** Block the calling thread while the Service processes incoming
+	messages.
+     */
     void spin();
+
+    /** Start a thread to sping for this Service, allowing the calling
+	thread to continue.  The implication here is that now there
+	are multiple threads running, and the handler must be
+	thread-aware.
+     */
     void async_spin();
 
+  protected:
+    /** The service handler implementation processes the incoming
+	message and passes the result to the
+	service_implementation. This method should generally not be
+	overridden.
+    */
+    virtual void handle_request(const Message* req);  
   private:
     std::string srv_name_;
     std::string promisc_topic_;
-    ServiceImpl impl_;
+    ServiceCallback impl_;
+    void* args_;
     GroupNode* node_;
     tbb::concurrent_bounded_queue<MessagePtr> reqs_;
+
+    void init(size_t queue_size);    
   };
   
 }

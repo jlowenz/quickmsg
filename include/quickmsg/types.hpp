@@ -9,6 +9,9 @@
 
 namespace quickmsg {
 
+
+#if !SWIG
+  // TODO: switch to std::chrono instead?
   class Time 
   {
   public:
@@ -46,6 +49,7 @@ namespace quickmsg {
     Header() {}
     friend std::ostream& operator<<(std::ostream& os, const Time& t);
   };
+#endif
 
   class Message
   {
@@ -54,6 +58,7 @@ namespace quickmsg {
     std::string msg;
 
     Message() {}
+    Message(const Message& m);
     virtual ~Message() {}
 
     double get_stamp();
@@ -72,13 +77,20 @@ namespace quickmsg {
   class ServiceReply : public Message
   {
   public:
-    ServiceReply() {}
+    ServiceReply() {}    
+    ServiceReply(const ServiceReply& s);
+    ServiceReply(const Message& r, bool success = true);
     virtual ~ServiceReply() {}
     bool successful;
   };
   typedef boost::shared_ptr<ServiceReply> ServiceReplyPtr;
 
-  typedef std::vector<MessagePtr> MsgList;
-  typedef boost::shared_ptr<MsgList> MsgListPtr;
-  
+  typedef std::vector<Message*> MsgList;
+
+  // common message callback type
+  // Message is owned by the caller, so copy any data needed
+  typedef void (*MessageCallback)(const Message*,void*); 
+
+  // service handler callback
+  typedef const char* (*ServiceCallback)(const Message*,void*);
 }

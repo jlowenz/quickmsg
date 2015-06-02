@@ -79,8 +79,6 @@ swig_cpp("${SWIG_FILES}")
 swig_add_module(quickmsg_py python swig/quickmsg_py.i)
 swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
-swig_add_module(quickmsg_java java swig/quickmsg_java.i)
-swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
 
 if (LIB_JSONCPP_FOUND)
   message("jsoncpp found, building service/client test")
@@ -101,10 +99,22 @@ target_link_libraries(test_pub ${PROJECT_NAME})
 add_executable(test_sub test/cpp/test_sub.cpp)
 target_link_libraries(test_sub ${PROJECT_NAME})
 
-#if (Java_FOUND)
-#  # build the Java jars 
-#  add_jar(quickmsg-${PROJECT_VERSION} SOURCES ${CMAKE_CURRENT_BINARY_DIR}/swig/
-#endif()
+if (JAVA_FOUND)
+  message("Java found. Running SWIG and building interfaces")
+  include(UseJava)
+  set(CMAKE_SWIG_FLAGS -package "quickmsg")
+  file(GLOB JAVA_SRC ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java)
+  swig_add_module(quickmsg_java java swig/quickmsg_java.i)
+  swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
+  # build the Java jars 
+  set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
+  add_jar(quickmsg_jar    
+    OUTPUT_NAME quickmsg
+    SOURCES ${JAVA_SRC}
+    VERSION ${PROJECT_VERSION})
+else()
+  message("Java not found...")
+endif()
 
 # installation
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}

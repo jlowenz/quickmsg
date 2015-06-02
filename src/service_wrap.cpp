@@ -7,7 +7,7 @@ extern "C" {
 
 qm_service_t *
 qm_service_new (const char* srv_name,
-                 const char* (*impl)(const Message*)) 
+		ServiceCallback impl) 
 {
   std::cout<<" Creating service "<<srv_name<<std::endl;
   Service* service = new Service(srv_name, impl);
