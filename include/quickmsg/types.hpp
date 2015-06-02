@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <list>
+//#include <list>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -77,7 +78,7 @@ namespace quickmsg {
   };
   typedef boost::shared_ptr<ServiceReply> ServiceReplyPtr;
 
-  typedef std::list<MessagePtr> MsgList;
+  typedef std::vector<MessagePtr> MsgList;
   typedef boost::shared_ptr<MsgList> MsgListPtr;
   
 }

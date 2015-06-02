@@ -8,16 +8,18 @@
 
 namespace quickmsg {
 
+#if !SWIG
   //  void default_cb(const char* msg);
-
   void default_cb(const Message* msg);
+  typedef std::add_pointer<void (const Message* msg)>::type SubscriberImpl;  
+#endif  
 
-  typedef std::add_pointer<decltype(default_cb)>::type SubscriberImpl;  
-  
   class Subscriber
   {
   public:    
+#if !SWIG
     Subscriber(const std::string& topic, const SubscriberImpl& impl, size_t queue_size=10);
+#endif
     Subscriber(const std::string& topic, size_t queue_size=10);
     virtual void init(size_t queue_size);
     virtual ~Subscriber();
@@ -38,7 +40,9 @@ namespace quickmsg {
   {
   public:
     //    AsyncSubscriber(const std::string& topic, MessageCallback cb, void* args=NULL);
+#if !SWIG
     AsyncSubscriber(const std::string& topic, const SubscriberImpl& impl);
+#endif
     AsyncSubscriber(const std::string& topic);
     void init();
     virtual ~AsyncSubscriber();

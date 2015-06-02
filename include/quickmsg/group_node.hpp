@@ -3,7 +3,6 @@
 #include <quickmsg/types.hpp>
 #include <zyre.h>
 #include <vector>
-#include <list>
 #include <map>
 #include <tbb/concurrent_unordered_map.h>
 #include <type_traits>
@@ -27,7 +26,7 @@ namespace quickmsg {
     std::string desc_;
   };
   typedef boost::shared_ptr<Peer> PeerPtr;
-  typedef std::list<PeerPtr> PeerList;
+  typedef std::vector<PeerPtr> PeerList;
   typedef boost::shared_ptr<PeerList> PeerListPtr;
 
   typedef std::add_pointer<void(const MessagePtr&,void*)>::type MessageCallback;

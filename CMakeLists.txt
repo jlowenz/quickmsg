@@ -55,6 +55,7 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES})
 
 # SWIG
+set(SWIG_EXECUTABLE "swig3.0")
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
@@ -100,6 +101,10 @@ target_link_libraries(test_pub ${PROJECT_NAME})
 add_executable(test_sub test/cpp/test_sub.cpp)
 target_link_libraries(test_sub ${PROJECT_NAME})
 
+#if (Java_FOUND)
+#  # build the Java jars 
+#  add_jar(quickmsg-${PROJECT_VERSION} SOURCES ${CMAKE_CURRENT_BINARY_DIR}/swig/
+#endif()
 
 # installation
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
