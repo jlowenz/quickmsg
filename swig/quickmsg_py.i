@@ -8,7 +8,6 @@
 #include "quickmsg/subscriber.hpp"
 #include "quickmsg/service.hpp"
 #include "quickmsg/client.hpp"
-#include "quickmsg/quickmsg_java.hpp"
 using namespace quickmsg;
 %}
 
@@ -25,6 +24,3 @@ using namespace quickmsg;
 %include "quickmsg/subscriber.hpp"
 %include "quickmsg/service.hpp"
 %include "quickmsg/client.hpp"
-
-
-%{

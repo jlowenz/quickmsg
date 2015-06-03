@@ -104,14 +104,18 @@ if (JAVA_FOUND)
   include(UseJava)
   set(CMAKE_SWIG_FLAGS -package "quickmsg")
   file(GLOB JAVA_SRC ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java)
-  swig_add_module(quickmsg_java java swig/quickmsg_java.i)
+  file(GLOB CB_SRC ${PROJECT_SOURCE_DIR}/swig/*.java)
+  swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
   swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
   add_jar(quickmsg_jar    
-    OUTPUT_NAME quickmsg
-    SOURCES ${JAVA_SRC}
+    #OUTPUT_NAME quickmsg
+    SOURCES ${JAVA_SRC} ${CB_SRC}
     VERSION ${PROJECT_VERSION})
+  add_dependencies(quickmsg_jar quickmsg_java quickmsg)
+
+  # TODO: build the native jar as well
 else()
   message("Java not found...")
 endif()
