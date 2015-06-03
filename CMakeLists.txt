@@ -99,30 +99,35 @@ target_link_libraries(test_pub ${PROJECT_NAME})
 add_executable(test_sub test/cpp/test_sub.cpp)
 target_link_libraries(test_sub ${PROJECT_NAME})
 
-function(swig_java)
-  file(GLOB CB_SRC ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java)
-  file(COPY ${CB_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/swig)
-  file(GLOB JAVA_SRC ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java)
-  message("Java sources: ")
-  foreach(f ${JAVA_SRC})
-    message("  Java file:" ${f})
-  endforeach()
-endfunction()  
+SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
+SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
+SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
 
 if (JAVA_FOUND)
   message("Java found. Running SWIG and building interfaces")
   include(UseJava)
   set(CMAKE_SWIG_FLAGS -package "quickmsg")
+  file(GLOB CB_SRC ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java)
+  file(COPY ${CB_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/swig)
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
   swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
-  add_custom_target(pre_jar swig_java)
-  add_jar(quickmsg_jar    
-    #OUTPUT_NAME quickmsg
-    SOURCES ${JAVA_SRC}
-    VERSION ${PROJECT_VERSION})
-  add_dependencies(quickmsg_jar pre_jar quickmsg_java quickmsg)
+  
+  # replace the add_jar with custom java build commands
+  #add_jar(quickmsg_jar
+  #  #OUTPUT_NAME quickmsg
+  #  SOURCES ${JAVA_SRC}
+  #  VERSION ${PROJECT_VERSION})
+  #add_dependencies(quickmsg_jar pre_jar quickmsg_java quickmsg)
+
+  add_custom_command(TARGET quickmsg_java
+    POST_BUILD
+    COMMAND cmake -E echo "Compiling Java files..."
+    COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/quickmsg
+    COMMAND ${JAVA_COMPILE2} ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java -d ${CMAKE_CURRENT_BINARY_DIR}/
+    COMMAND cmake -E echo "Creating jar file..."
+    COMMAND ${JAVA_ARCHIVE2} cvf quickmsg.jar quickmsg)
 
   # TODO: build the native jar as well
 else()
