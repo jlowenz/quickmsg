@@ -23,7 +23,7 @@ namespace quickmsg {
     return req->msg.c_str();
   }
 
-  Service::Service(const std::string& srv_name, const ServiceCallback& impl,
+  Service::Service(const std::string& srv_name, ServiceCallback impl,
 		   void* args, size_t queue_size)
     : srv_name_(srv_name), impl_(impl), args_(args)
   {

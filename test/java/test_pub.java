@@ -1,3 +1,5 @@
+import quickmsg.*;
+
 public class test_pub {
     static {
         String lib_name = "quickmsg_java";
@@ -10,13 +12,14 @@ public class test_pub {
     }
 
     public static void main(String[] argv) {
+	quickmsg_java.init("test_pub");
         Publisher p = new Publisher("chatter");
         String s = "Java Publisher Hello!";
         for (int i=0; i < 10; i++) {
             if (!quickmsg_java.ok()) {
                 break;
             }
-            System.out.println("Publishing"+s);
+            System.out.println("Publishing: "+s);
             p.publish(s);
             try{
                 Thread.sleep(100);

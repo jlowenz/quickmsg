@@ -1,13 +1,16 @@
+import quickmsg.*;
+
 class AsyncSubscriberImpl extends AsyncSubscriber {
     public AsyncSubscriberImpl(String topic)
     {
         super(topic);
     }
     
-    public void subscriber_impl(Message m) 
+    @Override
+    public void handle_message(Message m) 
     {
         System.out.println("Java inherited subscriber callback");
-        System.out.println(m.getMsg());
+        System.out.println(m.get_msg());
     }
 
 }
@@ -17,13 +20,6 @@ class SubscriberImpl extends Subscriber {
     {
         super(topic);
     }
-
-    public void subscriber_impl(Message m) 
-    {
-        System.out.println("Java inherited subscriber callback");
-        System.out.println(m.getMsg());
-    }    
-
 }
 
 public class test_sub {
@@ -38,14 +34,9 @@ public class test_sub {
     }
 
     public static void main(String[] argv) {
-        SubscriberImpl sub = new SubscriberImpl("chatter");
-        while(quickmsg_java.ok()) {
-            try{
-                Thread.sleep(100);
-            } catch(InterruptedException e){
-                System.out.println("got interrupted!");
-            }
-        }
+	quickmsg_java.init("test_sub");
+        AsyncSubscriberImpl sub = new AsyncSubscriberImpl("chatter");
+	sub.spin();
         // AsyncSubscriberImpl asub = new AsyncSubscriberImpl("chatter");
         // asub.spin();
     }

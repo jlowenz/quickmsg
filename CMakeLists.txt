@@ -110,7 +110,8 @@ if (JAVA_FOUND)
   file(GLOB CB_SRC ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java)
   file(COPY ${CB_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/swig)
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
-  swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
+  link_directories(/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64)
+  swig_link_libraries(quickmsg_java -L/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64 jsig ${JNI_LIBRARIES} ${PROJECT_NAME})
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
   

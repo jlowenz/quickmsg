@@ -20,7 +20,7 @@ public:
 };
 
 void
-handler(const qm::MessagePtr& msg, void* args)
+handler(const qm::Message* msg, void* args)
 {
   std::cout << "Message received: " << msg->msg << std::endl;
 }
@@ -29,13 +29,13 @@ int
 main(int argc, char** argv)
 {
   qm::init("test_sub");
-  //  qm::AsyncSubscriber async_sub("chatter", &handler, NULL);  
-  //  async_sub.spin();
+  qm::AsyncSubscriber async_sub("chatter", handler, NULL);  
+  async_sub.spin();
   //  qm::Subscriber sub("chatter", 20);
-  SubImpl sub("chatter");
-  while (qm::ok())
-  {
-    sleep(1);
-  }
+  // SubImpl sub("chatter");
+  // while (qm::ok())
+  // {
+  //   sleep(1);
+  // }
   return 0;
 }

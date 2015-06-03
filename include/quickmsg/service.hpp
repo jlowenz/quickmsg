@@ -17,7 +17,7 @@ namespace quickmsg {
             size_t queue_size=10);
 
     Service(const std::string& srv_name,
-            const ServiceCallback& impl,
+            ServiceCallback cb,
 	    void* args=NULL,
             size_t queue_size=10);
     virtual ~Service();

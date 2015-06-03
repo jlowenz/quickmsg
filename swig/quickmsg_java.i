@@ -24,11 +24,11 @@
 using namespace quickmsg;
 %}
 
-%shared_ptr(quickmsg::Message);
-%shared_ptr(quickmsg::Peer);
-%shared_ptr(quickmsg::ServiceReply);
-%shared_ptr(quickmsg::PeerList);
-%shared_ptr(quickmsg::MsgList);
+//%shared_ptr(quickmsg::Message);
+//%shared_ptr(quickmsg::Peer);
+//%shared_ptr(quickmsg::ServiceReply);
+//%shared_ptr(quickmsg::PeerList);
+//%shared_ptr(quickmsg::MsgList);
 %template(MessageVec) std::vector<quickmsg::Message*>;
 %template(PeerVec) std::vector<quickmsg::Peer*>;
 

@@ -101,7 +101,7 @@ namespace quickmsg {
     basic_lock lk(join_mutex_); 
     if (joins_[group] > 0) return;
     else {
-      join_cond_.wait(lk, [&](){ return joins_[group] > 0; });
+      join_cond_.wait(lk, [&](){ return joins_[group] > 0 or !ok(); });
     }
   }
   
@@ -273,7 +273,9 @@ namespace quickmsg {
     // read a new event from the zyre node, interrupt
     if (zsys_interrupted) return false;
 
+    DLOG(INFO) << "waiting for event" << std::endl;
     ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
+    DLOG(INFO) << "got event" << std::endl;
     // will be destroyed at the end of the function
     if (e.valid()) {
       zyre_event_type_t t = e.type();
@@ -324,11 +326,14 @@ namespace quickmsg {
       case ZYRE_EVENT_STOP: {
         DLOG(INFO) << e.peer_name() << " stops | " << node_name_ << std::endl; }
         return false;
+      default:
+	DLOG(INFO) << "got an unexpected event" << std::endl;
       }
     } else {
+      join_cond_.notify_all();
       return false;
     }
-    return true;
+    return true;    
   }
 
   void
