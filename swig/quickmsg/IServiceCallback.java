@@ -2,5 +2,5 @@ package quickmsg;
 
 public interface IServiceCallback
 {
-    String handleMessage(Message m);
+    public String handleMessage(quickmsg.Message m);
 }
