@@ -2,3 +2,5 @@ build
 *~
 doc
 *#*
+*.class
+*.log
