@@ -6,6 +6,8 @@
 #include <chrono>
 #include <functional>
 #include <algorithm>
+#include <pthread.h>
+#include <signal.h>
 
 #define DEBUG
 
@@ -75,14 +77,16 @@ namespace quickmsg {
   
   GroupNode::~GroupNode()
   {    
-    zyre_destroy(&node_);
+    zyre_stop(node_);    
     if (prom_thread_) {
       prom_thread_->join();
       delete prom_thread_;
     }
     if (event_thread_) {
+      event_thread_->join();
       delete event_thread_;
     }
+    zyre_destroy(&node_);
   }
     
   void    
@@ -98,10 +102,14 @@ namespace quickmsg {
   {
     // how do we wait for joins? we should receive at least one join message
     // but we MAY have received it in the PAST! 
+    std::chrono::duration<double,std::milli> period(500);
     basic_lock lk(join_mutex_); 
     if (joins_[group] > 0) return;
     else {
-      join_cond_.wait(lk, [&](){ return joins_[group] > 0 or !ok(); });
+      while (joins_[group] == 0 && ok()) {
+	// check periodically to make sure we're still running
+	join_cond_.wait_for(lk, period);
+      }
     }
   }
   
@@ -271,13 +279,13 @@ namespace quickmsg {
   GroupNode::spin_once()
   {
     // read a new event from the zyre node, interrupt
-    if (zsys_interrupted) return false;
+    if (zsys_interrupted || !ok()) return false;
 
     DLOG(INFO) << "waiting for event" << std::endl;
     ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
-    DLOG(INFO) << "got event" << std::endl;
     // will be destroyed at the end of the function
-    if (e.valid()) {
+    if (e.valid() && ok()) {
+      DLOG(INFO) << "got event" << std::endl;
       zyre_event_type_t t = e.type();
       switch (t) {
       case ZYRE_EVENT_WHISPER: {
@@ -330,6 +338,7 @@ namespace quickmsg {
 	DLOG(INFO) << "got an unexpected event" << std::endl;
       }
     } else {
+      DLOG(INFO) << "No event" << std::endl;
       join_cond_.notify_all();
       return false;
     }
@@ -339,6 +348,12 @@ namespace quickmsg {
   void
   GroupNode::update_groups()
   {
+    sigset_t signal_set;
+    sigaddset(&signal_set, SIGINT);
+    sigaddset(&signal_set, SIGTERM);
+    sigaddset(&signal_set, SIGHUP);
+    sigaddset(&signal_set, SIGPIPE);
+    pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
     // called by a thread in an infinite loop at a fixed rate (i.e. 1s)    
     while (ok()) {
       auto start = std::chrono::high_resolution_clock::now();
@@ -368,23 +383,33 @@ namespace quickmsg {
   {
     event_thread_ = NULL;
     bool continue_spinning = true;
-    while (!zsys_interrupted && GroupNode::running_.load() && continue_spinning) {
+    while (ok() && continue_spinning) {
       continue_spinning = spin_once();
     }
   }
 
+  void GroupNode::_spin()
+  {  
+    // sigset_t signal_set;
+    // sigaddset(&signal_set, SIGINT);
+    // sigaddset(&signal_set, SIGTERM);
+    // sigaddset(&signal_set, SIGHUP);
+    // sigaddset(&signal_set, SIGPIPE);
+    // pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+    spin();
+  }
+
   /** \brief Start the listener thread. This method will return immediately.
-      
       Spinning a group node is required for receiving messages
       whether you plan to access the messages synchronously OR
       asynchronously: something still must listen to the underlying
       network.
   */
   void 
-  GroupNode::async_spin()    
-  {    
+  GroupNode::async_spin()
+  {        
     // start a thread to call the event handlers
-    event_thread_ = new std::thread(std::mem_fun(&GroupNode::spin), this);
+    event_thread_ = new std::thread(std::mem_fun(&GroupNode::_spin), this);
     //    event_thread_->detach();
   }
 

@@ -35,8 +35,18 @@ public class test_sub {
 
     public static void main(String[] argv) {
 	quickmsg_java.init("test_sub");
+	Runtime.getRuntime().addShutdownHook(new Thread() {
+		@Override
+		public void run()
+		{
+		    System.out.println("shutdown hook");
+		    quickmsg_java.shutdown("done");
+		}
+	    });
+
         AsyncSubscriberImpl sub = new AsyncSubscriberImpl("chatter");
 	sub.spin();
+	sub.delete();
         // AsyncSubscriberImpl asub = new AsyncSubscriberImpl("chatter");
         // asub.spin();
     }

@@ -1,4 +1,5 @@
-import org.json.simple.*;
+//import org.json.simple.*;
+import quickmsg.*;
 
 public class test_client {
     static {
@@ -12,16 +13,17 @@ public class test_client {
     }
 
     public static void main(String[] argv) {
-        Client c = new Client("add");
-        JSONArray arr = new JSONArray();
-        arr.add(1);
-        arr.add(85);
-        JSONObject jsonreq = new JSONObject();
-        jsonreq.put("ints_to_add", arr);
-        String json_req_str = JSONObject.toJSONString(jsonreq);
-        System.out.println("Client request "+json_req_str);
-        String jsonresp = c.call_srv(json_req_str);
-        System.out.println("Client response "+jsonresp);
+        Client c = new Client("hello");
+        // JSONArray arr = new JSONArray();
+        // arr.add(1);
+        // arr.add(85);
+        // JSONObject jsonreq = new JSONObject();
+        // jsonreq.put("ints_to_add", arr);
+        // String json_req_str = JSONObject.toJSONString(jsonreq);
+        // System.out.println("Client request "+json_req_str);
+        String response = c.calls("HELLO");
+        System.out.println("Client response "+response);
+	c.delete();
     }
 }
 

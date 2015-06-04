@@ -27,6 +27,7 @@ public class test_pub {
                 System.out.println("got interrupted!");
             }
         }
+	p.delete();
     }
 }
 

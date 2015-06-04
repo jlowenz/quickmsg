@@ -104,6 +104,7 @@ namespace quickmsg {
   private:
     bool spin_once();
     void update_groups();
+    void _spin(); // for async, signal-disabled spinning
     
     zyre_t* node_;
     std::string node_name_;

@@ -79,10 +79,10 @@ using namespace quickmsg;
   $1 = java_ServiceCallback;
   $2 = data;
 }
-%typemap(freearg) (quickmsg::ServiceCallback cb, void* args) 
-{
-  free($2);
-}
+/* %typemap(freearg) (quickmsg::ServiceCallback cb, void* args)  */
+/* { */
+/*   free($2); */
+/* } */
 
 
 %include "quickmsg/quickmsg.hpp"
