@@ -86,8 +86,8 @@ using namespace quickmsg;
 // Handle exceptions
 %typemap(throws, throws="quickmsg.ServiceCallTimeout") quickmsg::ServiceCallTimeout %{
   jclass excep = jenv->FindClass("quickmsg/ServiceCallTimeout");
-  if (exep) {
-    jenv->ThrowNew(excep, $1.what().c_str());
+  if (excep) {
+    jenv->ThrowNew(excep, $1.what());
   }
   return $null;
 %}

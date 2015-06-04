@@ -9,7 +9,9 @@ extern "C" {
   void
   qm_init(const char* name) 
   {
-    init(name);
+    std::cout << "qm_init " << name << std::endl;
+    std::string sname(name);
+    init(sname);
   }
 
   void

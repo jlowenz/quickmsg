@@ -16,7 +16,9 @@
            service-spin
            get-msg-stamp
            get-msg-str
-           ok))
+           ok
+	   init
+	   shutdown))
 (in-package :qm)
 
 (setf json:*json-identifier-name-to-lisp* 'json:simplified-camel-case-to-lisp)
@@ -76,3 +78,9 @@
 
 ;; Misc
 (cffi:defcfun ("qm_ok" ok) :boolean )
+
+(cffi:defcfun ("qm_init" init) :void 
+  (node-name :string))
+
+(cffi:defcfun ("qm_shutdown" shutdown) :void
+  (reason :string))
