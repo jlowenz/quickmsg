@@ -3,6 +3,7 @@
 #include <quickmsg/types.hpp>
 #include <quickmsg/group_node.hpp>
 #include <exception>
+#include <stdexcept>
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
@@ -11,6 +12,8 @@ namespace quickmsg {
 
   struct ServiceCallTimeout : public std::runtime_error {
     ServiceCallTimeout() : std::runtime_error("ServiceCallTimeout") {}
+    virtual ~ServiceCallTimeout() {}
+    const char* what() const noexcept { return std::runtime_error::what(); }
   };
 
   class Client
@@ -20,8 +23,8 @@ namespace quickmsg {
     Client(const std::string& srv_name);
     virtual ~Client();
     
-    ServiceReplyPtr call(const std::string& msg, int timeout_s=10);
-    std::string calls(const std::string& req, int timeout_s=10);
+    ServiceReplyPtr call(const std::string& msg, int timeout_s=10) throw(ServiceCallTimeout);
+    std::string calls(const std::string& req, int timeout_s=10) throw(ServiceCallTimeout);
 
   protected:
     virtual void handle_response(const Message* resp);

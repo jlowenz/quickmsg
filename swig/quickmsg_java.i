@@ -83,6 +83,20 @@ using namespace quickmsg;
 /* { */
 /*   free($2); */
 /* } */
+// Handle exceptions
+%typemap(throws, throws="quickmsg.ServiceCallTimeout") quickmsg::ServiceCallTimeout %{
+  jclass excep = jenv->FindClass("quickmsg/ServiceCallTimeout");
+  if (exep) {
+    jenv->ThrowNew(excep, $1.what().c_str());
+  }
+  return $null;
+%}
+%typemap(javabase) quickmsg::ServiceCallTimeout "java.lang.Exception";
+%typemap(javacode) quickmsg::ServiceCallTimeout %{
+  public String getMessage() {
+    return what();
+  }
+%}
 
 
 %include "quickmsg/quickmsg.hpp"

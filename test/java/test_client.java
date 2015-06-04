@@ -13,6 +13,7 @@ public class test_client {
     }
 
     public static void main(String[] argv) {
+	quickmsg_java.init("test_client");
         Client c = new Client("hello");
         // JSONArray arr = new JSONArray();
         // arr.add(1);
@@ -23,7 +24,7 @@ public class test_client {
         // System.out.println("Client request "+json_req_str);
         String response = c.calls("HELLO");
         System.out.println("Client response "+response);
-	c.delete();
+	c.delete();	
     }
 }
 

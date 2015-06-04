@@ -6,3 +6,4 @@
 %include "std_map.i"
 %include "std_vector.i"
 %include "exception.i"
+%include "std_except.i"

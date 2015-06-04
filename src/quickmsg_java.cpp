@@ -64,7 +64,7 @@ const char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
 
   // create the shared_ptr ptr
   jlong jptr = 0;
-  *(boost::shared_ptr<quickmsg::Message>**)&jptr = new boost::shared_ptr<quickmsg::Message>(const_cast<quickmsg::Message*>(msg));  
+  *(quickmsg::Message**)&jptr = new quickmsg::Message(*msg);
   jboolean ownMem = JNI_FALSE;
   // create/wrap the Message object
   jobject jmsg = (data->env)->NewObject(jMessageCls, msgctor,
@@ -80,8 +80,9 @@ const char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
     GetStringUTFChars(ret_str, &is_copy);
   // need to copy the string to the C++ heap
   jsize len = (data->env)->GetStringUTFLength(ret_str);
-  char* ret_copy = new char[len];
+  char* ret_copy = new char[len]; // THIS NEEDS TO BE DELETED BY CALLER
   strncpy(ret_copy, java_chars, len);
+  ret_copy[len] = '\0';
   (data->env)->ReleaseStringUTFChars(ret_str, java_chars);
   return ret_copy;
 }

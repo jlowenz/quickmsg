@@ -58,6 +58,7 @@ public class test_service {
     }
 
     public static void main(String[] argv) {
+	quickmsg_java.init("test_service");
         Service svc = new Service("hello", new HelloService());
         svc.spin();
 	svc.delete();

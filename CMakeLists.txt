@@ -107,6 +107,10 @@ if (JAVA_FOUND)
   message("Java found. Running SWIG and building interfaces")
   include(UseJava)
   set(CMAKE_SWIG_FLAGS -package "quickmsg")
+  file(GLOB JAVA_SRC ${PROJECT_SOURCE_DIR}/swig/*.java)
+  if (NOT ${JAVA_SRC} EQUAL "")    
+    file(REMOVE ${JAVA_SRC})
+  endif()
   file(GLOB CB_SRC ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java)
   file(COPY ${CB_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/swig)
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
@@ -115,13 +119,16 @@ if (JAVA_FOUND)
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
   
+  # add_custom_command(TARGET quickmsg_java
+  #   PRE_BUILD
+  #   COMMAND cmake -E remove ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java)
+
   # replace the add_jar with custom java build commands
   #add_jar(quickmsg_jar
   #  #OUTPUT_NAME quickmsg
   #  SOURCES ${JAVA_SRC}
   #  VERSION ${PROJECT_VERSION})
-  #add_dependencies(quickmsg_jar pre_jar quickmsg_java quickmsg)
-
+  #add_dependencies(quickmsg_jar pre_jar quickmsg_java quickmsg)  
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
     COMMAND cmake -E echo "Compiling Java files..."

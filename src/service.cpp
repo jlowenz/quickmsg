@@ -64,8 +64,9 @@ namespace quickmsg {
     // if the queue is full, too bad!
     //MessagePtr msg(new Message(*req));
     //reqs_.try_push(msg);
-
-    std::string resp_str = service_impl(req);
+    
+    DLOG(INFO) << "got request: " << req->msg << std::endl;
+    std::string resp_str(service_impl(req));
     DLOG(INFO) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     // whisper the response back
     node_->whisper(req->header.src_uuid, resp_str);
@@ -75,7 +76,10 @@ namespace quickmsg {
   std::string 
   Service::service_impl(const Message* req)
   {
-    return std::string(impl_(req, args_));
+    const char* resp_chars = impl_(req, args_); // Don't leak mem
+    std::string resp(resp_chars);
+    delete resp_chars;
+    return resp;
   }
 
   void 
