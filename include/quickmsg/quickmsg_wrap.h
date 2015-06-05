@@ -14,20 +14,28 @@ extern "C" {
   void 
   qm_shutdown(const char* reason);
 
-  bool
+  int
   qm_ok();
 
+  // TODO: fix the inconsistencies
+
   double
-  qm_get_msg_stamp(qm_message_t *self_p);
+  qm_get_message_stamp(qm_message_t self_p);
 
   const char* 
-  qm_get_msg_src(qm_message_t *self_p);
+  qm_get_message_src(qm_message_t self_p);
 
   const char* 
-  qm_get_msg_str(qm_message_t *self_p);
+  qm_get_message_str(qm_message_t self_p);
 
-  bool
-  qm_get_successful(qm_service_reply_t* self_p);
+  void 
+  qm_message_destroy(qm_message_t self_p);
+
+  int
+  qm_get_successful(qm_service_reply_t self_p);
+  
+  void
+  qm_free_string(char* str);
 
 #ifdef __cplusplus
 }

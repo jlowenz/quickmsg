@@ -61,10 +61,10 @@ namespace quickmsg {
     Message(const Message& m);
     virtual ~Message() {}
 
-    double get_stamp();
-    std::string get_context();
-    std::string get_src();
-    std::string get_msg();
+    double get_stamp() const;
+    std::string get_context() const;
+    std::string get_src() const;
+    std::string get_msg() const;
 
     void set_stamp_now();
     void set_context(const std::string& ctx);
@@ -92,5 +92,5 @@ namespace quickmsg {
   typedef void (*MessageCallback)(const Message*,void*); 
 
   // service handler callback
-  typedef const char* (*ServiceCallback)(const Message*,void*);
+  typedef char* (*ServiceCallback)(const Message*,void*);
 }

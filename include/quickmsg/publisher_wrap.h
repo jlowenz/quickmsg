@@ -7,18 +7,14 @@
 extern "C" {
 #endif
 
-  qm_publisher_t *
+  qm_publisher_t
   qm_publisher_new (const char* topic);
 
   void
-  qm_publisher_destroy (qm_publisher_t *self_p);
+  qm_publisher_destroy (qm_publisher_t self_p);
 
   void 
-  qm_publish(qm_publisher_t *self_p, const char* msg);
-
-  //  Self test of this class
-  void
-  qm_publisher_test (bool verbose);
+  qm_publish(qm_publisher_t self_p, const char* msg);
 
 
 #ifdef __cplusplus

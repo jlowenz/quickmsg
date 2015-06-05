@@ -99,25 +99,25 @@ namespace quickmsg {
   }
 
   double 
-  Message::get_stamp()
+  Message::get_stamp() const
   {
     return header.stamp.to_secs();
   }
 
   std::string
-  Message::get_context()
+  Message::get_context() const
   {
     return header.context;
   }
 
   std::string
-  Message::get_src()
+  Message::get_src() const
   {
     return header.src_uuid;
   }
 
   std::string
-  Message::get_msg()
+  Message::get_msg() const 
   {
     return msg;
   }

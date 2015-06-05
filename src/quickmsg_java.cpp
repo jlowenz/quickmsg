@@ -41,7 +41,7 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
 
 // almost exactly the same as above, but a different return type, and 
 // different interface class
-const char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
+char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
 {
   java_cb_data* data = static_cast<java_cb_data*>(args);
 
@@ -80,7 +80,7 @@ const char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
     GetStringUTFChars(ret_str, &is_copy);
   // need to copy the string to the C++ heap
   jsize len = (data->env)->GetStringUTFLength(ret_str);
-  char* ret_copy = new char[len]; // THIS NEEDS TO BE DELETED BY CALLER
+  char* ret_copy = (char*)malloc(sizeof(char)*(len+1)); // THIS NEEDS TO BE DELETED BY CALLER
   strncpy(ret_copy, java_chars, len);
   ret_copy[len] = '\0';
   (data->env)->ReleaseStringUTFChars(ret_str, java_chars);

@@ -45,14 +45,49 @@ add_library(${PROJECT_NAME} SHARED
   src/subscriber.cpp
   src/client.cpp
   src/service.cpp
-  src/quickmsg.cpp
+  src/quickmsg.cpp)
+
+# TODO: hmmm should tbb/zyre/czmq be in variables?
+target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES})
+
+add_library("c${PROJECT_NAME}" SHARED
   src/quickmsg_wrap.cpp
   src/publisher_wrap.cpp
   src/subscriber_wrap.cpp
   src/client_wrap.cpp
   src/service_wrap.cpp)
-# TODO: hmmm should tbb/zyre/czmq be in variables?
-target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES})
+target_link_libraries("c${PROJECT_NAME}" ${PROJECT_NAME})
+
+if (LIB_JSONCPP_FOUND)
+  message("jsoncpp found, building service/client test")
+  include_directories(${LIB_JSONCPP_INCLUDE_DIRS})
+  
+  add_executable(test_service test/cpp/test_service.cpp)
+  target_link_libraries(test_service ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
+  
+  add_executable(test_client test/cpp/test_client.cpp)
+  target_link_libraries(test_client ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
+else()
+  message("jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' to install")
+endif()
+
+add_executable(test_pub test/cpp/test_pub.cpp)
+target_link_libraries(test_pub ${PROJECT_NAME})
+
+add_executable(test_sub test/cpp/test_sub.cpp)
+target_link_libraries(test_sub ${PROJECT_NAME})
+
+add_executable(test_cpub test/c/test_pub.c)
+target_link_libraries(test_cpub "c${PROJECT_NAME}")
+
+add_executable(test_csub test/c/test_sub.c)
+target_link_libraries(test_csub "c${PROJECT_NAME}")
+
+add_executable(test_cclient test/c/test_client.c)
+target_link_libraries(test_cclient "c${PROJECT_NAME}")
+
+add_executable(test_cservice test/c/test_service.c)
+target_link_libraries(test_cservice "c${PROJECT_NAME}")
 
 # SWIG
 set(SWIG_EXECUTABLE "swig3.0")
@@ -69,9 +104,14 @@ function(swig_cpp files)
   foreach(f ${files})
     message("swig src properties " ${f})
     set_source_files_properties(${f} PROPERTIES CPLUSPLUS ON)
-#    set_source_files_properties(${f} PROPERTIES SWIG_FLAGS "-includeall")
+    #    set_source_files_properties(${f} PROPERTIES SWIG_FLAGS "-includeall")
   endforeach(f)
 endfunction(swig_cpp)
+
+# function to clean the swig directory, to try and force rebuild
+# add_custom_target(clean_swig ALL
+#   COMMAND ${CMAKE_COMMAND} remove_directory ${CMAKE_CURRENT_BINARY_DIR}/swig
+#   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/swig)
 
 set(SWIG_FILES swig/swig_interfaces.i swig/quickmsg_py.i swig/quickmsg_java.i)
 swig_cpp("${SWIG_FILES}")
@@ -79,60 +119,27 @@ swig_cpp("${SWIG_FILES}")
 swig_add_module(quickmsg_py python swig/quickmsg_py.i)
 swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
-
-if (LIB_JSONCPP_FOUND)
-  message("jsoncpp found, building service/client test")
-  include_directories(${LIB_JSONCPP_INCLUDE_DIRS})
-
-  add_executable(test_service test/cpp/test_service.cpp)
-  target_link_libraries(test_service ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
-
-  add_executable(test_client test/cpp/test_client.cpp)
-  target_link_libraries(test_client ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
-else()
-  message("jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' to install")
-endif()
-  
-add_executable(test_pub test/cpp/test_pub.cpp)
-target_link_libraries(test_pub ${PROJECT_NAME})
-
-add_executable(test_sub test/cpp/test_sub.cpp)
-target_link_libraries(test_sub ${PROJECT_NAME})
-
-SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
-SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
-SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
-
 if (JAVA_FOUND)
   message("Java found. Running SWIG and building interfaces")
+  SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
+  SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
+  SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
+  
   include(UseJava)
   set(CMAKE_SWIG_FLAGS -package "quickmsg")
-  file(GLOB JAVA_SRC ${PROJECT_SOURCE_DIR}/swig/*.java)
-  if (NOT ${JAVA_SRC} EQUAL "")    
-    file(REMOVE ${JAVA_SRC})
-  endif()
-  file(GLOB CB_SRC ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java)
-  file(COPY ${CB_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/swig)
+
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
+  add_dependencies(quickmsg_java copy_interfaces_java)
   link_directories(/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64)
   swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
   
-  # add_custom_command(TARGET quickmsg_java
-  #   PRE_BUILD
-  #   COMMAND cmake -E remove ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java)
-
-  # replace the add_jar with custom java build commands
-  #add_jar(quickmsg_jar
-  #  #OUTPUT_NAME quickmsg
-  #  SOURCES ${JAVA_SRC}
-  #  VERSION ${PROJECT_VERSION})
-  #add_dependencies(quickmsg_jar pre_jar quickmsg_java quickmsg)  
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
     COMMAND cmake -E echo "Compiling Java files..."
-    COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/quickmsg
+    #COMMAND ${CMAKE_COMMAND} make_directory ${CMAKE_CURRENT_BINARY_DIR}/quickmsg
+    COMMAND cp ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java ${CMAKE_CURRENT_BINARY_DIR}/swig
     COMMAND ${JAVA_COMPILE2} ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java -d ${CMAKE_CURRENT_BINARY_DIR}/
     COMMAND cmake -E echo "Creating jar file..."
     COMMAND ${JAVA_ARCHIVE2} cvf quickmsg.jar quickmsg)

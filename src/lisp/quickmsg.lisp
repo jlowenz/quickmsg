@@ -1,7 +1,8 @@
 (require :cffi)
 (require :cl-json)
 (require :iterate)
-(defpackage :qm
+(defpackage :quickmsg
+  (:nicknames :qm)
   (:use :common-lisp :cffi :cl-json :iterate)
   (:export publisher-new
            publisher-destroy
@@ -19,12 +20,12 @@
            ok
 	   init
 	   shutdown))
-(in-package :qm)
+(in-package :quickmsg)
 
 (setf json:*json-identifier-name-to-lisp* 'json:simplified-camel-case-to-lisp)
 
 (cffi:define-foreign-library libqm
-    (t (:default "libquickmsg")))
+    (t (:default "libcquickmsg")))
 (cffi:use-foreign-library libqm)
 
 ;; Publisher

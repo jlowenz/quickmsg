@@ -1,6 +1,7 @@
 #include <glog/logging.h>
 #include <quickmsg/service.hpp>
 #include <type_traits>
+#include <string.h>
 
 namespace quickmsg {
 
@@ -16,11 +17,14 @@ namespace quickmsg {
   //   return req;
   // }
 
-  const char*
-  default_echo(const Message* req, void*)
+  char*
+  default_echo(const Message* req, void* args)
   {
     DLOG(INFO) << " Default service impl (echo request) " << std::endl;
-    return req->msg.c_str();
+    char* resp = (char*)malloc(req->msg.length()+1);
+    memcpy(resp, req->msg.c_str(), req->msg.length());
+    resp[req->msg.length()] = 0;
+    return resp;
   }
 
   Service::Service(const std::string& srv_name, ServiceCallback impl,
@@ -34,7 +38,7 @@ namespace quickmsg {
                    size_t queue_size)
     : srv_name_(srv_name)
   {
-    impl_=default_echo;
+    impl_ = default_echo;
     init(queue_size);
   }
 
@@ -76,9 +80,9 @@ namespace quickmsg {
   std::string 
   Service::service_impl(const Message* req)
   {
-    const char* resp_chars = impl_(req, args_); // Don't leak mem
+    char* resp_chars = impl_(req, args_); // Don't leak mem
     std::string resp(resp_chars);
-    delete resp_chars;
+    free(resp_chars);
     return resp;
   }
 

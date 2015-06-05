@@ -7,8 +7,6 @@
 
 namespace quickmsg {
 
-  const char* default_echo(const Message* req, void* data);
-
   class Service
   {
     friend void service_handler(const Message*, void*);

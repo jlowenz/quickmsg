@@ -43,7 +43,7 @@ using namespace quickmsg;
 // callback definitions
 %{ 
   void java_MessageCallback(const Message* msg, void* args);
-  const char* java_ServiceCallback(const Message* msg, void* args);
+  char* java_ServiceCallback(const Message* msg, void* args);
   %}
  
 %typemap(jstype) quickmsg::MessageCallback cb "IMessageCallback";

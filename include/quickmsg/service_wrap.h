@@ -7,19 +7,14 @@
 extern "C" {
 #endif
 
-  qm_service_t *
-  qm_service_new (const char* srv_name, 
-		  quickmsg::ServiceCallback impl);
+  qm_service_t
+  qm_service_new (const char* srv_name, qm_service_handler_t impl, void* arg);
 
   void
-  qm_service_destroy (qm_service_t *self_p);
+  qm_service_destroy (qm_service_t self_p);
 
   void
-  qm_service_spin(qm_service_t *self_p);
-
-  //  Self test of this class
-  void
-  qm_service_test (bool verbose);
+  qm_service_spin(qm_service_t self_p);
 
 
 #ifdef __cplusplus
