@@ -5,15 +5,13 @@
   (:export :main))
 (in-package :qm_service)
 
-(qm:init "test-service") ; should only be called once
-
 (cffi:defcallback add-ints :string ((req :pointer))
   (let* ((req-json (json:decode-json-from-string (qm:get-msg-str req)))
-	(ints-to-add (cdr (assoc 'ints_to_add req-json)))
-	(result (apply '+ ints-to-add))
-	(resp-alist (acons 'ints-to-add ints-to-add 
-			   (acons 'result result nil)))
-	(resp-str (json:encode-json-to-string resp-alist)))
+	 (addends (cdr (assoc :ints-to-add req-json)))
+	 (result (apply '+ addends))
+	 (resp-alist (acons 'ints-to-add addends 
+			    (acons 'result result nil)))
+	 (resp-str (json:encode-json-to-string resp-alist)))
     (format t "Lisp service callback~%")
     (format t "Message stamp: ~f~%Contents: ~S~%" 
 	    (qm:get-msg-stamp req)
@@ -21,6 +19,9 @@
     resp-str))
 
 (defun main ()
-  (defparameter *service* (qm:service-new "add" (cffi:callback add-ints)))
-  (qm:service-spin *service*)
-  (qm:service-destroy *service*))
+  (qm:init "test-service") ; should only be called once
+  (let ((svc (qm:service-new "add" (cffi:callback add-ints))))
+    (qm:service-spin svc)
+    (qm:service-destroy svc)))
+
+(main)

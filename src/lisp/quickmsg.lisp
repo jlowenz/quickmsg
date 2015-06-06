@@ -8,10 +8,15 @@
            publisher-destroy
            publish
            subscriber-new
+	   subscriber-get-messages
            subscriber-destroy
+	   async-subscriber-new
+	   async-subscriber-spin
+	   async-subscriber-destroy
            client-new
            client-destroy
            call-srv
+	   service-call-timeout
            service-new
            service-destroy
            service-spin
@@ -43,9 +48,23 @@
 ;; Subscriber
 (cffi:defcfun ("qm_subscriber_new" subscriber-new) :pointer 
   (topic :string)
-  (impl :pointer))
+  (queue-size :int))
+
+(cffi:defcfun ("qm_subscriber_get_messages" subscriber-get-messages) :pointer
+  (self_p :pointer))
 
 (cffi:defcfun ("qm_subscriber_destroy" subscriber-destroy) :void
+  (self_p :pointer))
+
+(cffi:defcfun ("qm_async_subscriber_new" async-subscriber-new) :pointer
+  (topic :string)
+  (handler :pointer)
+  (args :pointer))
+
+(cffi:defcfun ("qm_async_subscriber_spin" async-subscriber-spin) :void
+  (self_p :pointer))
+
+(cffi:defcfun ("qm_async_subscriber_destroy" async-subscriber-destroy) :void
   (self_p :pointer))
 
 ;; Client
@@ -55,9 +74,26 @@
 (cffi:defcfun ("qm_client_destroy" client-destroy) :void
   (self_p :pointer))
 
-(cffi:defcfun ("qm_call_srv" call-srv) :string
-  (self_p :pointer)
-  (msg :string))
+; define an error condition when the service call times out
+(define-condition service-call-timeout (error)
+  ((request :initarg :request :reader request)))
+
+(defun call-srv (self-p request)
+  "Call the service with the given request string"  
+  (let ((resp-ptr (cffi:foreign-alloc :pointer)))
+    (cffi:with-foreign-string (req-str request)      
+      (let* ((ret (cffi:foreign-funcall "qm_call_srv" 
+				       :pointer self-p
+				       :pointer req-str
+				       :pointer resp-ptr
+				       :int))
+	     (resp-str (if (= ret 0) (foreign-string-to-lisp (mem-ref resp-ptr :pointer)) "")))
+	(if (= ret 0) 
+	    (progn 	      
+	      (cffi:foreign-free (mem-ref resp-ptr :pointer)) ; free the string and the pointer we alloc'd
+	      (cffi:foreign-free resp-ptr)
+	      resp-str) ; return the value
+	    (error 'service-call-timeout :request request))))))
 
 ;; Server
 (cffi:defcfun ("qm_service_new" service-new) :pointer
@@ -71,10 +107,10 @@
   (self_p :pointer))
 
 ;; Message
-(cffi:defcfun ("qm_get_msg_stamp" get-msg-stamp) :double
+(cffi:defcfun ("qm_get_message_stamp" get-msg-stamp) :double
   (self_p :pointer))
 
-(cffi:defcfun ("qm_get_msg_str" get-msg-str) :string
+(cffi:defcfun ("qm_get_message_str" get-msg-str) :string
   (self_p :pointer))
 
 ;; Misc

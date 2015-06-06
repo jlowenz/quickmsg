@@ -1,17 +1,22 @@
 (load "../../src/lisp/quickmsg.lisp")
 
-(defpackage :qm_sub
-  (:use :common-lisp :cffi :cl-json :iterate))
-(in-package :qm_sub)
+;; (defpackage :qm_sub
+;;   (:use :common-lisp :cffi :cl-json :iterate)
+;;   (:export main))
+;; (in-package :qm_sub)
 
-(cffi:defcallback echo-msg :string ((msg :pointer))
-  (print "LISP subscriber callback")
-  (format t "Message stamp:~% ~S ~%    contents:~% ~S" 
-          (qm:get-msg-stamp msg)
-          (qm:get-msg-str msg)))
+(cffi:defcallback echo-msg :void ((msg :pointer))
+		  (format t "LISP subscriber callback~%")
+		  (format t "Message stamp:~% ~S ~%    contents:~% ~S" 
+			  (qm:get-msg-stamp msg)
+			  (qm:get-msg-str msg)))
 
-(defparameter *sub* (qm:subscriber-new "chatter" (cffi:callback echo-msg)))
+(defun main ()  
+  (qm:init "test_sub")
+  (let ((sub (qm:async-subscriber-new "chatter" 
+				      (cffi:callback echo-msg) 
+				      (cffi:null-pointer))))	
+    (qm:async-subscriber-spin sub)
+    (qm:async-subscriber-destroy sub)))
 
-(loop while (qm:ok) do (sleep 1))
-
-(qm:subscriber-destroy *sub*)
+(main)
