@@ -8,6 +8,7 @@ The following components have initial implementations:
 - *Subscriber*: receives messages from a topic (can be used synchronously and asynchronously / with a callback)
 - *Service*: provide an RPC-like service interface for...
 - *Client*: issues requests to a Service and blocks for a reply
+- *GroupNode*: low-level implementation allowing alternative patterns and supporting a promiscuous message handling mode.
 
 * SWIG Wrapping
 
@@ -17,9 +18,9 @@ Although there are [[http://www.swig.org/Doc3.0/Allegrocl.html][pages]] indicati
 
 Therefore, we do not use SWIG to generate the Common Lisp bindings, but instead implement a simple C wrapper that can be called directly with [[https://common-lisp.net/project/cffi/][CFFI]].
 
-See the [[test]] directory for language tests and usage examples for C++, Python, Java, and Common Lisp. 
+See the [[test]] directory for simple language tests and usage examples for C, C++, Java, and Common Lisp. 
 
-The Common Lisp examples were tested with sbcl. The required common lisp packages, such as [[https://common-lisp.net/project/cl-json/][cl-json]], were installed using [[https://www.quicklisp.org/beta/][quicklsip]]
+The Common Lisp examples were tested with sbcl. The required common lisp packages, such as [[https://common-lisp.net/project/cl-json/][cl-json]], were installed using [[https://www.quicklisp.org/beta/][quicklisp]]
 
 The Java examples require that you have installed [[https://code.google.com/p/json-simple/][json-simple]], and that your CLASSPATH is updated to include the =build/swig= directory as well as the installation JAR for json-simple-java.
 
