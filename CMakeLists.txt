@@ -59,7 +59,7 @@ add_library("c${PROJECT_NAME}" SHARED
 target_link_libraries("c${PROJECT_NAME}" ${PROJECT_NAME})
 
 if (LIB_JSONCPP_FOUND)
-  message("jsoncpp found, building service/client test")
+  message("-- jsoncpp found, building service/client test")
   include_directories(${LIB_JSONCPP_INCLUDE_DIRS})
   
   add_executable(test_service test/cpp/test_service.cpp)
@@ -68,7 +68,8 @@ if (LIB_JSONCPP_FOUND)
   add_executable(test_client test/cpp/test_client.cpp)
   target_link_libraries(test_client ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
 else()
-  message("jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' to install")
+  message("-- jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' or 'git clone https://github.com/open-source-parsers/jsoncpp' to install")
+  message("-- C++ service test code will not be built.")
 endif()
 
 add_executable(test_pub test/cpp/test_pub.cpp)
@@ -119,7 +120,7 @@ swig_cpp("${SWIG_FILES}")
 swig_add_module(quickmsg_py python swig/quickmsg_py.i)
 swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
-if (JAVA_FOUND)
+if (JAVA_FOUND and JNI_FOUND)
   message("Java found. Running SWIG and building interfaces")
   SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
   SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
