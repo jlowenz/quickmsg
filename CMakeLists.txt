@@ -19,8 +19,8 @@ pkg_check_modules(LIB_JSONCPP "jsoncpp")
 pkg_check_modules(LIB_GLOG "libglog")
 
 find_package(Boost REQUIRED COMPONENTS date_time system thread)
-find_package(Java REQUIRED COMPONENTS Runtime Development)
-find_package(JNI REQUIRED)
+find_package(Java COMPONENTS Runtime Development)
+find_package(JNI)
 
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${LIB_ZYRE_INCLUDE_DIRS})
@@ -91,7 +91,7 @@ add_executable(test_cservice test/c/test_service.c)
 target_link_libraries(test_cservice "c${PROJECT_NAME}")
 
 # SWIG
-set(SWIG_EXECUTABLE "swig3.0")
+# set(SWIG_EXECUTABLE "swig3.0")
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
@@ -120,12 +120,34 @@ swig_cpp("${SWIG_FILES}")
 swig_add_module(quickmsg_py python swig/quickmsg_py.i)
 swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
-if (JAVA_FOUND and JNI_FOUND)
+function(java_jar_native jar_file native_dir)
+  add_custom_command(TARGET quickmsg_java
+    POST_BUILD
+    COMMAND cmake -E echo "Creating native jar file... in ${native_dir}" 
+    COMMAND mkdir -p ${native_dir}
+    COMMAND cp $<TARGET_FILE:quickmsg_java> ${native_dir}
+    COMMAND cp $<TARGET_FILE:quickmsg> ${native_dir}
+    COMMAND ${JAVA_ARCHIVE2} cMf ${jar_file} native)
+  if (EXISTS ${MVN_BIN})
+    add_custom_command(TARGET quickmsg_java
+      POST_BUILD
+      COMMAND cmake -E echo "Installing maven repo local/quickmsg etc in repo 'file:repo'"
+      COMMAND ${MVN_BIN} install:install-file -Durl=file:repo -DgroupId=local -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
+      COMMAND ${MVN_BIN} install:install-file -Durl=file:repo -DgroupId=local -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
+  else ()
+    message("Not installing to Maven repo")
+  endif ()
+endfunction(java_jar_native)
+
+if (JAVA_FOUND AND JNI_FOUND)
   message("Java found. Running SWIG and building interfaces")
   SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
   SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
   SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
-  
+  # check to see if maven is installed
+  find_program(MVN_BIN NAMES mvn PATHS /usr/bin)
+  message("Maven: ${MVN_BIN}")
+
   include(UseJava)
   set(CMAKE_SWIG_FLAGS -package "quickmsg")
 
@@ -144,6 +166,32 @@ if (JAVA_FOUND and JNI_FOUND)
     COMMAND ${JAVA_COMPILE2} ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java -d ${CMAKE_CURRENT_BINARY_DIR}/
     COMMAND cmake -E echo "Creating jar file..."
     COMMAND ${JAVA_ARCHIVE2} cvf quickmsg.jar quickmsg)
+
+  set(JAVA_NATIVE_JAR ${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
+  if (UNIX)
+    set(JAVA_NATIVE_DIR native/linux/x86_64)
+    java_jar_native(${JAVA_NATIVE_JAR} ${JAVA_NATIVE_DIR})
+    # add_custom_command(TARGET quickmsg_java
+    #   POST_BUILD
+    #   COMMAND cmake -E echo "Creating native jar file..."
+    #   COMMAND mkdir -p ${JAVA_NATIVE_DIR}
+    #   COMMAND cp $<TARGET_FILE:quickmsg_java> ${JAVA_NATIVE_DIR}
+    #   COMMAND cp $<TARGET_FILE:quickmsg> ${JAVA_NATIVE_DIR}
+    #   COMMAND ${JAVA_ARCHIVE2} cMf ${JAVA_NATIVE_JAR} ${CMAKE_CURRENT_BINARY_DIR}/native)
+  elseif (WIN32)
+    set(JAVA_NATIVE_DIR native/windows/x86_64)
+    java_jar_native(${JAVA_NATIVE_JAR} ${JAVA_NATIVE_DIR})
+    # add_custom_command(TARGET quickmsg_java
+    #   POST_BUILD
+    #   COMMAND cmake -E echo "Creating native jar file..."
+    #   COMMAND mkdir -p ${JAVA_NATIVE_DIR}
+    #   COMMAND cp $<TARGET_FILE:quickmsg_java> ${JAVA_NATIVE_DIR}
+    #   COMMAND cp $<TARGET_FILE:quickmsg> ${JAVA_NATIVE_DIR}
+    #   COMMAND ${JAVA_ARCHIVE2} cMf ${JAVA_NATIVE_JAR} ${CMAKE_CURRENT_BINARY_DIR}/native)    
+  elseif (APPLE)
+    set(JAVA_NATIVE_DIR native/macosx/x86_64)
+    java_jar_native(${JAVA_NATIVE_JAR} ${JAVA_NATIVE_DIR})
+  endif()
 
   # TODO: build the native jar as well
 else()

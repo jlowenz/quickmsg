@@ -27,7 +27,7 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   // create the shared_ptr ptr
   jlong jptr = 0;
   // why this??? why???
-  *(boost::shared_ptr<quickmsg::Message>**)&jptr = new boost::shared_ptr<quickmsg::Message>(const_cast<quickmsg::Message*>(msg));  
+  *(quickmsg::Message**)&jptr = new quickmsg::Message(*msg);  
   jboolean ownMem = JNI_FALSE;
   // create/wrap the Message object
   jobject jmsg = (data->env)->NewObject(jMessageCls, msgctor,
