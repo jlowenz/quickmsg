@@ -7,6 +7,13 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
 {
   java_cb_data* data = static_cast<java_cb_data*>(args);
 
+  JavaVM* vms[3];
+  jsize num_vms = 0;
+  jint ret = JNI_GetCreatedJavaVMs(vms, 3, &num_vms);
+  assert(ret == JNI_OK);
+  assert(num_vms >= 1);
+  vms[0]->AttachCurrentThread((void**)&data->env, NULL);
+
   // get the callback interface method
   const jclass cbIfaceClass = (data->env)->
     FindClass("quickmsg/IMessageCallback");
@@ -44,6 +51,13 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
 char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
 {
   java_cb_data* data = static_cast<java_cb_data*>(args);
+
+  JavaVM* vms[3];
+  jsize num_vms = 0;
+  jint ret = JNI_GetCreatedJavaVMs(vms, 3, &num_vms);
+  assert(ret == JNI_OK);
+  assert(num_vms >= 1);
+  vms[0]->AttachCurrentThread((void**)&data->env, NULL);
 
   // get the callback interface method
   const jclass cbIfaceClass = (data->env)->

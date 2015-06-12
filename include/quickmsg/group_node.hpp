@@ -57,6 +57,8 @@ namespace quickmsg {
     void register_whispers(MessageCallback cb, void* args);
 
     // TODO: what about de-registering the handlers???
+    //void deregister_handler(const std::string& group, MessageCallback cb, void* args);
+    //void deregister_handler(const std::string& group, handler_id_t handler);
 
     void shout(const std::string& group, const std::string& msg);
     void whisper(const PeerPtr& peer, const std::string& msg);

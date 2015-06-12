@@ -60,10 +60,10 @@ using namespace quickmsg;
   $1 = java_MessageCallback;
   $2 = data;
 }
-%typemap(freearg) (quickmsg::MessageCallback cb, void* args) 
-{
-  free($2);
-}
+/* %typemap(freearg) (quickmsg::MessageCallback cb, void* args)  */
+/* { */
+/*   free($2); */
+/* } */
 
 %typemap(jstype) quickmsg::ServiceCallback cb "IServiceCallback";
 %typemap(jtype) quickmsg::ServiceCallback cb "IServiceCallback";
@@ -79,6 +79,7 @@ using namespace quickmsg;
   $1 = java_ServiceCallback;
   $2 = data;
 }
+/* This is NOT how to clean up the memory - can only happen when the handler is removed
 /* %typemap(freearg) (quickmsg::ServiceCallback cb, void* args)  */
 /* { */
 /*   free($2); */
