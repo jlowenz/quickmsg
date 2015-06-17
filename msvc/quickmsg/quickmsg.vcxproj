@@ -1,0 +1,358 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDLL|Win32">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDLL|x64">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BF349FAF-CF6C-4683-B0C7-77B90856196B}</ProjectGuid>
+    <RootNamespace>quickmsg</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <NuGetPackageImportStamp>f6d9431f</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    <LinkIncremental>
+    </LinkIncremental>
+    <Linkage-czmq>static</Linkage-czmq>
+    <Linkage-libsodium>static</Linkage-libsodium>
+    <Linkage-libzmq>static</Linkage-libzmq>
+    <Linkage-pthreads>static</Linkage-pthreads>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+    <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    <LinkIncremental />
+    <Linkage-czmq>static</Linkage-czmq>
+    <Linkage-libsodium>static</Linkage-libsodium>
+    <Linkage-libzmq>static</Linkage-libzmq>
+    <Linkage-pthreads>static</Linkage-pthreads>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    <LinkIncremental />
+    <Linkage-czmq>static</Linkage-czmq>
+    <Linkage-libsodium>static</Linkage-libsodium>
+    <Linkage-libzmq>static</Linkage-libzmq>
+    <Linkage-pthreads>static</Linkage-pthreads>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+    <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    <LinkIncremental />
+    <Linkage-czmq>dynamic</Linkage-czmq>
+    <Linkage-libsodium>dynamic</Linkage-libsodium>
+    <Linkage-libzmq>dynamic</Linkage-libzmq>
+    <Linkage-pthreads>static</Linkage-pthreads>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\include;C:\Users\Jason\Documents\dev\zyre\include;C:\Users\Jason\Documents\dev\quickmsg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Jason\Documents\dev\zyre\bin\x64\Debug\v120\static;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>czmq-x64-v120-mt-gd-3_0_1_0.imp.lib;libzmq-x64-v120-mt-gd-4_2_0_0.imp.lib;libsodium-x64-v120-mt-gd-0_5_0_0.imp.lib;zyre.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\include;C:\Users\Jason\Documents\dev\zyre\include;C:\Users\Jason\Documents\dev\quickmsg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Jason\Documents\dev\zyre\bin\x64\Debug\v120\static;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>czmq-x64-v120-mt-gd-3_0_1_0.imp.lib;libzmq-x64-v120-mt-gd-4_2_0_0.imp.lib;libsodium-x64-v120-mt-gd-0_5_0_0.imp.lib;zyre.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\include;C:\Users\Jason\Documents\dev\zyre\include;C:\Users\Jason\Documents\dev\quickmsg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Jason\Documents\dev\zyre\bin\x64\Debug\v120\dynamic;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>czmq-x64-v120-mt-gd-3_0_1_0.imp.lib;libzmq-x64-v120-mt-gd-4_2_0_0.imp.lib;libsodium-x64-v120-mt-gd-0_5_0_0.imp.lib;zyre.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\include;C:\Users\Jason\Documents\dev\zyre\include;C:\Users\Jason\Documents\dev\quickmsg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Jason\Documents\dev\zyre\bin\x64\Debug\v120\dynamic;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\quickmsg\client.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\ctypes.h" />
+    <ClInclude Include="..\..\include\quickmsg\group_node.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\publisher.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\quickmsg.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\quickmsg_java.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\service.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\subscriber.hpp" />
+    <ClInclude Include="..\..\include\quickmsg\types.hpp" />
+    <ClInclude Include="..\..\src\cqm_util.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\client.cpp" />
+    <ClCompile Include="..\..\src\group_node.cpp" />
+    <ClCompile Include="..\..\src\publisher.cpp" />
+    <ClCompile Include="..\..\src\quickmsg.cpp" />
+    <ClCompile Include="..\..\src\service.cpp" />
+    <ClCompile Include="..\..\src\subscriber.cpp" />
+    <ClCompile Include="..\..\src\types.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\zyre\builds\msvc\vs2013\zyre\zyre.vcxproj">
+      <Project>{0c4a2e28-8c9e-4b27-85d9-bb679ad84ac7}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\boost.1.58.0.0\build\native\boost.targets" Condition="Exists('packages\boost.1.58.0.0\build\native\boost.targets')" />
+    <Import Project="packages\boost_atomic-vc120.1.58.0.0\build\native\boost_atomic-vc120.targets" Condition="Exists('packages\boost_atomic-vc120.1.58.0.0\build\native\boost_atomic-vc120.targets')" />
+    <Import Project="packages\boost_chrono-vc120.1.58.0.0\build\native\boost_chrono-vc120.targets" Condition="Exists('packages\boost_chrono-vc120.1.58.0.0\build\native\boost_chrono-vc120.targets')" />
+    <Import Project="packages\boost_container-vc120.1.58.0.0\build\native\boost_container-vc120.targets" Condition="Exists('packages\boost_container-vc120.1.58.0.0\build\native\boost_container-vc120.targets')" />
+    <Import Project="packages\boost_context-vc120.1.58.0.0\build\native\boost_context-vc120.targets" Condition="Exists('packages\boost_context-vc120.1.58.0.0\build\native\boost_context-vc120.targets')" />
+    <Import Project="packages\boost_coroutine-vc120.1.58.0.0\build\native\boost_coroutine-vc120.targets" Condition="Exists('packages\boost_coroutine-vc120.1.58.0.0\build\native\boost_coroutine-vc120.targets')" />
+    <Import Project="packages\boost_date_time-vc120.1.58.0.0\build\native\boost_date_time-vc120.targets" Condition="Exists('packages\boost_date_time-vc120.1.58.0.0\build\native\boost_date_time-vc120.targets')" />
+    <Import Project="packages\boost_filesystem-vc120.1.58.0.0\build\native\boost_filesystem-vc120.targets" Condition="Exists('packages\boost_filesystem-vc120.1.58.0.0\build\native\boost_filesystem-vc120.targets')" />
+    <Import Project="packages\boost_graph-vc120.1.58.0.0\build\native\boost_graph-vc120.targets" Condition="Exists('packages\boost_graph-vc120.1.58.0.0\build\native\boost_graph-vc120.targets')" />
+    <Import Project="packages\boost_iostreams-vc120.1.58.0.0\build\native\boost_iostreams-vc120.targets" Condition="Exists('packages\boost_iostreams-vc120.1.58.0.0\build\native\boost_iostreams-vc120.targets')" />
+    <Import Project="packages\boost_locale-vc120.1.58.0.0\build\native\boost_locale-vc120.targets" Condition="Exists('packages\boost_locale-vc120.1.58.0.0\build\native\boost_locale-vc120.targets')" />
+    <Import Project="packages\boost_log-vc120.1.58.0.0\build\native\boost_log-vc120.targets" Condition="Exists('packages\boost_log-vc120.1.58.0.0\build\native\boost_log-vc120.targets')" />
+    <Import Project="packages\boost_log_setup-vc120.1.58.0.0\build\native\boost_log_setup-vc120.targets" Condition="Exists('packages\boost_log_setup-vc120.1.58.0.0\build\native\boost_log_setup-vc120.targets')" />
+    <Import Project="packages\boost_math_c99-vc120.1.58.0.0\build\native\boost_math_c99-vc120.targets" Condition="Exists('packages\boost_math_c99-vc120.1.58.0.0\build\native\boost_math_c99-vc120.targets')" />
+    <Import Project="packages\boost_math_c99f-vc120.1.58.0.0\build\native\boost_math_c99f-vc120.targets" Condition="Exists('packages\boost_math_c99f-vc120.1.58.0.0\build\native\boost_math_c99f-vc120.targets')" />
+    <Import Project="packages\boost_math_c99l-vc120.1.58.0.0\build\native\boost_math_c99l-vc120.targets" Condition="Exists('packages\boost_math_c99l-vc120.1.58.0.0\build\native\boost_math_c99l-vc120.targets')" />
+    <Import Project="packages\boost_math_tr1-vc120.1.58.0.0\build\native\boost_math_tr1-vc120.targets" Condition="Exists('packages\boost_math_tr1-vc120.1.58.0.0\build\native\boost_math_tr1-vc120.targets')" />
+    <Import Project="packages\boost_math_tr1f-vc120.1.58.0.0\build\native\boost_math_tr1f-vc120.targets" Condition="Exists('packages\boost_math_tr1f-vc120.1.58.0.0\build\native\boost_math_tr1f-vc120.targets')" />
+    <Import Project="packages\boost_math_tr1l-vc120.1.58.0.0\build\native\boost_math_tr1l-vc120.targets" Condition="Exists('packages\boost_math_tr1l-vc120.1.58.0.0\build\native\boost_math_tr1l-vc120.targets')" />
+    <Import Project="packages\boost_prg_exec_monitor-vc120.1.58.0.0\build\native\boost_prg_exec_monitor-vc120.targets" Condition="Exists('packages\boost_prg_exec_monitor-vc120.1.58.0.0\build\native\boost_prg_exec_monitor-vc120.targets')" />
+    <Import Project="packages\boost_program_options-vc120.1.58.0.0\build\native\boost_program_options-vc120.targets" Condition="Exists('packages\boost_program_options-vc120.1.58.0.0\build\native\boost_program_options-vc120.targets')" />
+    <Import Project="packages\boost_random-vc120.1.58.0.0\build\native\boost_random-vc120.targets" Condition="Exists('packages\boost_random-vc120.1.58.0.0\build\native\boost_random-vc120.targets')" />
+    <Import Project="packages\boost_regex-vc120.1.58.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('packages\boost_regex-vc120.1.58.0.0\build\native\boost_regex-vc120.targets')" />
+    <Import Project="packages\boost_serialization-vc120.1.58.0.0\build\native\boost_serialization-vc120.targets" Condition="Exists('packages\boost_serialization-vc120.1.58.0.0\build\native\boost_serialization-vc120.targets')" />
+    <Import Project="packages\boost_signals-vc120.1.58.0.0\build\native\boost_signals-vc120.targets" Condition="Exists('packages\boost_signals-vc120.1.58.0.0\build\native\boost_signals-vc120.targets')" />
+    <Import Project="packages\boost_system-vc120.1.58.0.0\build\native\boost_system-vc120.targets" Condition="Exists('packages\boost_system-vc120.1.58.0.0\build\native\boost_system-vc120.targets')" />
+    <Import Project="packages\boost_thread-vc120.1.58.0.0\build\native\boost_thread-vc120.targets" Condition="Exists('packages\boost_thread-vc120.1.58.0.0\build\native\boost_thread-vc120.targets')" />
+    <Import Project="packages\boost_timer-vc120.1.58.0.0\build\native\boost_timer-vc120.targets" Condition="Exists('packages\boost_timer-vc120.1.58.0.0\build\native\boost_timer-vc120.targets')" />
+    <Import Project="packages\boost_unit_test_framework-vc120.1.58.0.0\build\native\boost_unit_test_framework-vc120.targets" Condition="Exists('packages\boost_unit_test_framework-vc120.1.58.0.0\build\native\boost_unit_test_framework-vc120.targets')" />
+    <Import Project="packages\boost_wave-vc120.1.58.0.0\build\native\boost_wave-vc120.targets" Condition="Exists('packages\boost_wave-vc120.1.58.0.0\build\native\boost_wave-vc120.targets')" />
+    <Import Project="packages\boost_wserialization-vc120.1.58.0.0\build\native\boost_wserialization-vc120.targets" Condition="Exists('packages\boost_wserialization-vc120.1.58.0.0\build\native\boost_wserialization-vc120.targets')" />
+    <Import Project="packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets" Condition="Exists('packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets')" />
+    <Import Project="packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets" Condition="Exists('packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets')" />
+    <Import Project="packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets" Condition="Exists('packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets')" />
+    <Import Project="packages\tbb.redist.4.2.3.1\build\native\tbb.redist.targets" Condition="Exists('packages\tbb.redist.4.2.3.1\build\native\tbb.redist.targets')" />
+    <Import Project="packages\tbb.4.2.3.1\build\native\tbb.targets" Condition="Exists('packages\tbb.4.2.3.1\build\native\tbb.targets')" />
+    <Import Project="packages\pthreads.redist.2.9.1.4\build\native\pthreads.redist.targets" Condition="Exists('packages\pthreads.redist.2.9.1.4\build\native\pthreads.redist.targets')" />
+    <Import Project="packages\pthreads.2.9.1.4\build\native\pthreads.targets" Condition="Exists('packages\pthreads.2.9.1.4\build\native\pthreads.targets')" />
+    <Import Project="packages\libsodium_vc120.0.5.0.0\build\native\libsodium_vc120.targets" Condition="Exists('packages\libsodium_vc120.0.5.0.0\build\native\libsodium_vc120.targets')" />
+    <Import Project="packages\libzmq_vc120.4.2.0.0\build\native\libzmq_vc120.targets" Condition="Exists('packages\libzmq_vc120.4.2.0.0\build\native\libzmq_vc120.targets')" />
+    <Import Project="packages\czmq_vc120.3.0.1.0\build\native\czmq_vc120.targets" Condition="Exists('packages\czmq_vc120.3.0.1.0\build\native\czmq_vc120.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\boost.1.58.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost.1.58.0.0\build\native\boost.targets'))" />
+    <Error Condition="!Exists('packages\boost_atomic-vc120.1.58.0.0\build\native\boost_atomic-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_atomic-vc120.1.58.0.0\build\native\boost_atomic-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_chrono-vc120.1.58.0.0\build\native\boost_chrono-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_chrono-vc120.1.58.0.0\build\native\boost_chrono-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_container-vc120.1.58.0.0\build\native\boost_container-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_container-vc120.1.58.0.0\build\native\boost_container-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_context-vc120.1.58.0.0\build\native\boost_context-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_context-vc120.1.58.0.0\build\native\boost_context-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_coroutine-vc120.1.58.0.0\build\native\boost_coroutine-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_coroutine-vc120.1.58.0.0\build\native\boost_coroutine-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_date_time-vc120.1.58.0.0\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_date_time-vc120.1.58.0.0\build\native\boost_date_time-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_filesystem-vc120.1.58.0.0\build\native\boost_filesystem-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_filesystem-vc120.1.58.0.0\build\native\boost_filesystem-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_graph-vc120.1.58.0.0\build\native\boost_graph-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_graph-vc120.1.58.0.0\build\native\boost_graph-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_iostreams-vc120.1.58.0.0\build\native\boost_iostreams-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_iostreams-vc120.1.58.0.0\build\native\boost_iostreams-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_locale-vc120.1.58.0.0\build\native\boost_locale-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_locale-vc120.1.58.0.0\build\native\boost_locale-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_log-vc120.1.58.0.0\build\native\boost_log-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_log-vc120.1.58.0.0\build\native\boost_log-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_log_setup-vc120.1.58.0.0\build\native\boost_log_setup-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_log_setup-vc120.1.58.0.0\build\native\boost_log_setup-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_math_c99-vc120.1.58.0.0\build\native\boost_math_c99-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_math_c99-vc120.1.58.0.0\build\native\boost_math_c99-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_math_c99f-vc120.1.58.0.0\build\native\boost_math_c99f-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_math_c99f-vc120.1.58.0.0\build\native\boost_math_c99f-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_math_c99l-vc120.1.58.0.0\build\native\boost_math_c99l-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_math_c99l-vc120.1.58.0.0\build\native\boost_math_c99l-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_math_tr1-vc120.1.58.0.0\build\native\boost_math_tr1-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_math_tr1-vc120.1.58.0.0\build\native\boost_math_tr1-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_math_tr1f-vc120.1.58.0.0\build\native\boost_math_tr1f-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_math_tr1f-vc120.1.58.0.0\build\native\boost_math_tr1f-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_math_tr1l-vc120.1.58.0.0\build\native\boost_math_tr1l-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_math_tr1l-vc120.1.58.0.0\build\native\boost_math_tr1l-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_prg_exec_monitor-vc120.1.58.0.0\build\native\boost_prg_exec_monitor-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_prg_exec_monitor-vc120.1.58.0.0\build\native\boost_prg_exec_monitor-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_program_options-vc120.1.58.0.0\build\native\boost_program_options-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_program_options-vc120.1.58.0.0\build\native\boost_program_options-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_random-vc120.1.58.0.0\build\native\boost_random-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_random-vc120.1.58.0.0\build\native\boost_random-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_regex-vc120.1.58.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_regex-vc120.1.58.0.0\build\native\boost_regex-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_serialization-vc120.1.58.0.0\build\native\boost_serialization-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_serialization-vc120.1.58.0.0\build\native\boost_serialization-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_signals-vc120.1.58.0.0\build\native\boost_signals-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_signals-vc120.1.58.0.0\build\native\boost_signals-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_system-vc120.1.58.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_system-vc120.1.58.0.0\build\native\boost_system-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_thread-vc120.1.58.0.0\build\native\boost_thread-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_thread-vc120.1.58.0.0\build\native\boost_thread-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_timer-vc120.1.58.0.0\build\native\boost_timer-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_timer-vc120.1.58.0.0\build\native\boost_timer-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_unit_test_framework-vc120.1.58.0.0\build\native\boost_unit_test_framework-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_unit_test_framework-vc120.1.58.0.0\build\native\boost_unit_test_framework-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_wave-vc120.1.58.0.0\build\native\boost_wave-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_wave-vc120.1.58.0.0\build\native\boost_wave-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_wserialization-vc120.1.58.0.0\build\native\boost_wserialization-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_wserialization-vc120.1.58.0.0\build\native\boost_wserialization-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets'))" />
+    <Error Condition="!Exists('packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets'))" />
+    <Error Condition="!Exists('packages\tbb.redist.4.2.3.1\build\native\tbb.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\tbb.redist.4.2.3.1\build\native\tbb.redist.targets'))" />
+    <Error Condition="!Exists('packages\tbb.4.2.3.1\build\native\tbb.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\tbb.4.2.3.1\build\native\tbb.targets'))" />
+    <Error Condition="!Exists('packages\pthreads.redist.2.9.1.4\build\native\pthreads.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\pthreads.redist.2.9.1.4\build\native\pthreads.redist.targets'))" />
+    <Error Condition="!Exists('packages\pthreads.2.9.1.4\build\native\pthreads.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\pthreads.2.9.1.4\build\native\pthreads.targets'))" />
+    <Error Condition="!Exists('packages\libsodium_vc120.0.5.0.0\build\native\libsodium_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\libsodium_vc120.0.5.0.0\build\native\libsodium_vc120.targets'))" />
+    <Error Condition="!Exists('packages\libzmq_vc120.4.2.0.0\build\native\libzmq_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\libzmq_vc120.4.2.0.0\build\native\libzmq_vc120.targets'))" />
+    <Error Condition="!Exists('packages\czmq_vc120.3.0.1.0\build\native\czmq_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\czmq_vc120.3.0.1.0\build\native\czmq_vc120.targets'))" />
+  </Target>
+</Project>
