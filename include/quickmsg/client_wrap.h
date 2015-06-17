@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-  qm_client_t
+	QM_EXPORT qm_client_t
   qm_client_new (const char* srv_name);
 
-  void
+	QM_EXPORT void
   qm_client_destroy (qm_client_t self_p);
 
   /**
@@ -18,7 +18,7 @@ extern "C" {
    * string that represents the response from the service in the resp
    * OUT argument. Returns 0 on success, non-zero on service timeout.
    */
-  int 
+	QM_EXPORT int
   qm_call_srv(qm_client_t self_p, const char* req, char** out_resp);
 
 #ifdef __cplusplus

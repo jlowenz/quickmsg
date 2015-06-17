@@ -7,13 +7,13 @@
 extern "C" {
 #endif
 
-  qm_publisher_t
+	QM_EXPORT qm_publisher_t
   qm_publisher_new (const char* topic);
 
-  void
+	QM_EXPORT void
   qm_publisher_destroy (qm_publisher_t self_p);
 
-  void 
+	QM_EXPORT void
   qm_publish(qm_publisher_t self_p, const char* msg);
 
 

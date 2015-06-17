@@ -7,7 +7,7 @@
 
 namespace quickmsg {
 
-  class Service
+	class Service
   {
     friend void service_handler(const Message*, void*);
   public:

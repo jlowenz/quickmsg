@@ -9,6 +9,11 @@
 
 namespace quickmsg {
 
+#if _WIN32
+#define QM_EXPORT	__declspec(dllexport)
+#else
+#define QM_EXPORT
+#endif
 
 #if !SWIG
   // TODO: switch to std::chrono instead?

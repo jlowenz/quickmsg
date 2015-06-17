@@ -1,4 +1,5 @@
-#include <glog/logging.h>
+//#include <glog/logging.h>
+#include <boost/log/trivial.hpp>
 #include <quickmsg/subscriber.hpp>
 #include <type_traits>
 
@@ -7,7 +8,7 @@ namespace quickmsg {
   void
   default_cb(const Message* msg, void*)
   {
-    std::cout << " Default subscriber impl (echo) " << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << " Default subscriber impl (echo) " << std::endl;
     std::cout << (*msg) << std::endl;
   }
 
@@ -62,7 +63,7 @@ namespace quickmsg {
   void Subscriber::handle_message(const Message* msg)
   {
     // if the queue is full, too bad!
-    DLOG(INFO) << "Received message "<< msg->msg<<std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "Received message "<< msg->msg<<std::endl;
     msgs_.try_push(new Message(*msg));
   }
 
@@ -118,7 +119,7 @@ namespace quickmsg {
 
   void AsyncSubscriber::handle_message(const Message* msg)
   {
-    DLOG(INFO) << "Received message "<< msg->msg <<std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "Received message "<< msg->msg <<std::endl;
     impl_(msg, args_);
   }
    

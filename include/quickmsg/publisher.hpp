@@ -5,7 +5,7 @@
 
 namespace quickmsg {
 
-  class Publisher
+	class Publisher
   {
   public:
     Publisher(const std::string& topic);

@@ -1,4 +1,4 @@
-#include <glog/logging.h>
+#include <boost/log/trivial.hpp>
 #include <quickmsg/service.hpp>
 #include <type_traits>
 #include <string.h>
@@ -20,7 +20,7 @@ namespace quickmsg {
   char*
   default_echo(const Message* req, void* args)
   {
-    DLOG(INFO) << " Default service impl (echo request) " << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << " Default service impl (echo request) " << std::endl;
     char* resp = (char*)malloc(req->msg.length()+1);
     memcpy(resp, req->msg.c_str(), req->msg.length());
     resp[req->msg.length()] = 0;
@@ -69,9 +69,9 @@ namespace quickmsg {
     //MessagePtr msg(new Message(*req));
     //reqs_.try_push(msg);
     
-    DLOG(INFO) << "got request: " << req->msg << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "got request: " << req->msg << std::endl;
     std::string resp_str(service_impl(req));
-    DLOG(INFO) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     // whisper the response back
     node_->whisper(req->header.src_uuid, resp_str);
     // TODO: are we going to should the response to the promiscuous group too?

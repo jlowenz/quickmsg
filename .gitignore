@@ -4,3 +4,5 @@ doc
 *#*
 *.class
 *.log
+msvc/quickmsg/packages
+x64

@@ -1,4 +1,4 @@
-#include <glog/logging.h>
+#include <boost/log/trivial.hpp>
 #include <quickmsg/client.hpp>
 #include <quickmsg/quickmsg.hpp>
 #include <chrono>
@@ -19,9 +19,9 @@ namespace quickmsg {
     node_ = new GroupNode(name + srv_name);
     node_->join(srv_name_);
     node_->async_spin();
-    DLOG(INFO) << "waiting for server" << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "waiting for server" << std::endl;
     node_->wait_join(srv_name_); // wait for service
-    DLOG(INFO) << "server joined group" << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "server joined group" << std::endl;
     node_->register_whispers(&client_handler, (void*)this);
   }
 
@@ -66,7 +66,7 @@ namespace quickmsg {
   void 
   Client::handle_response(const Message* resp)
   {
-    DLOG(INFO) << "received response\n" << resp->msg << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "received response\n" << resp->msg << std::endl;
     ServiceReplyPtr rep(new ServiceReply(*resp, true));
     response_ = rep;
     message_received_.store(true);

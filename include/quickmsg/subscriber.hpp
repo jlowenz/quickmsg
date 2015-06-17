@@ -17,7 +17,7 @@ namespace quickmsg {
    * queue for later *synchronous* retrieval. The messages may be
    * retrieved using the messages() member. 
    */
-  class Subscriber
+	class Subscriber
   {
   public:    
 

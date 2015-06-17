@@ -1,4 +1,4 @@
-#include <glog/logging.h>
+#include <boost/log/trivial.hpp>
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
 #include <iterator> 
@@ -18,7 +18,7 @@ namespace quickmsg {
 
   // we will not protect name_ since it will be set once, and otherwise remain read-only
   std::string GroupNode::name_("");
-  std::atomic_bool GroupNode::running_(false);
+  std::atomic_bool GroupNode::running_;
 
   std::string GroupNode::name()
   {
@@ -71,7 +71,7 @@ namespace quickmsg {
      */
     if (promiscuous_) {
       prom_thread_ = new std::thread(&GroupNode::update_groups, this);
-      DLOG(INFO) << "Started promiscuous group thread..." << std::endl;
+      BOOST_LOG_TRIVIAL(debug) << "Started promiscuous group thread..." << std::endl;
     }
   }
   
@@ -102,7 +102,7 @@ namespace quickmsg {
   {
     // how do we wait for joins? we should receive at least one join message
     // but we MAY have received it in the PAST! 
-    std::chrono::duration<double,std::milli> period(500);
+    std::chrono::duration<int,std::milli> period(500);
     basic_lock lk(join_mutex_); 
     if (joins_[group] > 0) return;
     else {
@@ -281,37 +281,37 @@ namespace quickmsg {
     // read a new event from the zyre node, interrupt
     if (zsys_interrupted || !ok()) return false;
 
-    DLOG(INFO) << "waiting for event" << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "waiting for event" << std::endl;
     ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
     // will be destroyed at the end of the function
     if (e.valid() && ok()) {
-      DLOG(INFO) << "got event" << std::endl;
+      BOOST_LOG_TRIVIAL(debug) << "got event" << std::endl;
       zyre_event_type_t t = e.type();
       switch (t) {
       case ZYRE_EVENT_WHISPER: {
         std::string name = e.peer_name();
-        DLOG(INFO) << name << " whispers -> " << node_name_ << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << name << " whispers -> " << node_name_ << std::endl;
         std::string peer_uuid = e.peer_uuid();
-        DLOG(INFO) << " peer id " << peer_uuid << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << " peer id " << peer_uuid << std::endl;
         zmsg_t* msg = e.message();
         handle_whisper(peer_uuid, msg); }
         break;
       case ZYRE_EVENT_SHOUT: {
         std::string group_id = e.group();
-        DLOG(INFO) << e.peer_name() << " " << group_id 
+        BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " " << group_id 
 		   << " shouts ->" << node_name_ << std::endl;
         std::string peer_uuid = e.peer_uuid();
-        DLOG(INFO) << " peer id " << peer_uuid << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << " peer id " << peer_uuid << std::endl;
         zmsg_t* msg = e.message();
         handle_shout(group_id, peer_uuid, msg); }
         break;
       case ZYRE_EVENT_ENTER: {
         std::string name = e.peer_name();
-        DLOG(INFO) << name << " enters | " << node_name_ << std::endl; }
+        BOOST_LOG_TRIVIAL(debug) << name << " enters | " << node_name_ << std::endl; }
         break;
       case ZYRE_EVENT_JOIN: {
         std::string group_id = e.group();
-        DLOG(INFO) << e.peer_name() << " joins " << group_id << " | " 
+        BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " joins " << group_id << " | " 
 		   << node_name_ << std::endl;
         {
           basic_lock lk(join_mutex_);
@@ -321,7 +321,7 @@ namespace quickmsg {
         break; 
       case ZYRE_EVENT_LEAVE: {
         std::string group_id = e.group();
-        DLOG(INFO) << e.peer_name() << " leaves " << group_id << " | " 
+        BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " leaves " << group_id << " | " 
 		   << node_name_ << std::endl;
 	{
 	  basic_lock lk(join_mutex_);
@@ -329,16 +329,16 @@ namespace quickmsg {
 	}}
         break;
       case ZYRE_EVENT_EXIT: {
-        DLOG(INFO) << e.peer_name() << " exits | " << node_name_ << std::endl; }
+        BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " exits | " << node_name_ << std::endl; }
         break;
       case ZYRE_EVENT_STOP: {
-        DLOG(INFO) << e.peer_name() << " stops | " << node_name_ << std::endl; }
+        BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " stops | " << node_name_ << std::endl; }
         return false;
       default:
-	DLOG(INFO) << "got an unexpected event" << std::endl;
+	BOOST_LOG_TRIVIAL(debug) << "got an unexpected event" << std::endl;
       }
     } else {
-      DLOG(INFO) << "No event" << std::endl;
+      BOOST_LOG_TRIVIAL(debug) << "No event" << std::endl;
       join_cond_.notify_all();
       return false;
     }
@@ -348,12 +348,14 @@ namespace quickmsg {
   void
   GroupNode::update_groups()
   {
-    sigset_t signal_set;
+#ifndef _WIN32
+		sigset_t signal_set;
     sigaddset(&signal_set, SIGINT);
     sigaddset(&signal_set, SIGTERM);
     sigaddset(&signal_set, SIGHUP);
     sigaddset(&signal_set, SIGPIPE);
     pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+#endif
     // called by a thread in an infinite loop at a fixed rate (i.e. 1s)    
     while (ok()) {
       auto start = std::chrono::high_resolution_clock::now();

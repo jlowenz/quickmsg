@@ -13,18 +13,27 @@ namespace quickmsg {
   struct ServiceCallTimeout : public std::runtime_error {
     ServiceCallTimeout() : std::runtime_error("ServiceCallTimeout") {}
     virtual ~ServiceCallTimeout() {}
-    const char* what() const noexcept { return std::runtime_error::what(); }
+#if _WIN32
+	const char* what() const { return std::runtime_error::what(); }
+#else
+	const char* what() const noexcept{ return std::runtime_error::what(); }
+#endif // _WIN32
   };
 
-  class Client
+	class Client
   {
     friend void client_handler(const Message*,void*);
   public:
     Client(const std::string& srv_name);
     virtual ~Client();
     
-    ServiceReplyPtr call(const std::string& msg, int timeout_s=10) throw(ServiceCallTimeout);
+#if _WIN32
+	ServiceReplyPtr call(const std::string& msg, int timeout_s = 10);
+	std::string calls(const std::string& req, int timeout_s = 10);
+#else
+	ServiceReplyPtr call(const std::string& msg, int timeout_s=10) throw(ServiceCallTimeout);
     std::string calls(const std::string& req, int timeout_s=10) throw(ServiceCallTimeout);
+#endif
 
   protected:
     virtual void handle_response(const Message* resp);
