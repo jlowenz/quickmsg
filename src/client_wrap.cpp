@@ -26,11 +26,14 @@ extern "C" {
   {
     Client* client = reinterpret_cast<Client*>(self_p);
     try {
-      std::string resp = client->calls(req).c_str();
+      std::string resp = client->calls(req);
+      std::cout << "call_srv, received: " << resp << std::endl;
       *c_resp = (char*)malloc(resp.length() + 1);
       memcpy(*c_resp, resp.c_str(), resp.length() + 1);
+      std::cout << "copied to given handle..." << std::endl;
       return 0;
     } catch (ServiceCallTimeout& to) {
+      // can't let exceptions escape from the C interface
       *c_resp = NULL;
       return -1;
     }

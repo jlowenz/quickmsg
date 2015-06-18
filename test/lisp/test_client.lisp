@@ -1,7 +1,8 @@
 ;(load "../../src/lisp/quickmsg.lisp")
 
+(ql:quickload "quickmsg")
 (defpackage :qm_client
-  (:use :common-lisp :iterate :quickmsg)
+  (:use :common-lisp :cl-json :iterate :quickmsg)
   (:export :main))
 (in-package :qm_client)
 

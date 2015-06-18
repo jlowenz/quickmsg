@@ -23,6 +23,7 @@ static inline Service* from(qm_service_t s)
 
 extern "C" {
 
+  
   char* _service_handler(const Message* msg, void* arg)
   {
     qm_message_t m = to(msg);

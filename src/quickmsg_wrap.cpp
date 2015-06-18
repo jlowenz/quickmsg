@@ -62,6 +62,15 @@ extern "C" {
     if (msg) delete msg;
   }
 
+  /* this may need to be somewhere else */
+  char*
+  qm_alloc_string(int length)
+  {
+    char* out = (char*)malloc(sizeof(char)*(length+1));
+    out[length] = '\0';
+    return out;
+  }
+
   void 
   qm_free_string(char* str)
   {

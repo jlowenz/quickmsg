@@ -6,3 +6,9 @@ doc
 *.log
 msvc/quickmsg/packages
 x64
+*.tlog
+*.idb
+*.pdb
+*.sdf
+*.opensdf
+*.suo

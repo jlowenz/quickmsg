@@ -1,10 +1,9 @@
 (load "../../src/lisp/quickmsg.lisp")
 
-(use-package :iterate)
-
-;; (defpackage :qm_pub
-;;   (:use :common-lisp :cffi :cl-json :iterate))
-;; (in-package :qm_pub)
+(ql:quickload "quickmsg")
+(defpackage :qm_pub
+  (:use :common-lisp :cffi :cl-json :iterate))
+(in-package :qm_pub)
 
 (defun main ()
   (qm:init "test_pub")

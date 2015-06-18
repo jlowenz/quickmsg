@@ -8,33 +8,38 @@ extern "C" {
 #endif
 
 
-	QM_EXPORT void
+  QM_EXPORT void
   qm_init(const char* name);
 
-	QM_EXPORT void
+  QM_EXPORT void
   qm_shutdown(const char* reason);
 
-	QM_EXPORT int
-	qm_ok();
+  QM_EXPORT int
+  qm_ok();
 
   // TODO: fix the inconsistencies
 
-	QM_EXPORT double
+  QM_EXPORT double
   qm_get_message_stamp(qm_message_t self_p);
 
-	QM_EXPORT const char*
+  QM_EXPORT const char*
   qm_get_message_src(qm_message_t self_p);
 
-	QM_EXPORT const char*
+  QM_EXPORT const char*
   qm_get_message_str(qm_message_t self_p);
 
-	QM_EXPORT void 
+  QM_EXPORT void 
   qm_message_destroy(qm_message_t self_p);
 
-	QM_EXPORT int 
+  QM_EXPORT int 
   qm_get_successful(qm_service_reply_t self_p);
+
+
+  QM_EXPORT char*
+  qm_alloc_string(int length);
   
-	QM_EXPORT void 
+  
+  QM_EXPORT void 
   qm_free_string(char* str);
 
 #ifdef __cplusplus

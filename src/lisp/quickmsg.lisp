@@ -35,6 +35,9 @@
 (cffi:load-foreign-library 'libqm)
 ;(cffi:use-foreign-library 'libqm)
 
+(cffi:defcfun ("qm_alloc_string" alloc-string) :pointer (size :int))
+(cffi:defcfun ("qm_free_string" free-string) :void (str :pointer))
+
 ;; Publisher
 
 (cffi:defcfun ("qm_publisher_new" publisher-new) :pointer
@@ -115,15 +118,36 @@
 	     (resp-str (if (= ret 0) (foreign-string-to-lisp (mem-ref resp-ptr :pointer)) "")))
 	(if (= ret 0) 
 	    (progn 	      
-	      (cffi:foreign-free (mem-ref resp-ptr :pointer)) ; free the string and the pointer we alloc'd
+	      (free-string (mem-ref resp-ptr :pointer)) ; free the string and the pointer we alloc'd
 	      (cffi:foreign-free resp-ptr)
 	      resp-str) ; return the value
-	    (error 'service-call-timeout :request request))))))
-
+	    (progn
+	      (cffi:foreign-free resp-ptr)
+	      (error 'service-call-timeout :request request)))))))
 ;; Server
-(cffi:defcfun ("qm_service_new" service-new) :pointer
-  (topic :string)
-  (impl :pointer))
+
+
+(defvar *service-callback-handler* nil)
+(declaim (special *service-callback-handler*))
+(cffi:defcallback service-cb
+    :pointer ((msg :pointer))
+    (let* ((resp (funcall (symbol-value '*service-callback-handler*) msg))
+	   (resp-len (+ 1 (length resp)))
+	   (resp-ptr (alloc-string resp-len)))
+      (format t "Copying to native string~%")
+      (cffi:lisp-string-to-foreign resp resp-ptr resp-len)
+      resp-ptr)) ;; need to return a foreign-allocated pointer, since we are returning ownership
+
+(defun service-new (topic handler-fn)
+  (setf *service-callback-handler* handler-fn)
+  (cffi:foreign-funcall "qm_service_new"
+			:string topic
+			:pointer (cffi:callback service-cb)
+			:pointer (cffi:null-pointer)
+			:pointer))
+;; (cffi:defcfun ("qm_service_new" service-new) :pointer
+;;   (topic :string)
+;;   (impl :pointer))
 
 (cffi:defcfun ("qm_service_destroy" service-destroy) :void
   (self_p :pointer))
