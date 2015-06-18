@@ -42,7 +42,6 @@ namespace quickmsg {
 		boost::log::core::get()->set_filter(
 			boost::log::trivial::severity >= boost::log::trivial::debug);
     
-		std::cout << "installing sig (WTF is the boost log not working?)" << std::endl;
     BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
 #if _WIN32
 	signal(SIGINT, __sigint_handler);

@@ -1,3 +1,4 @@
+#include <boost/log/trivial.hpp>
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
 #include <quickmsg/quickmsg_wrap.h>
@@ -10,7 +11,7 @@ extern "C" {
   void
   qm_init(const char* name) 
   {
-    std::cout << "qm_init " << name << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "QuickMsg is initializing with name: " << name << std::endl;
     std::string sname(name);
     init(sname);
   }

@@ -9,7 +9,7 @@ namespace quickmsg {
   default_cb(const Message* msg, void*)
   {
     BOOST_LOG_TRIVIAL(debug) << " Default subscriber impl (echo) " << std::endl;
-    std::cout << (*msg) << std::endl;
+    std::cout << "Default Callback: [probably not what you want]\n" << (*msg) << std::endl;
   }
 
   /**
@@ -44,7 +44,7 @@ namespace quickmsg {
     // register the message handler for the group
     node_->register_handler(topic_, &subscriber_handler, (void*)this);
     // start spinning asynchronously, returns immediately
-    std::cout<<"Subscribing on topic "<<topic_<<std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Subscribing on topic "<<topic_<<std::endl;
     node_->async_spin();
   }
 
@@ -106,7 +106,7 @@ namespace quickmsg {
     // join the correct group (topic)
     node_->join(topic_);
     // register the message handler for the group
-    std::cout<<"Async Subscribing on topic "<<topic_<<std::endl;
+    BOOST_LOG_TRIVIAL(info) <<"Async Subscribing on topic "<<topic_<<std::endl;
     node_->register_handler(topic_, &async_subscriber_handler, (void*)this);
   }
 

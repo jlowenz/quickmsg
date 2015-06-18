@@ -71,7 +71,6 @@ namespace quickmsg {
     
     BOOST_LOG_TRIVIAL(debug) << "got request: " << req->msg << std::endl;
     std::string resp_str(service_impl(req));
-    std::cout << "survived service_impl: " << resp_str << std::endl;
     BOOST_LOG_TRIVIAL(debug) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     // whisper the response back
     node_->whisper(req->header.src_uuid, resp_str);
@@ -82,11 +81,8 @@ namespace quickmsg {
   Service::service_impl(const Message* req)
   {
     char* resp_chars = impl_(req, args_); // Don't leak mem
-    std::cout << "resp_chars: " << resp_chars << std::endl;
     std::string resp(resp_chars);
-    std::cout << "before free" << std::endl;
     free(resp_chars);
-    std::cout << "after free" << std::endl;
     return resp;
   }
 
