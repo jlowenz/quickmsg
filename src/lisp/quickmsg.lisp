@@ -30,8 +30,10 @@
 (setf json:*json-identifier-name-to-lisp* 'json:simplified-camel-case-to-lisp)
 
 (cffi:define-foreign-library libqm
-    (t (:default "libcquickmsg")))
-(cffi:use-foreign-library libqm)
+  (:unix (:default "libcquickmsg"))
+  (:windows "quickmsg-c.dll"))
+(cffi:load-foreign-library 'libqm)
+;(cffi:use-foreign-library 'libqm)
 
 ;; Publisher
 
@@ -56,10 +58,33 @@
 (cffi:defcfun ("qm_subscriber_destroy" subscriber-destroy) :void
   (self_p :pointer))
 
-(cffi:defcfun ("qm_async_subscriber_new" async-subscriber-new) :pointer
-  (topic :string)
-  (handler :pointer)
-  (args :pointer))
+;; (cffi:defcfun ("qm_async_subscriber_new" async-subscriber-new) :pointer
+;;   (topic :string)
+;;   (handler :pointer)
+;;   (args :pointer))
+
+					;(declaim (special *async-callback-handler*))
+					;(defvar *async-callback-handler* (make-hash-table))
+
+					;(declare (special *async-callback-handler*))
+;(defvar *async-callback-handler* (lambda (m) (format t "what????~%")))
+					;(defun get-handler () (symbol-value '*async-callback-handler*))
+(defvar *async-callback-handler* nil)
+(declaim (special *async-callback-handler*))
+(cffi:defcallback handler-cb :void ((msg :pointer))
+		  (funcall (symbol-value '*async-callback-handler*) msg))
+
+(defun async-subscriber-new (topic handler-fn)
+  (setf *async-callback-handler* handler-fn)
+					;  (let ((*async-callback-handler* handler-fn))
+					;  (declare (special *async-callback-handler*))    
+  (format t "handler: ~a~%" *async-callback-handler*)
+  (cffi:with-foreign-string (ftopic topic)
+    (cffi:foreign-funcall "qm_async_subscriber_new"
+			  :pointer ftopic
+			  :pointer (cffi:callback handler-cb)
+			  :pointer (cffi:null-pointer)
+			  :pointer)))
 
 (cffi:defcfun ("qm_async_subscriber_spin" async-subscriber-spin) :void
   (self_p :pointer))
@@ -110,8 +135,14 @@
 (cffi:defcfun ("qm_get_message_stamp" get-msg-stamp) :double
   (self_p :pointer))
 
-(cffi:defcfun ("qm_get_message_str" get-msg-str) :string
-  (self_p :pointer))
+;; (cffi:defcfun ("qm_get_message_str" get-msg-str) :string
+;;   (self_p :pointer))
+(defun get-msg-str (self-p)
+  (let ((c-str (cffi:foreign-funcall "qm_get_message_str"
+				     :pointer self-p
+				     :pointer)))
+    (format t "get-msg-str: ~a~%" c-str)
+    (cffi:foreign-string-to-lisp c-str)))
 
 ;; Misc
 (cffi:defcfun ("qm_ok" ok) :boolean )

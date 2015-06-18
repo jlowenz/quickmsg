@@ -1,4 +1,6 @@
 #include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
 #include <signal.h>
@@ -37,7 +39,10 @@ namespace quickmsg {
     GroupNode::name_ = name;
     zsys_init();
     //zsys_handler_set(NULL);
+		boost::log::core::get()->set_filter(
+			boost::log::trivial::severity >= boost::log::trivial::debug);
     
+		std::cout << "installing sig (WTF is the boost log not working?)" << std::endl;
     BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
 #if _WIN32
 	signal(SIGINT, __sigint_handler);

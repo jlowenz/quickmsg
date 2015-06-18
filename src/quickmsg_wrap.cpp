@@ -45,7 +45,7 @@ extern "C" {
   qm_get_message_str(qm_message_t self_p)
   {
     const Message* msg = reinterpret_cast<const Message*>(self_p);
-    return msg->get_msg().c_str();
+    return msg->msg.c_str();
   }
 
   int

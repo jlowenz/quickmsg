@@ -9,3 +9,4 @@
     :serial t
     :depends-on (:cl-json :iterate :cffi)
     :components ((:file "quickmsg")))
+

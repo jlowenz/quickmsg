@@ -65,7 +65,7 @@ extern "C" {
   
 	void _async_message_handler(const Message* msg, void* args)
   {
-    qm_message_t m = to(msg);
+    //qm_message_t m = to(msg);
     c_handler_t* data = static_cast<c_handler_t*>(args);
     data->handler(to(msg), data->args);
   }
