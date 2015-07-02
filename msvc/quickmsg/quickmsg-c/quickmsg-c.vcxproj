@@ -128,6 +128,7 @@
     <TargetExt>.dll</TargetExt>
     <Linkage-pthreads>static</Linkage-pthreads>
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -196,14 +197,22 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <PreprocessorDefinitions>SODIUM_STATIC;ZMQ_STATIC;HAVE_LIBSODIUM;LIBCZMQ_STATIC;LIBZYRE_STATIC;TBB_STATIC;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Release\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Release\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>czmq.lib;zyre.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Release\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Release\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;$(SolutionDir)\packages\tbb.4.2.3.1\build\native\lib\x64\v120\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tbb.lib;czmq.lib;zyre.lib;Ws2_32.lib;IPHLPAPI.lib;Rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <SubSystem>NotSet</SubSystem>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
     <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
