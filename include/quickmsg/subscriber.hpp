@@ -9,7 +9,7 @@
 namespace quickmsg {
 
   //  void default_cb(const char* msg);
-  void default_cb(const Message* msg);
+  void default_cb(const Message* msg, void*);
 
   /**
    * A Subscriber instance will register on the provided topic and

@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 #include <json/json.h>
 #include <algorithm>
+#include <numeric>
 #include <sstream>
 #include <iterator>
 

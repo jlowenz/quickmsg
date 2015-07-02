@@ -92,10 +92,7 @@ namespace quickmsg {
     */
     void async_spin();
 
-    // return whether node has been interrupted
-    bool interrupted();
     void join();
-
 
     static std::string name();
 
