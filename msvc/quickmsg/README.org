@@ -1,0 +1,18 @@
+* Windows Build
+
+Building on Windows requires a collection of extra dependencies (listed below). Each dependency should compile fine on its own, but may require some tweaks to refer to the next dependency. They should be compiled in the order listed below, and peferrably in static Release mode. 
+
+Quickmsg itself will compile in the static dependencies (except for TBB, for some reason it still requires the DLL). 
+
+To have the least trouble with adjusting project settings, pick some directory: ~$HOME/dev~ for example, and put all the dependencies and the quickmsg repo there. This build currently focuses on the quickmsg C library, since it is what the Common Lisp CFFI requires. Configuring the C++ API for DLL usage will require a considerable amount of work, and I'm not sure it's worth it at the moment. 
+
+Once building is complete, the quickmsg-c.dll and tbb.dll can be copied to your location of choice, but for CL usage, you can create a ~lib/~ directory in ~$HOME/quicklisp~, and then make sure it's in your ~PATH~. Quicklisp will load the system if you put the ~src/lisp/*~ contents in the ~local-projects~ directory.
+
+* Dependencies
+
+- libsodium [[https://github.com/jedisct1/libsodium]]
+- libzmq [[https://github.com/zeromq/libzmq.git]]
+- czmq [[https://github.com/zeromq/czmq.git]]
+- zyre [[https://github.com/zeromq/zyre.git]]
+
+Additional dependencies such as Boost and TBB should be handled by NuGet. 
