@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.6.2)
 project(quickmsg)
 
 # policies
-cmake_policy(SET CMP0042 OLD)
+if (CMAKE_MAJOR_VERSION EQUAL 3)
+  cmake_policy(SET CMP0042 OLD)
+endif()
 
 # directories
 set (QUICKMSG_SRC_DIR src)
