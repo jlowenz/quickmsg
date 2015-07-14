@@ -22,9 +22,13 @@ public class test_client {
         // jsonreq.put("ints_to_add", arr);
         // String json_req_str = JSONObject.toJSONString(jsonreq);
         // System.out.println("Client request "+json_req_str);
-        String response = c.calls("HELLO");
-        System.out.println("Client response "+response);
-	c.delete();	
+	try {
+	    String response = c.calls("HELLO");
+	    System.out.println("Client response "+response);
+	    c.delete();	
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
     }
 }
 
