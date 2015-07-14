@@ -1,7 +1,6 @@
 #pragma once
 
 #include <quickmsg/types.hpp>
-#include <quickmsg/group_node.hpp>
 #include <exception>
 #include <stdexcept>
 #include <atomic>
@@ -14,13 +13,15 @@ namespace quickmsg {
     ServiceCallTimeout() : std::runtime_error("ServiceCallTimeout") {}
     virtual ~ServiceCallTimeout() {}
 #if _WIN32
-	const char* what() const { return std::runtime_error::what(); }
+    const char* what() const { return std::runtime_error::what(); }
 #else
-	const char* what() const noexcept{ return std::runtime_error::what(); }
+    const char* what() const noexcept{ return std::runtime_error::what(); }
 #endif // _WIN32
   };
 
-	class Client
+  
+  class GroupNode;
+  class Client
   {
     friend void client_handler(const Message*,void*);
   public:
@@ -28,10 +29,10 @@ namespace quickmsg {
     virtual ~Client();
     
 #if _WIN32
-	ServiceReplyPtr call(const std::string& msg, int timeout_s = 10);
-	std::string calls(const std::string& req, int timeout_s = 10);
+    ServiceReplyPtr call(const std::string& msg, int timeout_s = 10);
+    std::string calls(const std::string& req, int timeout_s = 10);
 #else
-	ServiceReplyPtr call(const std::string& msg, int timeout_s=10) throw(ServiceCallTimeout);
+    ServiceReplyPtr call(const std::string& msg, int timeout_s=10) throw(ServiceCallTimeout);
     std::string calls(const std::string& req, int timeout_s=10) throw(ServiceCallTimeout);
 #endif
 

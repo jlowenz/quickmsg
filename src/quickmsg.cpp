@@ -18,18 +18,18 @@ namespace quickmsg {
     blah = 1;
     quickmsg::GroupNode::running_.store(false);
 #if _WIN32
-	signal(SIGINT, SIG_DFL);
-	raise(SIGINT);
+    signal(SIGINT, SIG_DFL);
+    raise(SIGINT);
 #else // __WIN32
-	struct sigaction action;
+    struct sigaction action;
     struct sigaction prev_action;
     action.sa_handler = SIG_DFL;
     action.sa_flags = 0;
     sigemptyset (&action.sa_mask);
     if (sigaction (SIGINT, &action, NULL)) {
-      LOG(WARNING) << "problem with sigaction" << std::endl;
+      BOOST_LOG_TRIVIAL(warning) << "problem with sigaction" << std::endl;
     }
-	kill(0, SIGINT);
+    kill(0, SIGINT);
 #endif
   }
   
@@ -39,21 +39,21 @@ namespace quickmsg {
     GroupNode::name_ = name;
     zsys_init();
     //zsys_handler_set(NULL);
-		boost::log::core::get()->set_filter(
-			boost::log::trivial::severity >= boost::log::trivial::debug);
+    boost::log::core::get()->set_filter(
+					boost::log::trivial::severity >= boost::log::trivial::debug);
     
     BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
 #if _WIN32
-	signal(SIGINT, __sigint_handler);
+    signal(SIGINT, __sigint_handler);
 #else
-	struct sigaction action;
-	struct sigaction prev_action;
-	action.sa_handler = __sigint_handler;
-	action.sa_flags = 0;
-	sigemptyset(&action.sa_mask);
-	if (sigaction(SIGINT, &action, NULL)) {
-		LOG(WARNING) << "problem with sigaction" << std::endl;
-	}
+    struct sigaction action;
+    struct sigaction prev_action;
+    action.sa_handler = __sigint_handler;
+    action.sa_flags = 0;
+    sigemptyset(&action.sa_mask);
+    if (sigaction(SIGINT, &action, NULL)) {
+      BOOST_LOG_TRIVIAL(warning) << "problem with sigaction" << std::endl;
+    }
 #endif
 
     // BOOST_LOG_TRIVIAL(debug) << "blah before: " << blah << std::endl;

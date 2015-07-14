@@ -1,4 +1,5 @@
 #include <boost/log/trivial.hpp>
+#include <quickmsg/group_node.hpp>
 #include <quickmsg/client.hpp>
 #include <quickmsg/quickmsg.hpp>
 #include <chrono>

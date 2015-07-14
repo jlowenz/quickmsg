@@ -7,13 +7,17 @@
 extern "C" {
 #endif
 
-	QM_EXPORT qm_publisher_t
-  qm_publisher_new (const char* topic);
+  typedef enum {
+    qm_wait, qm_nowait
+  } wait_mode_t;
 
-	QM_EXPORT void
+  QM_EXPORT qm_publisher_t
+  qm_publisher_new (const char* topic, wait_mode_t wait);
+
+  QM_EXPORT void
   qm_publisher_destroy (qm_publisher_t self_p);
 
-	QM_EXPORT void
+  QM_EXPORT void
   qm_publish(qm_publisher_t self_p, const char* msg);
 
 

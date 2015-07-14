@@ -15,7 +15,7 @@ main(int argc, char** argv)
   ts.tv_nsec = 0;
 
   qm_init("test_pub");
-  p = qm_publisher_new("test");  
+  p = qm_publisher_new("test", qm_wait);
   for (i = 0; i < 10; ++i) {
     sprintf(msg, "Hello World %d", i);
     qm_publish(p, msg);

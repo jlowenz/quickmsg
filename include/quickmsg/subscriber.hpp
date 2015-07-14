@@ -1,8 +1,6 @@
 #pragma once
 
-#include <tbb/concurrent_queue.h>
 #include <quickmsg/types.hpp>
-#include <quickmsg/group_node.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
 
@@ -11,13 +9,17 @@ namespace quickmsg {
   //  void default_cb(const char* msg);
   void default_cb(const Message* msg);
 
+  // forward
+  class GroupNode;
+  class SubscriberImpl;
+
   /**
    * A Subscriber instance will register on the provided topic and
    * listen for messages in a separate thread, delivering them to a
    * queue for later *synchronous* retrieval. The messages may be
    * retrieved using the messages() member. 
    */
-	class Subscriber
+  class Subscriber
   {
   public:    
 
@@ -38,17 +40,10 @@ namespace quickmsg {
     MsgList messages();
 
     void join();
-  protected:
-    virtual void handle_message(const Message* msg);
   private:
-    friend void subscriber_handler(const Message* msg, void* args);
-    std::string topic_;
-    MessageCallback impl_;
-    void* args_;
-    GroupNode* node_;
-    tbb::concurrent_bounded_queue<Message*> msgs_;
-    void init(size_t queue_size);
+    SubscriberImpl* self;
   };
+
 
   /**
    * An AsyncSubscriber registers on the provided topic and listens

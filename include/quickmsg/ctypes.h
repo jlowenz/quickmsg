@@ -3,6 +3,11 @@
 
 #include <stdlib.h>
 
+#if _WIN32
+#define QM_EXPORT	__declspec(dllexport)
+#else
+#define QM_EXPORT
+#endif
 
 #ifdef __cplusplus
 extern "C" {

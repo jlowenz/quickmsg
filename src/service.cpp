@@ -1,14 +1,12 @@
 #include <boost/log/trivial.hpp>
 #include <quickmsg/service.hpp>
+#include <quickmsg/group_node.hpp>
+#include <tbb/concurrent_queue.h>
 #include <type_traits>
 #include <string.h>
 
 namespace quickmsg {
 
-  void service_handler(const Message* msg, void* args)
-  {
-    static_cast<Service*>(args)->handle_request(msg);
-  }
 
   // std::string
   // default_echo(const std::string& req)
@@ -27,22 +25,92 @@ namespace quickmsg {
     return resp;
   }
 
-  Service::Service(const std::string& srv_name, ServiceCallback impl,
+  class ServiceImpl
+  {
+    friend void service_handler(const Message*, void*);
+  public:
+    ServiceImpl(const std::string& srv_name,
+		size_t queue_size=10);
+
+    ServiceImpl(const std::string& srv_name,
+		ServiceCallback cb,
+		void* args=NULL,
+		size_t queue_size=10);
+    virtual ~ServiceImpl();
+    
+    /**
+     * Override this method to implement how the service responds to
+     * the request. By default, this method will call the
+     * ServiceCallback given in the constructor, or will call the
+     * default "echo" service implementation, which simply returns the
+     * request as the reply.
+     */
+    virtual std::string service_impl(const Message* req);
+
+    /** Block the calling thread while the Service processes incoming
+	messages.
+     */
+    void spin();
+
+    /** Start a thread to sping for this Service, allowing the calling
+	thread to continue.  The implication here is that now there
+	are multiple threads running, and the handler must be
+	thread-aware.
+     */
+    void async_spin();
+
+  protected:
+    /** The service handler implementation processes the incoming
+	message and passes the result to the
+	service_implementation. This method should generally not be
+	overridden.
+    */
+    virtual void handle_request(const Message* req);  
+  private:
+    std::string srv_name_;
+    std::string promisc_topic_;
+    ServiceCallback impl_;
+    void* args_;
+    GroupNode* node_;
+    tbb::concurrent_bounded_queue<MessagePtr> reqs_;
+
+    void init(size_t queue_size);    
+  };
+
+  void service_handler(const Message* msg, void* args)
+  {
+    static_cast<ServiceImpl*>(args)->handle_request(msg);
+  }
+
+  ServiceImpl::ServiceImpl(const std::string& srv_name, ServiceCallback impl,
 		   void* args, size_t queue_size)
     : srv_name_(srv_name), impl_(impl), args_(args)
   {
     init(queue_size);
   }
-
   Service::Service(const std::string& srv_name,
-                   size_t queue_size)
+		   size_t queue_size)
+    : self(new ServiceImpl(srv_name, queue_size))
+  {
+  }
+
+  ServiceImpl::ServiceImpl(const std::string& srv_name,
+			   size_t queue_size)
     : srv_name_(srv_name)
   {
     impl_ = default_echo;
     init(queue_size);
   }
+  Service::Service(const std::string& srv_name,
+		   ServiceCallback cb,
+		   void* args,
+		   size_t queue_size)
+    : self(new ServiceImpl(srv_name, cb, args, queue_size))
+  {
+  }
 
-  void Service::init(size_t queue_size)
+
+  void ServiceImpl::init(size_t queue_size)
   {
     reqs_.set_capacity(queue_size);
     std::string name("Srv/");
@@ -55,15 +123,20 @@ namespace quickmsg {
     //    node_->async_spin();
   }
 
-  Service::~Service()
+
+  ServiceImpl::~ServiceImpl()
   {
     node_->leave(srv_name_);
     node_->stop();
     delete node_;
   }
+  Service::~Service()
+  {
+    delete self;
+  }
 
   void 
-  Service::handle_request(const Message* req)
+  ServiceImpl::handle_request(const Message* req)
   {
     // if the queue is full, too bad!
     //MessagePtr msg(new Message(*req));
@@ -78,24 +151,38 @@ namespace quickmsg {
   }
 
   std::string 
-  Service::service_impl(const Message* req)
+  ServiceImpl::service_impl(const Message* req)
   {
     char* resp_chars = impl_(req, args_); // Don't leak mem
     std::string resp(resp_chars);
     free(resp_chars);
     return resp;
   }
+  std::string 
+  Service::service_impl(const Message* req)
+  {
+    return self->service_impl(req);
+  }
 
   void 
-  Service::spin()
+  ServiceImpl::spin()
   {
     node_->spin();
   }
+  void
+  Service::spin()
+  {
+    self->spin();
+  }
 
   void 
-  Service::async_spin()
+  ServiceImpl::async_spin()
   {
     node_->async_spin();
   }
-
+  void
+  Service::async_spin()
+  {
+    self->async_spin();
+  }
 }

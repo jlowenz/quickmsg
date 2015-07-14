@@ -11,7 +11,7 @@ main(int argc, char** argv)
 {
   qm::init("test_pub");
   
-  qm::Publisher pub("chatter");
+  qm::Publisher pub("chatter", true);
   
   for (int i = 0; i < 20; ++i) {
     if (!qm::ok()) break;

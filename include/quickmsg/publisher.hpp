@@ -1,14 +1,19 @@
 #pragma once
 
 #include <quickmsg/types.hpp>
-#include <quickmsg/group_node.hpp>
 
 namespace quickmsg {
 
-	class Publisher
+  class GroupNode;
+  class Publisher
   {
   public:
-    Publisher(const std::string& topic);
+    /**
+     * Construct a new publisher on the given topic. If the publisher
+     * should wait for subscribers before returning, set wait to true
+     * (default is to NOT wait for subscribers).
+     */
+    Publisher(const std::string& topic, bool wait=false);
     virtual ~Publisher();
 
     void publish(const std::string& msg);

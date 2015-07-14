@@ -18,7 +18,7 @@ main(int argc, char** argv)
   
   qm_init("test_sub");
   s = qm_async_subscriber_new("test", callback, NULL);
-  qm_async_subscriber_spin(s);
+  qm_async_subscriber_spin(s); // doesn't return
   qm_async_subscriber_destroy(s);
 
   return 0;

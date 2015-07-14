@@ -1,6 +1,3 @@
-#include <boost/log/trivial.hpp>
-#include <quickmsg/quickmsg.hpp>
-#include <quickmsg/group_node.hpp>
 #include <iterator> 
 #include <thread>
 #include <chrono>
@@ -8,6 +5,12 @@
 #include <algorithm>
 #include <pthread.h>
 #include <signal.h>
+#include <zyre.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <boost/log/trivial.hpp>
+
+#include <quickmsg/quickmsg.hpp>
+#include <quickmsg/group_node.hpp>
 
 #define DEBUG
 
@@ -17,13 +20,6 @@ namespace quickmsg {
   // 		"std::atomic<std::string> requires std::string to be trivially copyable");
 
   // we will not protect name_ since it will be set once, and otherwise remain read-only
-  std::string GroupNode::name_("");
-  std::atomic_bool GroupNode::running_;
-
-  std::string GroupNode::name()
-  {
-    return GroupNode::name_;
-  }
 
   Peer::Peer(const std::string& uuid, const std::string& desc)
     : uuid_(uuid), desc_(desc)
@@ -46,7 +42,113 @@ namespace quickmsg {
     return desc_;
   }
 
-  GroupNode::GroupNode(const std::string& desc, bool promiscuous)
+  //--------------------------------------------------------------------------------
+  // define the private data implementation
+  class GroupNodeImpl 
+  {
+  public:    
+
+    GroupNodeImpl(const std::string& description = "", bool promiscuous=false);
+    virtual ~GroupNodeImpl();
+    
+    void join(const std::string& group);
+    void wait_join(const std::string& group);
+    void leave(const std::string& group);
+    
+    void register_handler(const std::string& group, MessageCallback cb, void* args);
+    void register_whispers(MessageCallback cb, void* args);
+
+    // TODO: what about de-registering the handlers???
+    //void deregister_handler(const std::string& group, MessageCallback cb, void* args);
+    //void deregister_handler(const std::string& group, handler_id_t handler);
+
+    void shout(const std::string& group, const std::string& msg);
+    void whisper(const PeerPtr& peer, const std::string& msg);
+    void whisper(const std::string& peer_uuid, const std::string& msg);
+
+    // return a snapshot of the peers on the network
+    void peers(PeerList& ps) const;
+    // return a snapshot of the peers with the given description
+    void peers_by_description(PeerList& ps, const std::string& desc) const;
+
+    /** \brief Terminate any processing for this node.
+	Terminate any processing for this node, non-recoverable (for now).
+    */
+    void stop();
+
+    /** \brief Start the listener. This method does not return.
+	
+	Spinning a group node is required for receiving messages
+	whether you plan to access the messages synchronously OR
+	asynchronously: something still must listen to the underlying
+	network.
+    */
+    void spin();
+
+    /** \brief Start the listener thread. This method will return immediately.
+	
+	Spinning a group node is required for receiving messages
+	whether you plan to access the messages synchronously OR
+	asynchronously: something still must listen to the underlying
+	network.
+    */
+    void async_spin();
+
+    // return whether node has been interrupted
+    bool interrupted();
+    void join();
+
+
+    static std::string name();
+
+    void handle_whisper(const std::string& uuid, zmsg_t* msg);
+    void handle_shout(const std::string& group, const std::string& uuid, zmsg_t* msg);
+
+    bool spin_once();
+    void update_groups();
+    void _spin(); // for async, signal-disabled spinning
+    
+    zyre_t* node_;
+    std::string node_name_;
+    PeerPtr self_;
+    std::thread* event_thread_;
+    std::thread* prom_thread_;
+
+    bool promiscuous_;
+    
+    typedef std::unique_lock<std::mutex> basic_lock;
+    typedef std::map<std::string,uint> join_map_t;
+    join_map_t joins_;
+    // should wrap these in a more useful class!
+    std::condition_variable join_cond_;
+    std::mutex join_mutex_;
+
+    // topic -> handler
+    typedef tbb::concurrent_unordered_multimap<std::string,std::pair<MessageCallback,void*> > handlers_t;
+    // typedef std::map<std::string,std::pair<MessageCallback,void*> > handlers_t;
+    handlers_t handlers_;
+    handlers_t whisper_handlers_;    
+
+    //static std::mutex  name_mutex_;
+    // static std::string name_;
+    // static std::atomic_bool running_;
+
+    // friend void init(const std::string&);
+    // friend void shutdown(const std::string&);
+    // friend bool ok();
+    // friend void __sigint_handler(int);
+  };
+
+  std::string GroupNode::name_("");
+  std::atomic_bool GroupNode::running_;
+
+  std::string GroupNode::name()
+  {
+    return GroupNode::name_;
+  }
+
+
+  GroupNodeImpl::GroupNodeImpl(const std::string& desc, bool promiscuous)
     : promiscuous_(promiscuous), event_thread_(NULL), prom_thread_(NULL)
   {
     // create the zyre node
@@ -70,12 +172,16 @@ namespace quickmsg {
        so, we need to periodically join all the known groups.
      */
     if (promiscuous_) {
-      prom_thread_ = new std::thread(&GroupNode::update_groups, this);
+      prom_thread_ = new std::thread(&GroupNodeImpl::update_groups, this);
       BOOST_LOG_TRIVIAL(debug) << "Started promiscuous group thread..." << std::endl;
     }
   }
+  GroupNode::GroupNode(const std::string& desc, bool prom)
+    : self(new GroupNodeImpl(desc, prom))
+  {    
+  }
   
-  GroupNode::~GroupNode()
+  GroupNodeImpl::~GroupNodeImpl()
   {    
     zyre_stop(node_);    
     if (prom_thread_) {
@@ -88,17 +194,26 @@ namespace quickmsg {
     }
     zyre_destroy(&node_);
   }
+  GroupNode::~GroupNode()
+  {
+    delete self;
+  }
     
   void    
-  GroupNode::join(const std::string& group)
+  GroupNodeImpl::join(const std::string& group)
   {
     if (zyre_join(node_, group.c_str())) {
       throw std::runtime_error("Error joining group: " + group);
     }    
   }
+  void
+  GroupNode::join(const std::string& group)
+  {
+    self->join(group);
+  }
 
   void
-  GroupNode::wait_join(const std::string& group)
+  GroupNodeImpl::wait_join(const std::string& group)
   {
     // how do we wait for joins? we should receive at least one join message
     // but we MAY have received it in the PAST! 
@@ -112,32 +227,52 @@ namespace quickmsg {
       }
     }
   }
+  void
+  GroupNode::wait_join(const std::string& group)
+  {
+    self->wait_join(group);
+  }
   
   void
-  GroupNode::leave(const std::string& group)
+  GroupNodeImpl::leave(const std::string& group)
   {
     if (zyre_leave(node_, group.c_str())) {
       throw std::runtime_error("Error leaving group: " + group);
     }
   }
+  void
+  GroupNode::leave(const std::string& group)
+  {
+    self->leave(group);
+  }
     
   void 
-  GroupNode::register_handler(const std::string& group, MessageCallback cb, void* args)
+  GroupNodeImpl::register_handler(const std::string& group, MessageCallback cb, void* args)
   {
     // add to the handlers
     handlers_.insert(std::make_pair(group,std::make_pair(cb, args)));
   }
+  void
+  GroupNode::register_handler(const std::string& group, MessageCallback cb, void* args)
+  {
+    self->register_handler(group, cb, args);
+  }
 
   void 
-  GroupNode::register_whispers(MessageCallback cb, void* args)
+  GroupNodeImpl::register_whispers(MessageCallback cb, void* args)
   {
     // add to the handlers   
     whisper_handlers_.insert(std::make_pair("w",std::make_pair(cb,args)));
   }
+  void
+  GroupNode::register_whispers(MessageCallback cb, void* args)
+  {
+    self->register_whispers(cb, args);
+  }
 
 
   void 
-  GroupNode::shout(const std::string& group, const std::string& msg)
+  GroupNodeImpl::shout(const std::string& group, const std::string& msg)
   {
     //zmsg_t* zmsg = zmsg_new();
     //zmsg_pushstr(zmsg, msg.c_str());
@@ -145,25 +280,41 @@ namespace quickmsg {
       throw std::runtime_error("Error sending message to topic: " + group);
     }
   }
+  void
+  GroupNode::shout(const std::string& group, const std::string& msg)
+  {
+    self->shout(group, msg);
+  }
 
   void 
-  GroupNode::whisper(const std::string& peer_uuid, const std::string& msg)
+  GroupNodeImpl::whisper(const std::string& peer_uuid, const std::string& msg)
   {
     if (zyre_whispers(node_, peer_uuid.c_str(), "%s", msg.c_str())) {
       throw std::runtime_error("Error sending message to peer: " + peer_uuid);
     }
   }
+  void
+  GroupNode::whisper(const std::string& peer_uuid, const std::string& msg)
+  {
+    self->whisper(peer_uuid, msg);
+  }
 
   void 
-  GroupNode::whisper(const PeerPtr& peer, const std::string& msg)
+  GroupNodeImpl::whisper(const PeerPtr& peer, const std::string& msg)
   {
     if (zyre_whispers(node_, peer->uuid().c_str(), "%s", msg.c_str())) {
       throw std::runtime_error("Error sending message to peer: " + peer->uuid());
     }
   }
+  void 
+  GroupNode::whisper(const PeerPtr& peer, const std::string& msg)
+  {
+    self->whisper(peer, msg);
+  }
+
 
   void
-  GroupNode::peers(PeerList& ps) const
+  GroupNodeImpl::peers(PeerList& ps) const
   {
     ps.clear();
     zlist_t* zpeers = zyre_peers(node_);
@@ -176,9 +327,14 @@ namespace quickmsg {
     }
     zlist_destroy(&zpeers);
   }
+  void 
+  GroupNode::peers(PeerList& ps) const
+  {
+    self->peers(ps);
+  }
 
   void
-  GroupNode::peers_by_description(PeerList& ps, const std::string& desc) const
+  GroupNodeImpl::peers_by_description(PeerList& ps, const std::string& desc) const
   {
     PeerList tmp_ps;
     this->peers(tmp_ps);
@@ -186,18 +342,29 @@ namespace quickmsg {
 	return p->uuid() != std::string(desc); });
     std::copy(tmp_ps.begin(), new_end, std::back_inserter(ps));
   }
+  void 
+  GroupNode::peers_by_description(PeerList& ps, const std::string& desc) const
+  {
+    self->peers_by_description(ps, desc);
+  }
+
   
   /** \brief Terminate any processing for this node.
       Terminate any processing for this node, non-recoverable (for now).
   */
   void 
-  GroupNode::stop()
+  GroupNodeImpl::stop()
   {
     zyre_stop(node_);
   }
+  void
+  GroupNode::stop()
+  {
+    self->stop();
+  }
 
   void
-  GroupNode::handle_whisper(const std::string& uuid, zmsg_t* zmsg)
+  GroupNodeImpl::handle_whisper(const std::string& uuid, zmsg_t* zmsg)
   {    
     MessagePtr msg(new Message);
     msg->header.stamp = time_now();
@@ -212,7 +379,7 @@ namespace quickmsg {
   }
 
   void 
-  GroupNode::handle_shout(const std::string& group, const std::string& uuid, zmsg_t* zmsg)
+  GroupNodeImpl::handle_shout(const std::string& group, const std::string& uuid, zmsg_t* zmsg)
   {
     MessagePtr msg(new Message);
     msg->header.stamp = time_now();
@@ -276,7 +443,7 @@ namespace quickmsg {
   };
 
   bool 
-  GroupNode::spin_once()
+  GroupNodeImpl::spin_once()
   {
     // read a new event from the zyre node, interrupt
     if (zsys_interrupted || !ok()) return false;
@@ -346,7 +513,7 @@ namespace quickmsg {
   }
 
   void
-  GroupNode::update_groups()
+  GroupNodeImpl::update_groups()
   {
 #ifndef _WIN32
 		sigset_t signal_set;
@@ -381,7 +548,7 @@ namespace quickmsg {
       network.
   */
   void 
-  GroupNode::spin()
+  GroupNodeImpl::spin()
   {
     event_thread_ = NULL;
     bool continue_spinning = true;
@@ -389,8 +556,13 @@ namespace quickmsg {
       continue_spinning = spin_once();
     }
   }
+  void
+  GroupNode::spin()
+  {
+    self->spin();
+  }
 
-  void GroupNode::_spin()
+  void GroupNodeImpl::_spin()
   {  
     // sigset_t signal_set;
     // sigaddset(&signal_set, SIGINT);
@@ -408,16 +580,26 @@ namespace quickmsg {
       network.
   */
   void 
-  GroupNode::async_spin()
+  GroupNodeImpl::async_spin()
   {        
     // start a thread to call the event handlers
-    event_thread_ = new std::thread(std::mem_fun(&GroupNode::_spin), this);
+    event_thread_ = new std::thread(std::mem_fun(&GroupNodeImpl::_spin), this);
     //    event_thread_->detach();
+  }
+  void
+  GroupNode::async_spin()
+  {
+    self->async_spin();
   }
 
   void 
-  GroupNode::join()    
+  GroupNodeImpl::join()    
   {    
     event_thread_->join();    
+  }
+  void
+  GroupNode::join()
+  {
+    self->join();
   }
 }

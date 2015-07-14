@@ -1,9 +1,10 @@
 #include <boost/log/trivial.hpp>
 #include <quickmsg/publisher.hpp>
+#include <quickmsg/group_node.hpp>
 
 namespace quickmsg {
 
-  Publisher::Publisher(const std::string& topic)
+  Publisher::Publisher(const std::string& topic, bool wait)
     : topic_(topic)
   {
     // create the group node
@@ -12,7 +13,7 @@ namespace quickmsg {
     node_->join(topic_);
     node_->async_spin();
     BOOST_LOG_TRIVIAL(info) << "Waiting for a subscriber on topic "<<topic<<std::endl;
-    node_->wait_join(topic_);
+    if (wait) node_->wait_join(topic_);
   }
 
   Publisher::~Publisher()

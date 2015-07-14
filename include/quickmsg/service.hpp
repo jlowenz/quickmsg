@@ -1,22 +1,21 @@
 #pragma once
 
-#include <tbb/concurrent_queue.h>
 #include <type_traits>
 #include <quickmsg/types.hpp>
-#include <quickmsg/group_node.hpp>
 
 namespace quickmsg {
 
-	class Service
+  class ServiceImpl;
+
+  class Service
   {
-    friend void service_handler(const Message*, void*);
   public:
     Service(const std::string& srv_name,
             size_t queue_size=10);
 
     Service(const std::string& srv_name,
             ServiceCallback cb,
-	    void* args=NULL,
+	    void* args,
             size_t queue_size=10);
     virtual ~Service();
     
@@ -41,22 +40,8 @@ namespace quickmsg {
      */
     void async_spin();
 
-  protected:
-    /** The service handler implementation processes the incoming
-	message and passes the result to the
-	service_implementation. This method should generally not be
-	overridden.
-    */
-    virtual void handle_request(const Message* req);  
   private:
-    std::string srv_name_;
-    std::string promisc_topic_;
-    ServiceCallback impl_;
-    void* args_;
-    GroupNode* node_;
-    tbb::concurrent_bounded_queue<MessagePtr> reqs_;
-
-    void init(size_t queue_size);    
+    ServiceImpl* self;
   };
   
 }

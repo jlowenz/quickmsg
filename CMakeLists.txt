@@ -18,7 +18,7 @@ pkg_check_modules(TBB "tbb")
 pkg_check_modules(LIB_JSONCPP "jsoncpp")
 pkg_check_modules(LIB_GLOG "libglog")
 
-find_package(Boost REQUIRED COMPONENTS date_time system thread)
+find_package(Boost REQUIRED COMPONENTS date_time system thread log)
 find_package(Java COMPONENTS Runtime Development)
 find_package(JNI)
 
@@ -46,17 +46,18 @@ add_library(${PROJECT_NAME} SHARED
   src/client.cpp
   src/service.cpp
   src/quickmsg.cpp)
-
+target_compile_options(${PROJECT_NAME} PRIVATE "-DBOOST_LOG_DYN_LINK")
 # TODO: hmmm should tbb/zyre/czmq be in variables?
-target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES} ${Boost_LIBRARIES})
 
-add_library("c${PROJECT_NAME}" SHARED
+add_library("${PROJECT_NAME}-c" SHARED
   src/quickmsg_wrap.cpp
   src/publisher_wrap.cpp
   src/subscriber_wrap.cpp
   src/client_wrap.cpp
   src/service_wrap.cpp)
-target_link_libraries("c${PROJECT_NAME}" ${PROJECT_NAME})
+target_compile_options("${PROJECT_NAME}-c" PRIVATE "-DBOOST_LOG_DYN_LINK")
+target_link_libraries("${PROJECT_NAME}-c" ${PROJECT_NAME})
 
 if (LIB_JSONCPP_FOUND)
   message("-- jsoncpp found, building service/client test")
@@ -79,16 +80,16 @@ add_executable(test_sub test/cpp/test_sub.cpp)
 target_link_libraries(test_sub ${PROJECT_NAME})
 
 add_executable(test_cpub test/c/test_pub.c)
-target_link_libraries(test_cpub "c${PROJECT_NAME}")
+target_link_libraries(test_cpub "${PROJECT_NAME}-c")
 
 add_executable(test_csub test/c/test_sub.c)
-target_link_libraries(test_csub "c${PROJECT_NAME}")
+target_link_libraries(test_csub "${PROJECT_NAME}-c")
 
 add_executable(test_cclient test/c/test_client.c)
-target_link_libraries(test_cclient "c${PROJECT_NAME}")
+target_link_libraries(test_cclient "${PROJECT_NAME}-c")
 
 add_executable(test_cservice test/c/test_service.c)
-target_link_libraries(test_cservice "c${PROJECT_NAME}")
+target_link_libraries(test_cservice "${PROJECT_NAME}-c")
 
 # SWIG
 # set(SWIG_EXECUTABLE "swig3.0")
@@ -154,7 +155,7 @@ if (JAVA_FOUND AND JNI_FOUND)
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
   add_dependencies(quickmsg_java copy_interfaces_java)
   link_directories(/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64)
-  swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME})
+  swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME} ${Boost_LIBRARIES})
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
   
