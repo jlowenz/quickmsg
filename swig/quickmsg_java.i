@@ -12,6 +12,7 @@
 //%template(ServiceReplyPtr) boost::shared_ptr<ServiceReply>;
 //%template(MessagePtrVecPtr) boost::shared_ptr<std::vector<boost::shared_ptr<Message> > >;
 
+
 %{
 #include "quickmsg/quickmsg.hpp"
 #include "quickmsg/types.hpp"
@@ -23,6 +24,8 @@
 #include "quickmsg/quickmsg_java.hpp"
 using namespace quickmsg;
 %}
+
+#pragma SWIG nowarn=401
 
 //%shared_ptr(quickmsg::Message);
 //%shared_ptr(quickmsg::Peer);
