@@ -117,7 +117,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>49d2efae</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>4fb43121</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
     <TargetExt>.dll</TargetExt>
@@ -165,6 +165,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\ralph\Documents\GitHub\quickmsg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -201,8 +202,8 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Release\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Release\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;$(SolutionDir)\packages\tbb.4.2.3.1\build\native\lib\x64\v120\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tbb.lib;czmq.lib;zyre.lib;Ws2_32.lib;IPHLPAPI.lib;Rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Release\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Release\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;$(SolutionDir)\packages\tbb.4.2.3.1\build\native\lib\x64\v120\Release;$(SolutionDir)..\..\..\libsodium\bin\x64\Release\v120\static;$(SolutionDir)..\..\..\libzmq\bin\x64\Release\v120\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tbb.lib;czmq.lib;zyre.lib;Ws2_32.lib;IPHLPAPI.lib;Rpcrt4.lib;libsodium.lib;libzmq.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SubSystem>NotSet</SubSystem>
       <IgnoreSpecificDefaultLibraries>
@@ -315,6 +316,7 @@
     <Import Project="..\packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets" Condition="Exists('..\packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets')" />
     <Import Project="..\packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets" Condition="Exists('..\packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets')" />
     <Import Project="..\packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets" Condition="Exists('..\packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets')" />
+    <Import Project="..\packages\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets" Condition="Exists('..\packages\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -357,5 +359,6 @@
     <Error Condition="!Exists('..\packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_exception-vc120.1.58.0.0\build\native\boost_exception-vc120.targets'))" />
     <Error Condition="!Exists('..\packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_test_exec_monitor-vc120.1.58.0.0\build\native\boost_test_exec_monitor-vc120.targets'))" />
     <Error Condition="!Exists('..\packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost-vc120.1.58.0.0\build\native\boost-vc120.targets'))" />
+    <Error Condition="!Exists('..\packages\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets'))" />
   </Target>
 </Project>
