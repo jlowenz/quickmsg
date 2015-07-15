@@ -176,15 +176,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\boost.1.58.0.0\lib\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\include;C:\Users\Jason\Documents\dev\zyre\include;C:\Users\Jason\Documents\dev\quickmsg\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\tbb.4.2.3.1\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\packages\boost.1.58.0.0\lib\native\include;$(ProjectDir)..\packages\tbb.4.2.3.1\build\native\include;$(ProjectDir)..\..\..\..\libsodium\src\libsodium\include;$(ProjectDir)..\..\..\..\libzmq\include;$(ProjectDir)..\..\..\..\czmq\include;$(ProjectDir)..\..\..\..\zyre\include;$(ProjectDir)..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>Default</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Jason\Documents\dev\zyre\bin\x64\Debug\v120\dynamic;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\bin;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>czmq-x64-v120-mt-gd-3_0_1_0.imp.lib;libzmq-x64-v120-mt-gd-4_2_0_0.imp.lib;libsodium-x64-v120-mt-gd-0_5_0_0.imp.lib;zyre.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Debug\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Debug\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;$(SolutionDir)\packages\tbb.4.2.3.1\build\native\lib\x64\v120\Debug;$(SolutionDir)..\..\..\libsodium\bin\x64\Debug\v120\static;$(SolutionDir)..\..\..\libzmq\bin\x64\Debug\v120\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tbb_debug.lib;czmq.lib;zyre.lib;Ws2_32.lib;IPHLPAPI.lib;Rpcrt4.lib;libsodium.lib;libzmq.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
