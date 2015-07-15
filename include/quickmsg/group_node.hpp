@@ -98,6 +98,7 @@ namespace quickmsg {
     
   private:
     static std::string name_;
+    static std::string control_;
     static std::atomic_bool running_;
 
     GroupNodeImpl* self;

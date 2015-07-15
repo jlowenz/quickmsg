@@ -37,6 +37,7 @@ namespace quickmsg {
   {
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
+    GroupNode::control_ = name + "/CTL";
     zsys_init();
     //zsys_handler_set(NULL);
     boost::log::core::get()->set_filter(

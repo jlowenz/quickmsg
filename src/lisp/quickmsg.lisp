@@ -39,9 +39,22 @@
 (cffi:defcfun ("qm_free_string" free-string) :void (str :pointer))
 
 ;; Publisher
+(cffi:defcenum wait_mode_t
+    :wait :nowait)
 
-(cffi:defcfun ("qm_publisher_new" publisher-new) :pointer
-  (topic :string))
+;; (cffi:defcfun ("qm_publisher_new" publisher-new) :pointer
+;;   (topic :string wait :int))
+
+;; wait-mode should be either :wait or :nowait
+(defun publisher-new (topic wait-mode)
+  "Create a new publisher on the given topic. Specify whether the
+publisher should :wait for a subscriber or exhibit :nowait behavior on
+startup."
+  (cffi:with-foreign-string (ftopic topic)
+    (cffi::foreign-funcall "qm_publisher_new" 
+			   :pointer ftopic
+			   :int (cffi::foreign-enum-value wait-mode)
+			   :pointer)))
 
 (cffi:defcfun ("qm_publisher_destroy" publisher-destroy) :void
   (self_p :pointer))
