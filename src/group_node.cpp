@@ -42,6 +42,12 @@ namespace quickmsg {
     return desc_;
   }
 
+  void notify_interrupt(const std::string& group)
+  {
+    GroupNode node("interrupter");
+    node.join(group);    
+  }
+
   //--------------------------------------------------------------------------------
   // define the private data implementation
   class GroupNodeImpl 
@@ -108,13 +114,17 @@ namespace quickmsg {
     void update_groups();
     void _spin(); // for async, signal-disabled spinning
     
+  private:
+
     zyre_t* node_;
     std::string node_name_;
+    std::string control_group_;
     PeerPtr self_;
     std::thread* event_thread_;
     std::thread* prom_thread_;
 
     bool promiscuous_;
+    bool stopped_;
     
     typedef std::unique_lock<std::mutex> basic_lock;
     typedef std::map<std::string,uint> join_map_t;
@@ -140,13 +150,13 @@ namespace quickmsg {
   };
 
   std::string GroupNode::name_("");
+  std::string GroupNode::control_("");
   std::atomic_bool GroupNode::running_;
 
   std::string GroupNode::name()
   {
     return GroupNode::name_;
   }
-
 
   GroupNodeImpl::GroupNodeImpl(const std::string& desc, bool promiscuous)
     : promiscuous_(promiscuous), event_thread_(NULL), prom_thread_(NULL)
@@ -163,6 +173,13 @@ namespace quickmsg {
     if (zyre_start(node_)) {
       throw std::runtime_error("Could not start the zyre node");
     }
+
+    // join the control group - too heavy
+    control_group_ = GroupNode::name() + "/CTL";
+    if (zyre_join(node_, control_group_.c_str())) {
+      throw std::runtime_error("Error joining CONTROL group");
+    }
+
     GroupNode::running_ = true;
     // create our self peer
     self_.reset(new Peer(uuid, desc));
@@ -183,7 +200,9 @@ namespace quickmsg {
   
   GroupNodeImpl::~GroupNodeImpl()
   {    
-    zyre_stop(node_);    
+    if (!stopped_) {
+      zyre_stop(node_);
+    }
     if (prom_thread_) {
       prom_thread_->join();
       delete prom_thread_;
@@ -205,6 +224,7 @@ namespace quickmsg {
     if (zyre_join(node_, group.c_str())) {
       throw std::runtime_error("Error joining group: " + group);
     }    
+    // we should WAIT to get an enter event?
   }
   void
   GroupNode::join(const std::string& group)
@@ -356,6 +376,7 @@ namespace quickmsg {
   GroupNodeImpl::stop()
   {
     zyre_stop(node_);
+    stopped_ = true;
   }
   void
   GroupNode::stop()
@@ -446,7 +467,7 @@ namespace quickmsg {
   GroupNodeImpl::spin_once()
   {
     // read a new event from the zyre node, interrupt
-    if (zsys_interrupted || !ok()) return false;
+    if (zsys_interrupted || !ok() || stopped_) return false;
 
     BOOST_LOG_TRIVIAL(debug) << "waiting for event" << std::endl;
     ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
@@ -496,9 +517,15 @@ namespace quickmsg {
 	}}
         break;
       case ZYRE_EVENT_EXIT: {
+	if (e.peer_name() == node_name_) {
+	  stopped_ = true;
+	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " exits | " << node_name_ << std::endl; }
         break;
       case ZYRE_EVENT_STOP: {
+	if (e.peer_name() == node_name_) {
+	  stopped_ = true;
+	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " stops | " << node_name_ << std::endl; }
         return false;
       default:
