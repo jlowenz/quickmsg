@@ -5,6 +5,7 @@ doc
 *.class
 *.log
 msvc/quickmsg/packages
+*ReleaseDLL*
 x64
 *.tlog
 *.idb

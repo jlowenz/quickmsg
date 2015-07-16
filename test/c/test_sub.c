@@ -20,6 +20,7 @@ main(int argc, char** argv)
   s = qm_async_subscriber_new("test", callback, NULL);
   qm_async_subscriber_spin(s); // doesn't return
   qm_async_subscriber_destroy(s);
+	qm_shutdown("done");
 
   return 0;
 }

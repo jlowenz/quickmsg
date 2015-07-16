@@ -28,6 +28,7 @@ main(int argc, char** argv)
 		nanosleep(&ts, NULL);
 #endif
   }
-  //qm_publisher_destroy(p);
+  qm_publisher_destroy(p);
+	qm_shutdown("done");
   return 0;
 }

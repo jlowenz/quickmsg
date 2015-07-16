@@ -176,12 +176,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\boost.1.58.0.0\lib\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libsodium_vc120.0.5.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\libzmq_vc120.4.2.0.0\build\native\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\czmq_vc120.3.0.1.0\build\native\include;C:\Users\Jason\Documents\dev\zyre\include;C:\Users\Jason\Documents\dev\quickmsg\include;C:\Users\Jason\Documents\dev\quickmsg\msvc\quickmsg\packages\tbb.4.2.3.1\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\packages\boost.1.58.0.0\lib\native\include;$(ProjectDir)..\packages\tbb.4.2.3.1\build\native\include;$(ProjectDir)..\..\..\..\libsodium\src\libsodium\include;$(ProjectDir)..\..\..\..\libzmq\include;$(ProjectDir)..\..\..\..\czmq\include;$(ProjectDir)..\..\..\..\zyre\include;$(ProjectDir)..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>Default</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>SODIUM_STATIC;ZMQ_STATIC;HAVE_LIBSODIUM;LIBCZMQ_STATIC;LIBZYRE_STATIC;TBB_STATIC;_LIB;DEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -42,10 +42,13 @@ namespace quickmsg {
     return desc_;
   }
 
-  void notify_interrupt(const std::string& group)
+  void GroupNode::notify_interrupt()
   {
-    GroupNode node("interrupter");
-    node.join(group);    
+    GroupNode node("_interrupter_");
+    node.join(GroupNode::control_);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		node.leave(GroupNode::control_);
+		node.stop();
   }
 
   //--------------------------------------------------------------------------------
@@ -175,12 +178,10 @@ namespace quickmsg {
     }
 
     // join the control group - too heavy
-    control_group_ = GroupNode::name() + "/CTL";
-    if (zyre_join(node_, control_group_.c_str())) {
+    if (zyre_join(node_, GroupNode::control_.c_str())) {
       throw std::runtime_error("Error joining CONTROL group");
     }
 
-    GroupNode::running_ = true;
     // create our self peer
     self_.reset(new Peer(uuid, desc));
 
@@ -448,7 +449,9 @@ namespace quickmsg {
     }
 
     std::string peer_name() const {
-      return std::string(zyre_event_name(e_));
+			std::string str(zyre_event_name(e_));
+			printf("peer_name %s", str.c_str());
+      return str;
     }
     
     std::string group() const {
