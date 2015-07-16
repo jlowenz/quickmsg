@@ -13,4 +13,4 @@ if __name__=='__main__':
     req_msg = json.dumps({'ints_to_add':[1,2,3,4]})
     print 'requesting', req_msg
     
-    resp_msg = c.call_srv(req_msg)
+    resp_msg = c.calls(req_msg)

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.6.2)
 project(quickmsg)
 
+# policies
+if (CMAKE_MAJOR_VERSION EQUAL 3)
+  cmake_policy(SET CMP0042 OLD)
+endif()
+
 # directories
 set (QUICKMSG_SRC_DIR src)
 set (CMAKE_SWIG_OUTDIR swig)
@@ -14,9 +19,20 @@ include(FindPkgConfig)
 pkg_check_modules(LIB_ZMQ "libzmq")
 pkg_check_modules(LIB_CZMQ "libczmq")
 pkg_check_modules(LIB_ZYRE "libzyre")
-pkg_check_modules(TBB "tbb")
 pkg_check_modules(LIB_JSONCPP "jsoncpp")
 pkg_check_modules(LIB_GLOG "libglog")
+
+# TBB formula is currently broken on Mac OS X; i.e. it doesn't install a pkgconfig spec
+if (APPLE)
+  execute_process(COMMAND brew --prefix tbb OUTPUT_VARIABLE TBB_PREFIX)
+  if (NOT ${TBB_PREFIX} EQUAL "")
+    include_directories(${TBB_PREFIX}/include)
+  else()
+    message("TBB not found. Please install using homebrew: 'brew install tbb'")
+  endif()
+else()
+  pkg_check_modules(TBB "tbb")
+endif()
 
 find_package(Boost REQUIRED COMPONENTS date_time system thread log)
 find_package(Java COMPONENTS Runtime Development)
@@ -142,9 +158,13 @@ endfunction(java_jar_native)
 
 if (JAVA_FOUND AND JNI_FOUND)
   message("Java found. Running SWIG and building interfaces")
-  SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
-  SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
-  SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
+  #SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
+  #SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
+  #SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
+  # HRRM - fix this junk up
+  SET(JAVA_RUNTIME2  ${Java_JAVA_EXECUTABLE})
+  SET(JAVA_ARCHIVE2  ${Java_JAR_EXECUTABLE})
+  SET(JAVA_COMPILE2  ${Java_JAVAC_EXECUTABLE})
   # check to see if maven is installed
   find_program(MVN_BIN NAMES mvn PATHS /usr/bin)
   message("Maven: ${MVN_BIN}")
@@ -153,7 +173,6 @@ if (JAVA_FOUND AND JNI_FOUND)
   set(CMAKE_SWIG_FLAGS -package "quickmsg")
 
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
-  add_dependencies(quickmsg_java copy_interfaces_java)
   link_directories(/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64)
   swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME} ${Boost_LIBRARIES})
   # build the Java jars 

@@ -7,7 +7,7 @@
 namespace quickmsg {
 
   //  void default_cb(const char* msg);
-  void default_cb(const Message* msg);
+  void default_cb(const Message* msg, void*);
 
   // forward
   class GroupNode;
