@@ -41,15 +41,16 @@ namespace quickmsg {
   {
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
+    GroupNode::control_ = name + "/CTL";
 #if _WIN32
-		printf("Windows: initializing WinSock\n");
-		WSADATA ws_data;
-		WORD wVersionRequested;
-		wVersionRequested = MAKEWORD(2, 2);
-		int err = WSAStartup(wVersionRequested,&ws_data);
-		if (err != 0) {
-			printf("WSAStartup failed with %d\n", err);
-		}
+    printf("Windows: initializing WinSock\n");
+    WSADATA ws_data;
+    WORD wVersionRequested;
+    wVersionRequested = MAKEWORD(2, 2);
+    int err = WSAStartup(wVersionRequested,&ws_data);
+    if (err != 0) {
+      printf("WSAStartup failed with %d\n", err);
+    }
 #endif
     zsys_init();
     //zsys_handler_set(NULL);
