@@ -40,7 +40,9 @@ namespace quickmsg {
      */
     void async_spin();
 
+
   private:
+    friend class ServiceImpl;
     ServiceImpl* self;
   };
   

@@ -29,23 +29,18 @@ namespace quickmsg {
   {
     friend void service_handler(const Message*, void*);
   public:
-    ServiceImpl(const std::string& srv_name,
+    ServiceImpl(Service* owner,
+		const std::string& srv_name,
 		size_t queue_size=10);
 
-    ServiceImpl(const std::string& srv_name,
+    ServiceImpl(Service* owner,
+		const std::string& srv_name,
 		ServiceCallback cb,
 		void* args=NULL,
 		size_t queue_size=10);
     virtual ~ServiceImpl();
     
-    /**
-     * Override this method to implement how the service responds to
-     * the request. By default, this method will call the
-     * ServiceCallback given in the constructor, or will call the
-     * default "echo" service implementation, which simply returns the
-     * request as the reply.
-     */
-    virtual std::string service_impl(const Message* req);
+    
 
     /** Block the calling thread while the Service processes incoming
 	messages.
@@ -59,14 +54,14 @@ namespace quickmsg {
      */
     void async_spin();
 
-  protected:
     /** The service handler implementation processes the incoming
 	message and passes the result to the
 	service_implementation. This method should generally not be
 	overridden.
     */
     virtual void handle_request(const Message* req);  
-  private:
+
+    Service* owner_;
     std::string srv_name_;
     std::string promisc_topic_;
     ServiceCallback impl_;
@@ -82,30 +77,34 @@ namespace quickmsg {
     static_cast<ServiceImpl*>(args)->handle_request(msg);
   }
 
-  ServiceImpl::ServiceImpl(const std::string& srv_name, ServiceCallback impl,
-		   void* args, size_t queue_size)
-    : srv_name_(srv_name), impl_(impl), args_(args)
-  {
-    init(queue_size);
-  }
-  Service::Service(const std::string& srv_name,
-		   size_t queue_size)
-    : self(new ServiceImpl(srv_name, queue_size))
-  {
-  }
-
-  ServiceImpl::ServiceImpl(const std::string& srv_name,
+  ServiceImpl::ServiceImpl(Service* owner,
+			   const std::string& srv_name, 
+			   ServiceCallback impl,
+			   void* args, 
 			   size_t queue_size)
-    : srv_name_(srv_name)
+    : owner_(owner), srv_name_(srv_name), impl_(impl), args_(args)
   {
-    impl_ = default_echo;
     init(queue_size);
   }
   Service::Service(const std::string& srv_name,
 		   ServiceCallback cb,
 		   void* args,
 		   size_t queue_size)
-    : self(new ServiceImpl(srv_name, cb, args, queue_size))
+    : self(new ServiceImpl(this, srv_name, cb, args, queue_size))
+  {
+  }
+
+  ServiceImpl::ServiceImpl(Service* owner,
+			   const std::string& srv_name,
+			   size_t queue_size)
+    : owner_(owner), srv_name_(srv_name)
+  {
+    impl_ = default_echo;
+    init(queue_size);
+  }
+  Service::Service(const std::string& srv_name,
+		   size_t queue_size)
+    : self(new ServiceImpl(this, srv_name, queue_size))
   {
   }
 
@@ -143,7 +142,7 @@ namespace quickmsg {
     //reqs_.try_push(msg);
     
     BOOST_LOG_TRIVIAL(debug) << "got request: " << req->msg << std::endl;
-    std::string resp_str(service_impl(req));
+    std::string resp_str(owner_->service_impl(req));
     BOOST_LOG_TRIVIAL(debug) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
     // whisper the response back
     node_->whisper(req->header.src_uuid, resp_str);
@@ -151,17 +150,12 @@ namespace quickmsg {
   }
 
   std::string 
-  ServiceImpl::service_impl(const Message* req)
+  Service::service_impl(const Message* req)
   {
-    char* resp_chars = impl_(req, args_); // Don't leak mem
+    char* resp_chars = self->impl_(req, self->args_);
     std::string resp(resp_chars);
     free(resp_chars);
     return resp;
-  }
-  std::string 
-  Service::service_impl(const Message* req)
-  {
-    return self->service_impl(req);
   }
 
   void 

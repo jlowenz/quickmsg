@@ -108,8 +108,7 @@ namespace quickmsg {
     friend void init(const std::string&);
     friend void shutdown(const std::string&);
     friend bool ok();
-    friend void __sigint_handler(int);
-		friend void __sigterm_handler(int);
+    friend void __shutdown_handler(int);
   };
   
 }
