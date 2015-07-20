@@ -186,8 +186,10 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Debug\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Debug\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;$(SolutionDir)\packages\tbb.4.2.3.1\build\native\lib\x64\v120\Debug;$(SolutionDir)..\..\..\libsodium\bin\x64\Debug\v120\static;$(SolutionDir)..\..\..\libsodium\Build\Debug\x64;$(SolutionDir)..\..\..\libzmq\bin\x64\Debug\v120\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\czmq\bin\x64\Debug\v120\static;$(SolutionDir)..\..\..\zyre\bin\x64\Debug\v120\static;$(SolutionDir)\packages\boost_log-vc120.1.58.0.0\lib\native\address-model-64\lib;$(SolutionDir)\packages\tbb.4.2.3.1\build\native\lib\x64\v120\Debug;$(SolutionDir)..\..\..\libsodium\bin\x64\Debug\v120\static;$(SolutionDir)..\..\..\libzmq\bin\x64\Debug\v120\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>tbb_debug.lib;czmq.lib;zyre.lib;Ws2_32.lib;IPHLPAPI.lib;Rpcrt4.lib;libsodium.lib;libzmq.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      
+    
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>

@@ -82,9 +82,9 @@ extern "C" {
   inline size_t qm_vec_##C_TYPE##_size(qm_vec_##C_TYPE o) {		\
     std::vector<PTR(CPP_TYPE)>* v = reinterpret_cast<std::vector<PTR(CPP_TYPE) >*>(o); \
     return v->size(); }							\
-  inline C_TYPE* qm_vec_##C_TYPE##_get(qm_vec_##C_TYPE o, size_t elem) { \
+  inline C_TYPE qm_vec_##C_TYPE##_get(qm_vec_##C_TYPE o, size_t elem) { \
     std::vector<PTR(CPP_TYPE)>* v = reinterpret_cast<std::vector<PTR(CPP_TYPE) >*>(o); \
-    return reinterpret_cast<C_TYPE*>((*v)[elem]); }			\
+    return reinterpret_cast<C_TYPE>((*v)[elem]); }			\
   inline void qm_vec_##C_TYPE##_destroy(qm_vec_##C_TYPE o) {		\
     std::vector<PTR(CPP_TYPE)>* v = reinterpret_cast<std::vector<PTR(CPP_TYPE) >*>(o); \
     delete v; }
