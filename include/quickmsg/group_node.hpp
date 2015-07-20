@@ -23,7 +23,7 @@ namespace quickmsg {
     std::string uuid_;
     std::string desc_;
   };
-  typedef boost::shared_ptr<Peer> PeerPtr;
+  typedef std::shared_ptr<Peer> PeerPtr;
   typedef std::vector<PeerPtr> PeerList;
 
   // forward

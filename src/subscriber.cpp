@@ -4,6 +4,7 @@
 #include <quickmsg/group_node.hpp>
 #include <tbb/concurrent_queue.h>
 #include <type_traits>
+#include <iostream>
 
 namespace quickmsg {
 

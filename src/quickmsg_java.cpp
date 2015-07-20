@@ -2,6 +2,7 @@
 #include <quickmsg/types.hpp>
 #include <boost/shared_ptr.hpp>
 #include <jni.h>
+#include <cstring>
 
 void java_MessageCallback(const quickmsg::Message* msg, void* args)
 {

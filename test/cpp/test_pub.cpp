@@ -3,6 +3,8 @@
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
+#include <chrono>
+#include <thread>
 
 namespace qm = quickmsg;
 
@@ -19,7 +21,7 @@ main(int argc, char** argv)
     ss << "Hello world: " << i << std::endl;
     pub.publish(ss.str());    
     std::cout << ss.str();
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   return 0;
 }

@@ -3,9 +3,8 @@
 #include <string>
 //#include <list>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <memory>
+#include <chrono>
 
 namespace quickmsg {
 
@@ -17,8 +16,9 @@ namespace quickmsg {
     Time();
     explicit Time(double time);
     Time(uint32_t secs, uint32_t micro);
-    Time(const boost::posix_time::ptime& t);
     Time(const Time& t);
+    // removed ptime constructor
+    Time(const std::chrono::high_resolution_clock::time_point& tp);
     ~Time();
 
     Time& operator=(const Time& t);
@@ -32,8 +32,8 @@ namespace quickmsg {
     std::string to_json() const;
     
   private:
-    uint32_t secs_;
-    uint32_t msecs_;
+    uint64_t secs_;
+    uint64_t msecs_;
   };
 
   Time time_now();
@@ -70,7 +70,6 @@ namespace quickmsg {
     void set_msg(const std::string& msg_str);
     friend std::ostream& operator<<(std::ostream& os, const Message& m);
   };
-  typedef boost::shared_ptr<Message> MessagePtr;
 
 
   class ServiceReply : public Message
@@ -82,7 +81,10 @@ namespace quickmsg {
     virtual ~ServiceReply() {}
     bool successful;
   };
-  typedef boost::shared_ptr<ServiceReply> ServiceReplyPtr;
+
+  // shared pointers
+  typedef std::shared_ptr<Message> MessagePtr;
+  typedef std::shared_ptr<ServiceReply> ServiceReplyPtr;
 
   typedef std::vector<Message*> MsgList;
 

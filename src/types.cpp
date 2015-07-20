@@ -1,4 +1,7 @@
 #include <quickmsg/types.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace quickmsg {
   using namespace boost::posix_time;
@@ -16,13 +19,13 @@ namespace quickmsg {
     : secs_(secs), msecs_(micro)
   {
   }
-  Time::Time(const ptime& t)
+  Time::Time(const std::chrono::high_resolution_clock::time_point& t)
   {
-    time_duration d = t - from_time_t(std::time_t(0));
-    secs_ = d.total_seconds();
-    uint64_t msecs = d.total_microseconds();
-    uint64_t secs = static_cast<uint64_t>(1e6*d.total_seconds());
-    msecs_ = static_cast<uint32_t>(msecs-secs);
+    std::chrono::high_resolution_clock::duration d = t.time_since_epoch();
+    secs_ = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(d).count());
+    uint64_t micros = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
+    uint64_t secs = 1e6*secs_;
+    msecs_ = micros - secs;
   }
   Time::Time(const Time& t)
   {
@@ -89,7 +92,7 @@ namespace quickmsg {
 
   Time time_now()
   {
-    Time t(microsec_clock::universal_time());
+    Time t(std::chrono::high_resolution_clock::now());
     return t;
   }
 

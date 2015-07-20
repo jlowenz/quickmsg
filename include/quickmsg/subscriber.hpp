@@ -1,7 +1,6 @@
 #pragma once
 
 #include <quickmsg/types.hpp>
-#include <boost/shared_ptr.hpp>
 #include <list>
 
 namespace quickmsg {
