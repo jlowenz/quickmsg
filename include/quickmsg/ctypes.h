@@ -45,11 +45,11 @@ extern "C" {
 
   // List/Vector access (defines a SIZE and GET accessor for each type)
 #define PTR(T) T*
-#define VEC_OF(C_TYPE) 					\
+#define VEC_OF(C_TYPE)							\
   typedef struct _qm_vec_##C_TYPE * qm_vec_##C_TYPE;			\
-  size_t qm_vec_##C_TYPE##_size(qm_vec_##C_TYPE o);		\
-  C_TYPE qm_vec_##C_TYPE##_get(qm_vec_##C_TYPE o, size_t elem);	\
-  void qm_vec_##C_TYPE##_destroy(qm_vec_##C_TYPE o);		\
+  QM_EXPORT size_t qm_vec_##C_TYPE##_size(qm_vec_##C_TYPE o);		\
+  QM_EXPORT C_TYPE qm_vec_##C_TYPE##_get(qm_vec_##C_TYPE o, size_t elem); \
+  QM_EXPORT void qm_vec_##C_TYPE##_destroy(qm_vec_##C_TYPE o);		\
 
   VEC_OF(qm_peer_t) // qm_vec_qm_peer_t
   VEC_OF(qm_message_t) // qm_vec_qm_message_t
