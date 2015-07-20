@@ -48,7 +48,7 @@ extern "C" {
 #define VEC_OF(CPP_TYPE,C_TYPE) 					\
   typedef struct _qm_vec_##C_TYPE * qm_vec_##C_TYPE;			\
   inline size_t qm_vec_##C_TYPE##_size(qm_vec_##C_TYPE o);		\
-  inline C_TYPE* qm_vec_##C_TYPE##_get(qm_vec_##C_TYPE o, size_t elem);	\
+  inline C_TYPE qm_vec_##C_TYPE##_get(qm_vec_##C_TYPE o, size_t elem);	\
   inline void qm_vec_##C_TYPE##_destroy(qm_vec_##C_TYPE o);		\
   
   VEC_OF(quickmsg::Peer,qm_peer_t) // qm_vec_qm_peer_t
