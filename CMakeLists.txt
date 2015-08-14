@@ -138,6 +138,7 @@ swig_add_module(quickmsg_py python swig/quickmsg_py.i)
 swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 function(java_jar_native jar_file native_dir)
+  set(JAVA_INSTALL_DIR "file://${CMAKE_INSTALL_PREFIX}/share/java")
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
     COMMAND cmake -E echo "Creating native jar file... in ${native_dir}" 
@@ -148,9 +149,9 @@ function(java_jar_native jar_file native_dir)
   if (EXISTS ${MVN_BIN})
     add_custom_command(TARGET quickmsg_java
       POST_BUILD
-      COMMAND cmake -E echo "Installing maven repo local/quickmsg etc in repo 'file:repo'"
-      COMMAND ${MVN_BIN} install:install-file -Durl=file:repo -DgroupId=local -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
-      COMMAND ${MVN_BIN} install:install-file -Durl=file:repo -DgroupId=local -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
+      COMMAND cmake -E echo "Installing maven repo local/quickmsg etc in repo"
+      COMMAND ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
+      COMMAND ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
   else ()
     message("Not installing to Maven repo")
   endif ()
@@ -234,5 +235,9 @@ install(FILES
   DESTINATION lib/python2.7/dist-packages)
 
 # install Java components
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
+  ${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar
+  DESTINATION share/java)
 
 # install Common Lisp components
