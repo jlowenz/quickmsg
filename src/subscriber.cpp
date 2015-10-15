@@ -6,6 +6,10 @@
 #include <type_traits>
 #include <iostream>
 
+#ifdef SWIGPYTHON
+#include <Python.h>
+#endif
+
 namespace quickmsg {
 
   void
@@ -57,10 +61,6 @@ namespace quickmsg {
     static_cast<SubscriberImpl*>(args)->handle_message(msg);
   }
 
-  void async_subscriber_handler(const Message* msg, void* args)
-  {
-    static_cast<AsyncSubscriber*>(args)->handle_message(msg);
-  }
 
   SubscriberImpl::SubscriberImpl(const std::string& topic, size_t queue_size)
     : topic_(topic)
@@ -130,6 +130,25 @@ namespace quickmsg {
   Subscriber::messages()
   {
     return self->messages();
+  }
+
+#ifdef SWIGPYTHON
+  class SWIG_Python_Thread_Block {
+    bool status;
+    PyGILState_STATE state;
+  public:
+    void end() { if (status) { PyGILState_Release(state); status = false;} }
+    SWIG_Python_Thread_Block() : status(true), state(PyGILState_Ensure()) {}
+    ~SWIG_Python_Thread_Block() { end(); }
+  };
+#endif
+
+  void async_subscriber_handler(const Message* msg, void* args)
+  {
+#ifdef SWIGPYTHON
+    SWIG_Python_Thread_Block ptb;
+#endif
+    static_cast<AsyncSubscriber*>(args)->handle_message(msg);
   }
 
   AsyncSubscriber::AsyncSubscriber(const std::string& topic, 

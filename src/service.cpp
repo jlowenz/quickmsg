@@ -5,6 +5,10 @@
 #include <type_traits>
 #include <string.h>
 
+#ifdef SWIGPYTHON
+#include <Python.h>
+#endif
+
 namespace quickmsg {
 
 
@@ -24,7 +28,7 @@ namespace quickmsg {
     resp[req->msg.length()] = 0;
     return resp;
   }
-
+  
   class ServiceImpl
   {
     friend void service_handler(const Message*, void*);
@@ -32,7 +36,7 @@ namespace quickmsg {
     ServiceImpl(Service* owner,
 		const std::string& srv_name,
 		size_t queue_size=10);
-
+    
     ServiceImpl(Service* owner,
 		const std::string& srv_name,
 		ServiceCallback cb,
@@ -60,7 +64,7 @@ namespace quickmsg {
 	overridden.
     */
     virtual void handle_request(const Message* req);  
-
+    
     Service* owner_;
     std::string srv_name_;
     std::string promisc_topic_;
@@ -68,10 +72,21 @@ namespace quickmsg {
     void* args_;
     GroupNode* node_;
     tbb::concurrent_bounded_queue<MessagePtr> reqs_;
-
+    
     void init(size_t queue_size);    
   };
-
+  
+#ifdef SWIGPYTHON
+  class SWIG_Python_Thread_Block {
+    bool status;
+    PyGILState_STATE state;
+  public:
+    void end() { if (status) { PyGILState_Release(state); status = false;} }
+    SWIG_Python_Thread_Block() : status(true), state(PyGILState_Ensure()) {}
+    ~SWIG_Python_Thread_Block() { end(); }
+  };
+#endif
+  
   void service_handler(const Message* msg, void* args)
   {
     static_cast<ServiceImpl*>(args)->handle_request(msg);
@@ -140,10 +155,16 @@ namespace quickmsg {
     // if the queue is full, too bad!
     //MessagePtr msg(new Message(*req));
     //reqs_.try_push(msg);
-    
-    BOOST_LOG_TRIVIAL(debug) << "got request: " << req->msg << std::endl;
-    std::string resp_str(owner_->service_impl(req));
-    BOOST_LOG_TRIVIAL(debug) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
+#ifdef SWIGPYTHON
+    {
+      SWIG_Python_Thread_Block ptb;
+#endif    
+      BOOST_LOG_TRIVIAL(debug) << "got request: " << req->msg << std::endl;
+      std::string resp_str(owner_->service_impl(req));
+      BOOST_LOG_TRIVIAL(debug) << "add request\n" << req->msg << "response\n" << resp_str << std::endl;
+#ifdef SWIGPYTHON
+    }
+#endif
     // whisper the response back
     node_->whisper(req->header.src_uuid, resp_str);
     // TODO: are we going to should the response to the promiscuous group too?
