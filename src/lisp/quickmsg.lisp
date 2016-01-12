@@ -30,7 +30,7 @@
 (setf json:*json-identifier-name-to-lisp* 'json:simplified-camel-case-to-lisp)
 
 (cffi:define-foreign-library libqm
-  (:unix (:default "libcquickmsg"))
+  (:unix (:default "libquickmsg-c"))
   (:windows "quickmsg-c.dll"))
 (cffi:load-foreign-library 'libqm)
 ;(cffi:use-foreign-library 'libqm)
