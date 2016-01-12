@@ -11,6 +11,7 @@ namespace quickmsg {
 
   struct ServiceCallTimeout : public std::runtime_error {
     ServiceCallTimeout() : std::runtime_error("ServiceCallTimeout") {}
+    ServiceCallTimeout(const std::string& msg) : std::runtime_error(std::string("ServiceCallTimeout") + msg) {}
     virtual ~ServiceCallTimeout() {}
 #if _WIN32
     const char* what() const { return std::runtime_error::what(); }

@@ -23,8 +23,11 @@ public class test_client {
         // String json_req_str = JSONObject.toJSONString(jsonreq);
         // System.out.println("Client request "+json_req_str);
 	try {
-	    String response = c.calls("HELLO");
-	    System.out.println("Client response "+response);
+	    for (int i = 0; i < 10; i++) {
+		String response = c.calls("HELLO");
+		System.out.println("Client response "+response);
+		Thread.sleep(1);
+	    }
 	    c.delete();	
 	} catch (Exception e) {
 	    e.printStackTrace();
