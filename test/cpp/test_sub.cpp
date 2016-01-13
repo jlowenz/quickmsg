@@ -28,7 +28,7 @@ handler(const qm::Message* msg, void* args)
 int
 main(int argc, char** argv)
 {
-  qm::init("test_sub");
+  qm::init("test_cpp_sub");
   qm::AsyncSubscriber async_sub("chatter", handler, NULL);  
   async_sub.spin();
   //  qm::Subscriber sub("chatter", 20);

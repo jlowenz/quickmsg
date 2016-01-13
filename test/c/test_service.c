@@ -19,7 +19,7 @@ main(int argc, char** argv)
 {
   qm_service_t svc = NULL; 
   
-  qm_init("test_service");
+  qm_init("test_c_service");
   svc = qm_service_new("hello", service_handler, NULL);
   qm_service_spin(svc);
   qm_service_destroy(svc);

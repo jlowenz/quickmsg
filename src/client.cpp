@@ -2,6 +2,7 @@
 #include <quickmsg/group_node.hpp>
 #include <quickmsg/client.hpp>
 #include <quickmsg/quickmsg.hpp>
+#include <thread>
 #include <chrono>
 
 namespace quickmsg {
@@ -27,7 +28,7 @@ namespace quickmsg {
   }
 
   Client::~Client()
-  {
+  {    
     node_->leave(srv_name_);
     node_->stop();
     delete node_;
@@ -53,7 +54,7 @@ namespace quickmsg {
       // wait for the response
       std::unique_lock<std::mutex> lock(response_mutex_);
       response_cond_.wait_for(lock, std::chrono::seconds(timeout_s), 
-			      [&]{ return message_received_.load(); });
+			      [&]{ return !ok() || message_received_.load(); });
     }
     
     if (!message_received_.load()) {

@@ -11,20 +11,15 @@ namespace qm = quickmsg;
 int
 main(int argc, char** argv)
 {
-  qm::init("test_client");
-  qm::Client client("add");
+  qm::init("test_cpp_client");
+  qm::Client client("hello");
 
-  std::vector<int> add_ints_vec;
-  add_ints_vec.push_back(1);
-  add_ints_vec.push_back(22);
-  add_ints_vec.push_back(99);
-  qm::AddNInts add_ints;
-  for (int i = 0; i < 5; ++i) {
+  std::string req("Hello");
+  for (int i = 0; i < 10; ++i) {
     if (!qm::ok()) break;    
-    std::string req_str = add_ints.create_req(add_ints_vec);
-    std::cout << "client request\n" << req_str << std::endl;
-    std::string resp = client.calls(req_str);
-    std::cout << "response: " << add_ints.result_from_resp(resp) << std::endl;
+    std::cout << "client request\n" << req << std::endl;
+    std::string resp = client.calls(req);
+    std::cout << "server response: " << resp << std::endl;
     sleep(1);
   }
   

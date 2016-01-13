@@ -10,14 +10,15 @@ sys.path.append('../../build/swig')
 import quickmsg_py
 
 if __name__=='__main__':
+    quickmsg_py.init("test_py_pub")
     p = quickmsg_py.Publisher('chatter')
 
-    for i in range(10):
+    for i in xrange(10):
         if not quickmsg_py.ok():
             break
         some_msg = json.dumps({'important_matrix':np.random.rand(4,4).tolist()})
         print 'publishing', some_msg
         p.publish(some_msg)
-        time.sleep(1)
+        time.sleep(0.5)
     
 

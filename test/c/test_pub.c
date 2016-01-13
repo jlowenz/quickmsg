@@ -12,23 +12,23 @@ main(int argc, char** argv)
   qm_publisher_t p;
 
 #ifndef _WIN32
-	struct timespec ts;
+  struct timespec ts;
   ts.tv_sec = 1;
   ts.tv_nsec = 0;
 #endif
 
-  qm_init("test_pub");
-  p = qm_publisher_new("test", qm_wait);
+  qm_init("test_c_pub");
+  p = qm_publisher_new("chatter", qm_wait);
   for (i = 0; i < 10; ++i) {
     sprintf(msg, "Hello World %d", i);
     qm_publish(p, msg);
 #ifdef _WIN32
-		Sleep(1000);
+    Sleep(1000);
 #else
-		nanosleep(&ts, NULL);
+    nanosleep(&ts, NULL);
 #endif
   }
   qm_publisher_destroy(p);
-	qm_shutdown("done");
+  qm_shutdown("done");
   return 0;
 }

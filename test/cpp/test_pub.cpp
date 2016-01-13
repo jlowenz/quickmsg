@@ -11,7 +11,7 @@ namespace qm = quickmsg;
 int
 main(int argc, char** argv)
 {
-  qm::init("test_pub");
+  qm::init("test_cpp_pub");
   
   qm::Publisher pub("chatter", true);
   

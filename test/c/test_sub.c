@@ -16,11 +16,11 @@ main(int argc, char** argv)
   char msg[256];
   qm_async_subscriber_t s;
   
-  qm_init("test_sub");
-  s = qm_async_subscriber_new("test", callback, NULL);
+  qm_init("test_c_sub");
+  s = qm_async_subscriber_new("chatter", callback, NULL);
   qm_async_subscriber_spin(s); // doesn't return
   qm_async_subscriber_destroy(s);
-	qm_shutdown("done");
+  qm_shutdown("done");
 
   return 0;
 }

@@ -34,7 +34,7 @@ public class test_sub {
     }
 
     public static void main(String[] argv) {
-	quickmsg_java.init("test_sub");
+	quickmsg_java.init("test_java_sub");
 	Runtime.getRuntime().addShutdownHook(new Thread() {
 		@Override
 		public void run()

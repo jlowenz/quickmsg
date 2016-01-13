@@ -6,12 +6,14 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <string>
 
 namespace quickmsg {
 
-  struct ServiceCallTimeout : public std::runtime_error {
+  class ServiceCallTimeout : public std::runtime_error {
+  public:
     ServiceCallTimeout() : std::runtime_error("ServiceCallTimeout") {}
-    ServiceCallTimeout(const std::string& msg) : std::runtime_error(std::string("ServiceCallTimeout") + msg) {}
+    ServiceCallTimeout(const std::string& msg) : std::runtime_error(std::string("ServiceCallTimeout: ") + msg) {}
     virtual ~ServiceCallTimeout() {}
 #if _WIN32
     const char* what() const { return std::runtime_error::what(); }

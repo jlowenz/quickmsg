@@ -14,7 +14,7 @@ main(int argc, char** argv)
   ts.tv_sec = 1;
   ts.tv_nsec = 0;
   
-  qm_init("test_client");
+  qm_init("test_c_client");
   c = qm_client_new("hello");
   
   for (i = 0; i < 10; ++i) {

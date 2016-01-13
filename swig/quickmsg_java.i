@@ -14,6 +14,7 @@
 
 
 %{
+#define SWIG_JAVA_ATTACH_CURRENT_THREAD_AS_DAEMON
 #include "quickmsg/quickmsg.hpp"
 #include "quickmsg/types.hpp"
 #include "quickmsg/publisher.hpp"

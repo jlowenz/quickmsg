@@ -13,24 +13,19 @@ public class test_client {
     }
 
     public static void main(String[] argv) {
-	quickmsg_java.init("test_client");
+	quickmsg_java.init("test_java_client");
         Client c = new Client("hello");
-        // JSONArray arr = new JSONArray();
-        // arr.add(1);
-        // arr.add(85);
-        // JSONObject jsonreq = new JSONObject();
-        // jsonreq.put("ints_to_add", arr);
-        // String json_req_str = JSONObject.toJSONString(jsonreq);
-        // System.out.println("Client request "+json_req_str);
+	System.out.println("after client creation");
 	try {
 	    for (int i = 0; i < 10; i++) {
-		String response = c.calls("HELLO");
+		String response = c.calls("Hello");
 		System.out.println("Client response "+response);
-		Thread.sleep(1);
+		Thread.sleep(500);
 	    }
-	    c.delete();	
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    e.printStackTrace();	   
+	} finally {
+	    c.delete();
 	}
     }
 }

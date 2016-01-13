@@ -3,6 +3,7 @@
 #include <chrono>
 #include <functional>
 #include <algorithm>
+#include <iostream>
 #include <pthread.h>
 #include <signal.h>
 #include <zyre.h>
@@ -162,7 +163,7 @@ namespace quickmsg {
   }
 
   GroupNodeImpl::GroupNodeImpl(const std::string& desc, bool promiscuous)
-    : promiscuous_(promiscuous), event_thread_(NULL), prom_thread_(NULL)
+    : event_thread_(NULL), prom_thread_(NULL), promiscuous_(promiscuous), stopped_(false)
   {
     // create the zyre node
     node_ = zyre_new((GroupNode::name() + "/" + desc).c_str());
@@ -212,6 +213,7 @@ namespace quickmsg {
       event_thread_->join();
       delete event_thread_;
     }
+    BOOST_LOG_TRIVIAL(debug) << "destroying zyre node..." << std::endl;
     zyre_destroy(&node_);
   }
   GroupNode::~GroupNode()
@@ -221,16 +223,20 @@ namespace quickmsg {
     
   void    
   GroupNodeImpl::join(const std::string& group)
-  {
+  {  
+    {
+      basic_lock lk(join_mutex_);
+      joins_[group] = 0;    
+    }
     if (zyre_join(node_, group.c_str())) {
       throw std::runtime_error("Error joining group: " + group);
-    }    
+    }
     // we should WAIT to get an enter event?
   }
   void
   GroupNode::join(const std::string& group)
   {
-    self->join(group);
+    self->join(group);    
   }
 
   void
@@ -449,8 +455,8 @@ namespace quickmsg {
     }
 
     std::string peer_name() const {
-			std::string str(zyre_event_name(e_));
-			printf("peer_name %s", str.c_str());
+      std::string str(zyre_event_name(e_));
+      printf("peer_name %s", str.c_str());
       return str;
     }
     
@@ -470,7 +476,11 @@ namespace quickmsg {
   GroupNodeImpl::spin_once()
   {
     // read a new event from the zyre node, interrupt
-    if (zsys_interrupted || !ok() || stopped_) return false;
+    if (zsys_interrupted || !ok() || stopped_) {
+      BOOST_LOG_TRIVIAL(debug) << "GroupNode::spin_once(): zsysi " << (int)zsys_interrupted << 
+	" ok " << (int)!ok() << " stopped " <<  (int)stopped_ << std::endl;
+      return false;
+    }
 
     BOOST_LOG_TRIVIAL(debug) << "waiting for event" << std::endl;
     ScopedEvent e(zyre_event_new(node_)); // apparently, blocks until event occurs.
@@ -546,7 +556,7 @@ namespace quickmsg {
   GroupNodeImpl::update_groups()
   {
 #ifndef _WIN32
-		sigset_t signal_set;
+    sigset_t signal_set;
     sigaddset(&signal_set, SIGINT);
     sigaddset(&signal_set, SIGTERM);
     sigaddset(&signal_set, SIGHUP);
@@ -580,11 +590,12 @@ namespace quickmsg {
   void 
   GroupNodeImpl::spin()
   {
-    event_thread_ = NULL;
+    //event_thread_ = NULL;
     bool continue_spinning = true;
     while (ok() && continue_spinning) {
       continue_spinning = spin_once();
     }
+    
   }
   void
   GroupNode::spin()
@@ -612,9 +623,10 @@ namespace quickmsg {
   void 
   GroupNodeImpl::async_spin()
   {        
+    BOOST_LOG_TRIVIAL(debug) << "starting async thread..." << std::endl;
     // start a thread to call the event handlers
     event_thread_ = new std::thread(std::mem_fun(&GroupNodeImpl::_spin), this);
-    //    event_thread_->detach();
+    BOOST_LOG_TRIVIAL(debug) << "started..." << std::endl;
   }
   void
   GroupNode::async_spin()

@@ -12,7 +12,7 @@ public class test_pub {
     }
 
     public static void main(String[] argv) {
-	quickmsg_java.init("test_pub");
+	quickmsg_java.init("test_java_pub");
         Publisher p = new Publisher("chatter");
         String s = "Java Publisher Hello!";
         for (int i=0; i < 10; i++) {

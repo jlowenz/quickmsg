@@ -100,7 +100,7 @@ namespace quickmsg {
     static std::string name_;
     static std::string control_;
     static std::atomic_bool running_;
-		static void notify_interrupt();
+    static void notify_interrupt();
 
     GroupNodeImpl* self;
 
