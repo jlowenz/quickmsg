@@ -95,6 +95,9 @@ target_link_libraries(test_pub ${PROJECT_NAME})
 add_executable(test_sub test/cpp/test_sub.cpp)
 target_link_libraries(test_sub ${PROJECT_NAME})
 
+add_executable(test_node test/cpp/test_node.cpp)
+target_link_libraries(test_node ${PROJECT_NAME})
+
 add_executable(test_cpub test/c/test_pub.c)
 target_link_libraries(test_cpub "${PROJECT_NAME}-c")
 

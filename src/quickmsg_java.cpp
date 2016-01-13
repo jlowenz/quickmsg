@@ -36,7 +36,7 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   jlong jptr = 0;
   // why this??? why???
   *(quickmsg::Message**)&jptr = new quickmsg::Message(*msg);  
-  jboolean ownMem = JNI_FALSE;
+  jboolean ownMem = JNI_TRUE;
   // create/wrap the Message object
   jobject jmsg = (data->env)->NewObject(jMessageCls, msgctor,
 					jptr, ownMem);
@@ -80,7 +80,7 @@ char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
   // create the shared_ptr ptr
   jlong jptr = 0;
   *(quickmsg::Message**)&jptr = new quickmsg::Message(*msg);
-  jboolean ownMem = JNI_FALSE;
+  jboolean ownMem = JNI_TRUE;
   // create/wrap the Message object
   jobject jmsg = (data->env)->NewObject(jMessageCls, msgctor,
 					 jptr, ownMem);

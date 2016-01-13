@@ -166,7 +166,7 @@ namespace quickmsg {
     }
 #endif
     // whisper the response back
-    node_->whisper(req->header.src_uuid, resp_str);
+    node_->whispers(req->header.src_uuid, resp_str);
     // TODO: are we going to should the response to the promiscuous group too?
   }
 

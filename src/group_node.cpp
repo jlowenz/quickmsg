@@ -316,12 +316,13 @@ namespace quickmsg {
   void 
   GroupNodeImpl::whisper(const std::string& peer_uuid, const std::string& msg)
   {
+    BOOST_LOG_TRIVIAL(debug) << "GroupNodeImpl::whisper" << std::endl;
     if (zyre_whispers(node_, peer_uuid.c_str(), "%s", msg.c_str())) {
       throw std::runtime_error("Error sending message to peer: " + peer_uuid);
     }
   }
   void
-  GroupNode::whisper(const std::string& peer_uuid, const std::string& msg)
+  GroupNode::whispers(const std::string& peer_uuid, const std::string& msg)
   {
     self->whisper(peer_uuid, msg);
   }

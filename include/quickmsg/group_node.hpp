@@ -62,7 +62,7 @@ namespace quickmsg {
 
     void shout(const std::string& group, const std::string& msg);
     void whisper(const PeerPtr& peer, const std::string& msg);
-    void whisper(const std::string& peer_uuid, const std::string& msg);
+    void whispers(const std::string& peer_uuid, const std::string& msg);
 
     // return a snapshot of the peers on the network
     void peers(PeerList& ps) const;

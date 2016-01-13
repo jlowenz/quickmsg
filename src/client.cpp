@@ -19,12 +19,12 @@ namespace quickmsg {
     // create the group node
     std::string name("C/");
     node_ = new GroupNode(name + srv_name);
+    node_->register_whispers(&client_handler, (void*)this);
     node_->join(srv_name_);
     node_->async_spin();
     BOOST_LOG_TRIVIAL(debug) << "waiting for server" << std::endl;
     node_->wait_join(srv_name_); // wait for service
     BOOST_LOG_TRIVIAL(debug) << "server joined group" << std::endl;
-    node_->register_whispers(&client_handler, (void*)this);
   }
 
   Client::~Client()
