@@ -1,8 +1,33 @@
 #include <quickmsg/quickmsg_java.hpp>
 #include <quickmsg/types.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/log/trivial.hpp>
 #include <jni.h>
 #include <cstring>
+#include <iostream>
+#include <exception>
+#include <sstream>
+
+void check_for_exception(java_cb_data* data, const std::string& context_desc)
+{
+  // need to check whether an exception was thrown here
+  jthrowable ex = (data->env)->ExceptionOccurred();
+  if (ex) {
+    // BOOST_LOG_TRIVIAL causes undefined symbol, even though libboost_log is linked in!
+    // BOOST_LOG_TRIVIAL(error) << "Exception in MessageCallback/handleMessage()" << std::endl;
+    std::cerr << "Exception in " << context_desc << std::endl;
+    (data->env)->ExceptionDescribe();
+    (data->env)->ExceptionClear();
+    // Throwing the exception doesn't do anything, because the context
+    // of this thread is C++ and there is no Java code excecuted
+    // untill the next callback is called...  
+    // (data->env)->Throw(ex);
+    // So... we could throw a C++ exception!
+    std::stringstream ss;
+    ss << "Java exception occurred in " << context_desc;
+    throw std::runtime_error(ss.str());
+  }  
+}
 
 void java_MessageCallback(const quickmsg::Message* msg, void* args)
 {
@@ -45,7 +70,10 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   // call the callback interface method with the wrapped argument
   (data->env)->CallVoidMethod(data->obj, meth, jmsg);
   //------------------------------------------------------------
+  
+  check_for_exception(data, "IMessageCallback.handleMessage()");
 }
+
 
 // almost exactly the same as above, but a different return type, and 
 // different interface class
@@ -89,6 +117,8 @@ char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
   jstring ret_str = (jstring)(data->env)->CallObjectMethod(data->obj, meth, jmsg);
   //------------------------------------------------------------
   
+  check_for_exception(data, "IServiceCallback.handleMessage()");
+ 
   // parse the string, extract the data (don't leak memory in the JVM)
   jboolean is_copy;
   const char* java_chars = (data->env)->
