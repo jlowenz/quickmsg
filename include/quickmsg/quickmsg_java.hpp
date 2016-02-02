@@ -7,6 +7,9 @@ struct java_cb_data
 {
   JNIEnv* env;
   jobject obj;
+  bool init_thread;
+  
+  java_cb_data() : env(NULL), init_thread(false) {}
 };
 
 

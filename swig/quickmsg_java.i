@@ -57,7 +57,7 @@ using namespace quickmsg;
 // 4:
 %typemap(in,numinputs=1) (quickmsg::MessageCallback cb, void *args) 
 {
-  java_cb_data* data = (java_cb_data*)malloc(sizeof(java_cb_data));
+  java_cb_data* data = new java_cb_data;
   data->env = jenv;
   data->obj = JCALL1(NewGlobalRef, jenv, $input);
   JCALL1(DeleteLocalRef, jenv, $input);

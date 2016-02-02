@@ -40,6 +40,15 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   assert(num_vms >= 1);
   vms[0]->AttachCurrentThreadAsDaemon((void**)&data->env, NULL);
 
+  if (!data->init_thread) {
+    const jclass jniutilClass = (data->env)->FindClass("quickmsg/JNIUtil");
+    assert(jniutilClass);
+    const jmethodID load_classloader = (data->env)->
+      GetStaticMethodID(jniutilClass, "load_classloader", "()V");
+    assert(load_classloader);
+    (data->env)->CallStaticVoidMethod(jniutilClass, load_classloader);
+  }
+
   // get the callback interface method
   const jclass cbIfaceClass = (data->env)->
     FindClass("quickmsg/IMessageCallback");
