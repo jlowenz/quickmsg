@@ -47,6 +47,7 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
       GetStaticMethodID(jniutilClass, "load_classloader", "()V");
     assert(load_classloader);
     (data->env)->CallStaticVoidMethod(jniutilClass, load_classloader);
+    data->init_thread = true;
   }
 
   // get the callback interface method
