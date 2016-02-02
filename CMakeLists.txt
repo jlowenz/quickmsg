@@ -144,7 +144,7 @@ function(java_jar_native jar_file native_dir)
   set(JAVA_INSTALL_DIR "file://${CMAKE_INSTALL_PREFIX}/share/java")
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
-    COMMAND cmake -E echo "Creating native jar file... in ${native_dir}" 
+    COMMAND cmake -E echo "Creating native jar file... in ${native_dir}"
     COMMAND mkdir -p ${native_dir}
     COMMAND cp $<TARGET_FILE:quickmsg_java> ${native_dir}
     COMMAND cp $<TARGET_FILE:quickmsg> ${native_dir}
@@ -155,6 +155,21 @@ function(java_jar_native jar_file native_dir)
       COMMAND cmake -E echo "Installing maven repo local/quickmsg etc in repo"
       COMMAND ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
       COMMAND ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
+    # Add local maven repo to clean list if it exists
+    set(M2_HOME_REPO "$ENV{M2_HOME}/repository/jlowenz")
+    if(EXISTS ${M2_HOME_REPO})
+      message("Adding maven repo ${M2_HOME_REPO} to list for make clean")
+      set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${M2_HOME_REPO})
+    else ()
+      set(M2_DEFAULT_REPO "$ENV{HOME}/.m2/repository/jlowenz")
+      if (EXISTS ${M2_DEFAULT_REPO})
+        message("Adding maven repo ${M2_DEFAULT_REPO} to list for make clean")
+        set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${M2_DEFAULT_REPO})
+      else ()
+        message("Not adding local maven quickmsg repository to make clean list")
+      endif()
+    endif ()
+
   else ()
     message("Not installing to Maven repo")
   endif ()
@@ -244,3 +259,5 @@ install(FILES
   DESTINATION share/java)
 
 # install Common Lisp components
+
+# Add maven repository to clean list
