@@ -11,7 +11,7 @@ namespace quickmsg {
    * \brief Initialize the quickmsg system. 
    * Must be called once per process.
    */
-  void init(const std::string& name);
+  void init(const std::string& name, const std::string& iface = "");
   void shutdown(const std::string& reason = "");
   bool ok();
 

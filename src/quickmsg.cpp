@@ -84,11 +84,12 @@ namespace quickmsg {
 
   static void (*prev_handler)(int);
 
-  void init(const std::string& name)
+  void init(const std::string& name, const std::string& iface)
   {
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
     GroupNode::control_ = name + "/CTL";
+    GroupNode::iface_ = iface;
     zsys_init();
     //zsys_handler_set(NULL);
     boost::log::core::get()

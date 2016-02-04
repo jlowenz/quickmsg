@@ -9,7 +9,10 @@ sys.path.append('../../build/swig')
 import quickmsg_py
 
 if __name__=='__main__':
-    quickmsg_py.init("test_py_client")
+    # By default, qm uses whatever interface it finds finds first.
+    # this should be tailored to network configuration
+    iface = ""
+    quickmsg_py.init("test_py_client", iface)
     c = quickmsg_py.Client('hello')
 
     req_msg = "Hello"

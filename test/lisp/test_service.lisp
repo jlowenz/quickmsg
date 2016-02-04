@@ -36,7 +36,8 @@
 
 
 (defun main ()
-  (qm:init "test-service") ; should only be called once
+  ;; default network iface name is "". Should be set based on network configuration
+  (qm:init "test-service" "") ; should only be called once
   (let ((svc (qm:service-new "add" #'add-ints)))
     (qm:service-spin svc)
     (qm:service-destroy svc)))

@@ -17,9 +17,10 @@ char* service_handler(qm_message_t msg, void* arg)
 int
 main(int argc, char** argv)
 {
-  qm_service_t svc = NULL; 
-  
-  qm_init("test_c_service");
+  qm_service_t svc = NULL;
+
+  const char* iface = ""; // whatever iface zyre defaults to
+  qm_init("test_c_service", iface);
   svc = qm_service_new("hello", service_handler, NULL);
   qm_service_spin(svc);
   qm_service_destroy(svc);

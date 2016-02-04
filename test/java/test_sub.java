@@ -34,7 +34,10 @@ public class test_sub {
     }
 
     public static void main(String[] argv) {
-	quickmsg_java.init("test_java_sub");
+        // By default, qm uses whatever interface it finds finds first.
+        // this should be tailored to network configuration
+        String iface = "";
+	quickmsg_java.init("test_java_sub", iface);
 	Runtime.getRuntime().addShutdownHook(new Thread() {
 		@Override
 		public void run()

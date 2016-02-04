@@ -154,6 +154,7 @@ namespace quickmsg {
   };
 
   std::string GroupNode::name_("");
+  std::string GroupNode::iface_("");
   std::string GroupNode::control_("");
   std::atomic_bool GroupNode::running_;
 
@@ -162,11 +163,20 @@ namespace quickmsg {
     return GroupNode::name_;
   }
 
+  std::string GroupNode::iface()
+  {
+    return GroupNode::iface_;
+  }
+
   GroupNodeImpl::GroupNodeImpl(const std::string& desc, bool promiscuous)
     : event_thread_(NULL), prom_thread_(NULL), promiscuous_(promiscuous), stopped_(false)
   {
     // create the zyre node
     node_ = zyre_new((GroupNode::name() + "/" + desc).c_str());
+    // verbose output
+    zyre_set_verbose(node_);
+    // set the interface to use, otherwise zyre just guesses (default "")
+    zyre_set_interface(node_, GroupNode::iface().c_str());
     // set the headers
     zyre_set_header(node_, "desc", "%s", desc.c_str());
     // access our uuid

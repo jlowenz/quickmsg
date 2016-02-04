@@ -15,8 +15,9 @@ main(int argc, char** argv)
 {
   char msg[256];
   qm_async_subscriber_t s;
-  
-  qm_init("test_c_sub");
+
+  const char* iface = ""; // whatever iface zyre defaults to
+  qm_init("test_c_sub", iface);
   s = qm_async_subscriber_new("chatter", callback, NULL);
   qm_async_subscriber_spin(s); // doesn't return
   qm_async_subscriber_destroy(s);

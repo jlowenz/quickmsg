@@ -9,7 +9,7 @@ extern "C" {
 
 
   QM_EXPORT void
-  qm_init(const char* name);
+  qm_init(const char* name, const char* iface);
 
   QM_EXPORT void
   qm_shutdown(const char* reason);

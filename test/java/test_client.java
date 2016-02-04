@@ -13,7 +13,10 @@ public class test_client {
     }
 
     public static void main(String[] argv) {
-	quickmsg_java.init("test_java_client");
+        // By default, qm uses whatever interface it finds finds first.
+        // this should be tailored to network configuration
+        String iface = "";
+        quickmsg_java.init("test_java_client", iface);
         Client c = new Client("hello");
 	System.out.println("after client creation");
 	try {
@@ -23,7 +26,7 @@ public class test_client {
 		Thread.sleep(500);
 	    }
 	} catch (Exception e) {
-	    e.printStackTrace();	   
+	    e.printStackTrace();
 	} finally {
 	    c.delete();
 	}

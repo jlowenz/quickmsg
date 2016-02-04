@@ -17,7 +17,8 @@ main(int argc, char** argv)
   ts.tv_nsec = 0;
 #endif
 
-  qm_init("test_c_pub");
+  const char* iface = ""; // whatever iface zyre defaults to
+  qm_init("test_c_pub", iface);
   p = qm_publisher_new("chatter", qm_wait);
   for (i = 0; i < 10; ++i) {
     sprintf(msg, "Hello World %d", i);

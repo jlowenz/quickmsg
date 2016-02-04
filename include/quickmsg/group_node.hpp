@@ -95,9 +95,12 @@ namespace quickmsg {
     void join();
 
     static std::string name();    
+
+    static std::string iface();
     
   private:
     static std::string name_;
+    static std::string iface_;
     static std::string control_;
     static std::atomic_bool running_;
     static void notify_interrupt();
@@ -105,7 +108,7 @@ namespace quickmsg {
     GroupNodeImpl* self;
 
     friend class GroupNodeImpl;
-    friend void init(const std::string&);
+    friend void init(const std::string&, const std::string&);
     friend void shutdown(const std::string&);
     friend bool ok();
     friend void __shutdown_handler(int);
