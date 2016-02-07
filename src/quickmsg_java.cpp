@@ -1,6 +1,5 @@
 #include <quickmsg/quickmsg_java.hpp>
 #include <quickmsg/types.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/log/trivial.hpp>
 #include <jni.h>
 #include <cstring>
