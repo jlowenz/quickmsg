@@ -238,7 +238,7 @@ else()
 endif()
 
 # installation
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
+install(TARGETS ${PROJECT_NAME} "${PROJECT_NAME}-c" "${PROJECT_NAME}_java" LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
 
 install(DIRECTORY include/${PROJECT_NAME}
   DESTINATION include
