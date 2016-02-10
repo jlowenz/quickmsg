@@ -115,7 +115,7 @@ target_link_libraries(test_cservice "${PROJECT_NAME}-c")
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
-find_package(PythonLibs)
+find_package(PythonLibs 2)
 include_directories(${PYTHON_INCLUDE_PATH})
 
 set(CMAKE_SWIG_FLAGS "-threads")
