@@ -44,7 +44,7 @@ include_directories(${LIB_GLOG_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+set(CMAKE_C_FLAGS "-fPIC -Wall -Wno-long-long -pedantic")
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)

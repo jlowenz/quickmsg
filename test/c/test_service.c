@@ -19,7 +19,7 @@ main(int argc, char** argv)
 {
   qm_service_t svc = NULL;
 
-  const char* iface = ""; // whatever iface zyre defaults to
+  const char* iface = ""; /* whatever iface zyre defaults to */
   qm_init("test_c_service", iface);
   svc = qm_service_new("hello", service_handler, NULL);
   qm_service_spin(svc);

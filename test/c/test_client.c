@@ -10,11 +10,11 @@ main(int argc, char** argv)
   int i = 0;
   qm_client_t c;
   struct timespec ts;
+  const char* iface = ""; /* whatever iface zyre defaults to */
   const char* req = "Hello";
   ts.tv_sec = 1;
   ts.tv_nsec = 0;
 
-  const char* iface = ""; // whatever iface zyre defaults to
   qm_init("test_c_client", iface);
   c = qm_client_new("hello");
 
@@ -29,4 +29,5 @@ main(int argc, char** argv)
   }
 
   qm_client_destroy(c);
+  return 0;
 }
