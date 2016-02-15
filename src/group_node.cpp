@@ -474,13 +474,13 @@ namespace quickmsg {
     }
 
     std::string peer_uuid() const {
-      char* s = zyre_event_sender(e_);
+      const char* s = zyre_event_sender(e_);
       assert(s != NULL);
       return std::string(s);
     }
 
     std::string peer_name() const {
-      char* s = zyre_event_name(e_);
+      const char* s = zyre_event_name(e_);
       assert(s != NULL);
       std::string str(s);
       printf("peer_name %s", str.c_str());
@@ -488,7 +488,7 @@ namespace quickmsg {
     }
     
     std::string group() const {
-      char* s = zyre_event_group(e_);
+      const char* s = zyre_event_group(e_);
       assert(s != NULL);
       return std::string(s);
     }
