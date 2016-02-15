@@ -123,6 +123,8 @@ namespace quickmsg {
     zyre_t* node_;
     std::string node_name_;
     std::string control_group_;
+    std::string node_iface_;
+    std::string node_desc_;
     PeerPtr self_;
     std::thread* event_thread_;
     std::thread* prom_thread_;
@@ -170,15 +172,19 @@ namespace quickmsg {
 
   GroupNodeImpl::GroupNodeImpl(const std::string& desc, bool promiscuous)
     : event_thread_(NULL), prom_thread_(NULL), promiscuous_(promiscuous), stopped_(false)
-  {
+  {							
+    node_name_ = GroupNode::name() + "/" + desc;
+    node_iface_ = GroupNode::iface();
+    node_desc_ = desc;
+    control_group_ = GroupNode::control_;
     // create the zyre node
-    node_ = zyre_new((GroupNode::name() + "/" + desc).c_str());
+    node_ = zyre_new(node_name_.c_str());
     // verbose output
     zyre_set_verbose(node_);
-    // set the interface to use, otherwise zyre just guesses (default "")
-    zyre_set_interface(node_, GroupNode::iface().c_str());
+    // set the interface to use, otherwise zyre just guesses (default "")    
+    zyre_set_interface(node_, node_iface_.c_str());
     // set the headers
-    zyre_set_header(node_, "desc", "%s", desc.c_str());
+    zyre_set_header(node_, "desc", "%s", node_desc_.c_str());
     // access our uuid
     std::string uuid = zyre_uuid(node_);
     // access our name
@@ -189,12 +195,12 @@ namespace quickmsg {
     }
 
     // join the control group - too heavy
-    if (zyre_join(node_, GroupNode::control_.c_str())) {
+    if (zyre_join(node_, control_group_.c_str())) {
       throw std::runtime_error("Error joining CONTROL group");
     }
 
     // create our self peer
-    self_.reset(new Peer(uuid, desc));
+    self_.reset(new Peer(uuid, node_desc_));
 
     /* we want to minimize the groups joined and messages sent -
        especially by other non-promiscuous components; in order to do
@@ -313,6 +319,9 @@ namespace quickmsg {
   {
     //zmsg_t* zmsg = zmsg_new();
     //zmsg_pushstr(zmsg, msg.c_str());
+    const char* g = group.c_str();
+    const char* m = msg.c_str();
+    BOOST_LOG_TRIVIAL(debug) << "shouting to group [" << g << "] message: [" << m << "]" << std::endl;
     if (zyre_shouts(node_, group.c_str(), "%s", msg.c_str())) {
       throw std::runtime_error("Error sending message to topic: " + group);
     }
@@ -425,7 +434,9 @@ namespace quickmsg {
     msg->header.context = group;
     msg->header.src_uuid = uuid;
     char* a_str = zmsg_popstr(zmsg);
-    msg->msg = a_str;
+    assert(a_str);
+    msg->msg = std::string(a_str);
+    BOOST_LOG_TRIVIAL(debug) << "handle_shout got msg [" << msg->msg << "]" << std::endl;
     free(a_str);
     //zmsg_destroy(&zmsg);
     auto range = handlers_.equal_range(group);
@@ -450,6 +461,7 @@ namespace quickmsg {
 
     ~ScopedEvent() 
     {
+      BOOST_LOG_TRIVIAL(debug) << "DELETING SCOPED EVENT" << std::endl;
       zyre_event_destroy(&e_);
     }
 
@@ -462,17 +474,23 @@ namespace quickmsg {
     }
 
     std::string peer_uuid() const {
-      return std::string(zyre_event_sender(e_));
+      char* s = zyre_event_sender(e_);
+      assert(s != NULL);
+      return std::string(s);
     }
 
     std::string peer_name() const {
-      std::string str(zyre_event_name(e_));
+      char* s = zyre_event_name(e_);
+      assert(s != NULL);
+      std::string str(s);
       printf("peer_name %s", str.c_str());
       return str;
     }
     
     std::string group() const {
-      return std::string(zyre_event_group(e_));
+      char* s = zyre_event_group(e_);
+      assert(s != NULL);
+      return std::string(s);
     }
     
     zmsg_t* message() const {

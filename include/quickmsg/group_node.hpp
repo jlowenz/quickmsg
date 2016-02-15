@@ -92,6 +92,7 @@ namespace quickmsg {
     */
     void async_spin();
 
+    // TODO: should probably rename this to async_join()
     void join();
 
     static std::string name();    

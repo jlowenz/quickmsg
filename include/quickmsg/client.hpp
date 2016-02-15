@@ -8,6 +8,8 @@
 #include <condition_variable>
 #include <string>
 
+const int DEFAULT_TIMEOUT = 30;
+
 namespace quickmsg {
 
   class ServiceCallTimeout : public std::runtime_error {
@@ -32,11 +34,11 @@ namespace quickmsg {
     virtual ~Client();
     
 #if _WIN32
-    ServiceReplyPtr call(const std::string& msg, int timeout_s = 10);
-    std::string calls(const std::string& req, int timeout_s = 10);
+    ServiceReplyPtr call(const std::string& msg, int timeout_s = DEFAULT_TIMEOUT);
+    std::string calls(const std::string& req, int timeout_s = DEFAULT_TIMEOUT);
 #else
-    ServiceReplyPtr call(const std::string& msg, int timeout_s=10) throw(ServiceCallTimeout);
-    std::string calls(const std::string& req, int timeout_s=10) throw(ServiceCallTimeout);
+    ServiceReplyPtr call(const std::string& msg, int timeout_s=DEFAULT_TIMEOUT) throw(ServiceCallTimeout);
+    std::string calls(const std::string& req, int timeout_s=DEFAULT_TIMEOUT) throw(ServiceCallTimeout);
 #endif
 
   protected:

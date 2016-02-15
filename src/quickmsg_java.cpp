@@ -41,13 +41,13 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
 
   if (!data->init_thread) {
     std::string name("handleMessage(JNI)");
-    jstring threadName = (data->env)->NewStringUTF(name->c_str());
+    jstring threadName = (data->env)->NewStringUTF(name.c_str());
     const jclass jniutilClass = (data->env)->FindClass("quickmsg/JNIUtil");
     assert(jniutilClass);
     const jmethodID load_classloader = (data->env)->
       GetStaticMethodID(jniutilClass, "load_classloader", "(Ljava/lang/String;)V");
     assert(load_classloader);
-    (data->env)->CallStaticVoidMethod(jniutilClass, load_classloader);
+    (data->env)->CallStaticVoidMethod(jniutilClass, load_classloader, threadName);
     data->init_thread = true;
   }
 
@@ -71,17 +71,19 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   // create the shared_ptr ptr
   jlong jptr = 0;
   // why this??? why???
-  jptr = std::static_cast<jlong>(new quickmsg::Message(*msg));
+  jptr = reinterpret_cast<jlong>(new quickmsg::Message(*msg));
   jboolean ownMem = JNI_TRUE;
   // create/wrap the Message object
   jobject jmsg = (data->env)->NewObject(jMessageCls, msgctor,
 					jptr, ownMem);
+  
 
   //------------------------------------------------------------
   // call the callback interface method with the wrapped argument
   (data->env)->CallVoidMethod(data->obj, meth, jmsg);
   //------------------------------------------------------------
-  
+  (data->env)->DeleteLocalRef(jmsg);
+
   check_for_exception(data, "IMessageCallback.handleMessage()");
 }
 
