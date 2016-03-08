@@ -1,7 +1,7 @@
 %module(directors="1") quickmsg_java
 %include "swig_includes.i"
 
-//%shared_ptr(quickmsg::Message) 
+//%shared_ptr(quickmsg::Message)
 //%shared_ptr(quickmsg::ServiceReply)
 
 %feature("director") Service;
@@ -45,17 +45,17 @@ using namespace quickmsg;
 /* typedef boost::shared_ptr<quickmsg::PeerList> quickmsg::PeerListPtr; */
 
 // callback definitions
-%{ 
+%{
   void java_MessageCallback(const Message* msg, void* args);
   char* java_ServiceCallback(const Message* msg, void* args);
   %}
- 
+
 %typemap(jstype) quickmsg::MessageCallback cb "IMessageCallback";
 %typemap(jtype) quickmsg::MessageCallback cb "IMessageCallback";
 %typemap(jni) quickmsg::MessageCallback cb "jobject";
 %typemap(javain) quickmsg::MessageCallback cb "$javainput";
 // 4:
-%typemap(in,numinputs=1) (quickmsg::MessageCallback cb, void *args) 
+%typemap(in,numinputs=1) (quickmsg::MessageCallback cb, void *args)
 {
   // TODO: consider making java_cb_data a java class so it can be
   // garbage collected
@@ -76,7 +76,7 @@ using namespace quickmsg;
 %typemap(jni) quickmsg::ServiceCallback cb "jobject";
 %typemap(javain) quickmsg::ServiceCallback cb "$javainput";
 // 4:
-%typemap(in,numinputs=1) (quickmsg::ServiceCallback cb, void *args) 
+%typemap(in,numinputs=1) (quickmsg::ServiceCallback cb, void *args)
 {
   java_cb_data* data = (java_cb_data*)malloc(sizeof(java_cb_data));
   data->env = jenv;
