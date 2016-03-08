@@ -82,13 +82,14 @@ namespace quickmsg {
   }
 #endif
 
-  static void (*prev_handler)(int);
+  //static void (*prev_handler)(int);
 
-  void init(const std::string& name)
+  void init(const std::string& name, const std::string& iface)
   {
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
     GroupNode::control_ = name + "/CTL";
+    GroupNode::iface_ = iface;
     zsys_init();
     //zsys_handler_set(NULL);
     boost::log::core::get()
@@ -99,7 +100,7 @@ namespace quickmsg {
     SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE);
 #else
     struct sigaction action;
-    struct sigaction prev_action;
+    //struct sigaction prev_action;
     action.sa_handler = __shutdown_handler;
     action.sa_flags = 0;
     sigemptyset(&action.sa_mask);

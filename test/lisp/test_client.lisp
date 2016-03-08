@@ -7,7 +7,8 @@
 (in-package :qm_client)
 
 (defun main ()
-  (qm:init "test-client")
+  ;; default network iface name is "". Should be set based on network configuration
+  (qm:init "test-client" "")
   (let ((client (qm:client-new "add"))
 	(req (json:encode-json-to-string
 	      '((ints-to-add . (1 2 3)) (bar . "asdf")))))

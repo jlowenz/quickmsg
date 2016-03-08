@@ -6,7 +6,8 @@
 (in-package :qm_pub)
 
 (defun main ()
-  (qm:init "test_pub")
+  ;; default network iface name is "". Should be set based on network configuration
+  (qm:init "test_pub" "")
   (let ((pub (qm:publisher-new "chatter")))
     (iterate:iterate (iterate:while (qm:ok))
 	     (for i from 1 to 10)

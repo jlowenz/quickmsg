@@ -42,7 +42,9 @@ include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${LIB_ZYRE_INCLUDE_DIRS})
 include_directories(${LIB_GLOG_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+set(CMAKE_C_FLAGS "-fPIC -Wall -Wno-long-long -pedantic")
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
@@ -115,7 +117,7 @@ target_link_libraries(test_cservice "${PROJECT_NAME}-c")
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
-find_package(PythonLibs)
+find_package(PythonLibs 2)
 include_directories(${PYTHON_INCLUDE_PATH})
 
 set(CMAKE_SWIG_FLAGS "-threads")
@@ -144,7 +146,7 @@ function(java_jar_native jar_file native_dir)
   set(JAVA_INSTALL_DIR "file://${CMAKE_INSTALL_PREFIX}/share/java")
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
-    COMMAND cmake -E echo "Creating native jar file... in ${native_dir}" 
+    COMMAND cmake -E echo "Creating native jar file... in ${native_dir}"
     COMMAND mkdir -p ${native_dir}
     COMMAND cp $<TARGET_FILE:quickmsg_java> ${native_dir}
     COMMAND cp $<TARGET_FILE:quickmsg> ${native_dir}
@@ -155,6 +157,21 @@ function(java_jar_native jar_file native_dir)
       COMMAND cmake -E echo "Installing maven repo local/quickmsg etc in repo"
       COMMAND ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
       COMMAND ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
+    # Add local maven repo to clean list if it exists
+    set(M2_HOME_REPO "$ENV{M2_HOME}/repository/jlowenz")
+    if(EXISTS ${M2_HOME_REPO})
+      message("Adding maven repo ${M2_HOME_REPO} to list for make clean")
+      set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${M2_HOME_REPO})
+    else ()
+      set(M2_DEFAULT_REPO "$ENV{HOME}/.m2/repository/jlowenz")
+      if (EXISTS ${M2_DEFAULT_REPO})
+        message("Adding maven repo ${M2_DEFAULT_REPO} to list for make clean")
+        set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${M2_DEFAULT_REPO})
+      else ()
+        message("Not adding local maven quickmsg repository to make clean list")
+      endif()
+    endif ()
+
   else ()
     message("Not installing to Maven repo")
   endif ()
@@ -223,7 +240,7 @@ else()
 endif()
 
 # installation
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
+install(TARGETS ${PROJECT_NAME} "${PROJECT_NAME}-c" "${PROJECT_NAME}_java" LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
 
 install(DIRECTORY include/${PROJECT_NAME}
   DESTINATION include
@@ -244,3 +261,5 @@ install(FILES
   DESTINATION share/java)
 
 # install Common Lisp components
+
+# Add maven repository to clean list

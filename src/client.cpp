@@ -48,8 +48,6 @@ namespace quickmsg {
     message_received_.store(false);
     response_.reset();
     node_->shout(srv_name_, req);
-    double start_t = clock();
-
     { 
       // wait for the response
       std::unique_lock<std::mutex> lock(response_mutex_);

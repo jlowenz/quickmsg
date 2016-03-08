@@ -13,7 +13,8 @@
 	  (qm:get-msg-str msg)))
 
 (defun main ()  
-  (qm:init "test_sub")
+  ;; default network iface name is "". Should be set based on network configuration
+  (qm:init "test_sub" "")
   (let ((sub (qm:async-subscriber-new "chatter" #'echo-msg)))
     (qm:async-subscriber-spin sub)
     (qm:async-subscriber-destroy sub)))

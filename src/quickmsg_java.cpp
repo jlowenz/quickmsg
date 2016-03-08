@@ -1,6 +1,5 @@
 #include <quickmsg/quickmsg_java.hpp>
 #include <quickmsg/types.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/log/trivial.hpp>
 #include <jni.h>
 #include <cstring>
@@ -32,7 +31,7 @@ void check_for_exception(java_cb_data* data, const std::string& context_desc)
 void java_MessageCallback(const quickmsg::Message* msg, void* args)
 {
   java_cb_data* data = static_cast<java_cb_data*>(args);
-
+  
   JavaVM* vms[3];
   jsize num_vms = 0;
   jint ret = JNI_GetCreatedJavaVMs(vms, 3, &num_vms);
@@ -41,12 +40,14 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   vms[0]->AttachCurrentThreadAsDaemon((void**)&data->env, NULL);
 
   if (!data->init_thread) {
+    std::string name("handleMessage(JNI)");
+    jstring threadName = (data->env)->NewStringUTF(name.c_str());
     const jclass jniutilClass = (data->env)->FindClass("quickmsg/JNIUtil");
     assert(jniutilClass);
     const jmethodID load_classloader = (data->env)->
-      GetStaticMethodID(jniutilClass, "load_classloader", "()V");
+      GetStaticMethodID(jniutilClass, "load_classloader", "(Ljava/lang/String;)V");
     assert(load_classloader);
-    (data->env)->CallStaticVoidMethod(jniutilClass, load_classloader);
+    (data->env)->CallStaticVoidMethod(jniutilClass, load_classloader, threadName);
     data->init_thread = true;
   }
 
@@ -70,17 +71,19 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   // create the shared_ptr ptr
   jlong jptr = 0;
   // why this??? why???
-  *(quickmsg::Message**)&jptr = new quickmsg::Message(*msg);  
+  jptr = reinterpret_cast<jlong>(new quickmsg::Message(*msg));
   jboolean ownMem = JNI_TRUE;
   // create/wrap the Message object
   jobject jmsg = (data->env)->NewObject(jMessageCls, msgctor,
 					jptr, ownMem);
+  
 
   //------------------------------------------------------------
   // call the callback interface method with the wrapped argument
   (data->env)->CallVoidMethod(data->obj, meth, jmsg);
   //------------------------------------------------------------
-  
+  (data->env)->DeleteLocalRef(jmsg);
+
   check_for_exception(data, "IMessageCallback.handleMessage()");
 }
 

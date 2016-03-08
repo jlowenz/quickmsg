@@ -13,9 +13,6 @@ using namespace quickmsg;
 %}
 
 
-//%shared_ptr(quickmsg::Message)
-//%shared_ptr(quickmsg::ServiceReply)
-
 %feature("director") Service;
 %feature("director") AsyncSubscriber;
 

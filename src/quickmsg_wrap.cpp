@@ -9,11 +9,12 @@ using namespace quickmsg;
 extern "C" {
 
   void
-  qm_init(const char* name) 
+  qm_init(const char* name, const char* iface)
   {
-    BOOST_LOG_TRIVIAL(info) << "QuickMsg is initializing with name: " << name << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "QuickMsg is initializing with name: " << name << " and interface: " << iface << std::endl;
     std::string sname(name);
-    init(sname);
+    std::string siface(iface);
+    init(sname, siface);
   }
 
   void

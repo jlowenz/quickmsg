@@ -11,8 +11,9 @@ package quickmsg;
 
 public class JNIUtil
 {
-    public static void load_classloader()
+    public static void load_classloader(String threadName)
     {
+	Thread.currentThread().setName(threadName);
 	try {
 	    ClassLoader cl = JNIUtil.class.getClassLoader();
 	    Class rt = cl.loadClass("clojure.lang.RT");

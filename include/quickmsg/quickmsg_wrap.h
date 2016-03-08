@@ -9,7 +9,7 @@ extern "C" {
 
 
   QM_EXPORT void
-  qm_init(const char* name);
+  qm_init(const char* name, const char* iface);
 
   QM_EXPORT void
   qm_shutdown(const char* reason);
@@ -17,7 +17,7 @@ extern "C" {
   QM_EXPORT int
   qm_ok();
 
-  // TODO: fix the inconsistencies
+  /* TODO: fix the inconsistencies */
 
   QM_EXPORT double
   qm_get_message_stamp(qm_message_t self_p);
