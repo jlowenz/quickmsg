@@ -185,7 +185,8 @@ startup."
 (cffi:defcfun ("qm_ok" ok) :boolean )
 
 (cffi:defcfun ("qm_init" init) :void 
-  (node-name :string))
+  (node-name :string)
+  (iface-name :string))
 
 (cffi:defcfun ("qm_shutdown" shutdown) :void
   (reason :string))
