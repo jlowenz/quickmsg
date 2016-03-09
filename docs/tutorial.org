@@ -1,0 +1,90 @@
+#+title: Quickmsg Tutorial
+#+author: Jason L. Owens
+#+latex_header: \usepackage[margin=0.75in]{geometry} \usepackage{ae,aecompl}
+
+* Introduction
+
+Quickmsg is a small, simple library that wraps Zyre, another small library built on top of the ZeroMQ messaging toolkit. Zyre provides functions to implement dynamic group communication between a set of cooperating processes on a local network without a lookup service. Quickmsg adds two standard communication patterns to the base Zyre (many-to-many) functionality: one-to-many publish/subscribe (pubsub), and many-to-one synchronous client/server procedure calls.
+
+Quickmsg is written in C++, but has a C bindings which we use with SWIG 3.0 to create wrappers for Python, Java, and C# (in progress). Quickmsg also provides an initial Common Lisp binding using CFFI with the C bindings. In all cases, we've tried to create the most natural interface for the given the language.
+
+* Networking
+
+Quickmsg is designed to make creating local network applications simple. Simple to code, and simple to use. All messages are based on strings (Quickmsg does not care what you put in your strings), and as long as topics are known to each participant, no IP addresses, domains, or ports are required. Zyre utilizes broadcast beacons to support discovery and then manages the available groups and peers available on the network (including their addresses and ports). 
+
+Natively, Zyre supports a group communication model where each member is a peer and may join some set of groups and communicate to all other members of a group through a single =shout()= function. Quickmsg adds support for two additional models\footnote{While the goal is for Quickmsg to support the standard group model through the use of the =GroupNode= class, it is not yet well implemented.}: publish/subscribe and client/server.
+
+** Publish/Subscribe
+The publish/subscribe model handles communication environments that don't require synchronous procedure calls and focus more on disseminating information. As an example, consider a sensor component that publishes data like ambient air temperature at a given location, or images from a camera. There may be zero or more consumer components that want that information; but the sensor component doesn't care! In this case, the sensor /publishes/ the data as a message on the appropriate topic ("temp\_sensor\_042") and other algorithms can /subscribe/ to the "temp\_sensor\_042" topic and receive the data as they are produced. 
+
+** Client/Server
+The client/server model is familiar to most everyone that uses the internet. 
+
+* API Overview
+Table of the main classes, descriptions, and important functions for implementating a Quickmsg system...
+* Basic Usage: C++ Client/Server
+** Basic client implementation
+We begin our code-based tutorial with the simplest client implementation: just a single function, =main()=, that uses Quickmsg client calls. In this case, we do not even need to subclass the =Client=, since we primarily use the single =calls= method. 
+
+#+BEGIN_SRC c++ -n -r
+int
+main(int argc, char** argv)
+{
+  quickmsg::init("test_cpp_client"); // Initialize the system (ref:cli-init)
+  quickmsg::Client client("hello"); // Instantiate the Client on (ref:cli-inst)
+				    // the service topic "hello"
+  std::string req("Hello");
+  for (int i = 0; i < 10; ++i) {
+    if (!quickmsg::ok()) break; // Check if the client is ok to continue (ref:cli-ok)
+    std::string resp = client.calls(req); // Make the service call (ref:cli-svccall)
+    std::cout << "Service response: " << resp << std::endl;
+    sleep(1);
+  } 
+  return 0;
+}
+#+END_SRC
+
+In line [[(cli-init)]] we initialize the Quickmsg subsystem, providing the base endpoint name for this collection of classes\footnote{Portions of the Quickmsg system use this name to describe the internal peers. A lot of this is not exposed yet to the user-level API}. This =init= function must always be called before any other Quickmsg functions are called. The results of doing otherwise are undefined. 
+
+Then, in line [[(cli-inst)]], we instantiate the Quickmsg client that will provide communication to the specified service (where the topic name, "hello", is given as a parameter to the =Client= constructor). The rest of the main function simply runs a loop that sends the request "Hello" to the server ten times (line [[(cli-svccall)]]), first checking to see if the client has been cancelled due to an interrupt in line [[(cli-ok)]]. This is necessary since due to the network implementation in ZeroMQ, Quickmsg must intercept signals. 
+
+** Basic service implementation
+
+Now we introduce the smallest example of a Quickmsg service. Line [[(qminit)]] is the first Quickmsg function that should be called in system that uses Quickmsg. It provides the base name for any Quickmsg used within the same process and initializes the necessary resources. In this case, we also provide a string argument that tells Quickmsg which network interface it should use for communication\footnote{This parameter is optional, but on systems with multiple interfaces, it may be necessary to explicitly specify the interface of interest}. In line [[(srv-instantiation)]] we instantiate the ExampleService class we've created, and finally we spin up the service in line [[(spin)]]. This example shows a synchronous spin process, i.e. =spin()= does not return until the process has been exited (similar to many other event-driven systems). Quickmsg also provides an asynchronous spin mechanism that launches a thread. In this case, the application becomes multi-threaded, and appropriate care must be taken when implementing the service call. 
+
+#+BEGIN_SRC c++ -n -r
+int
+main(int argc, char** argv)
+{
+  quickmsg::init("test_cpp_service", "eth0"); // Initialize the system (ref:qminit)
+  ExampleService svc("hello", 20); // overridden svc impl (ref:srv-instantiation)
+  svc.spin(); // Spin (doesn't return) (ref:spin)
+  return 0;
+}
+#+END_SRC
+
+In the second code excerpt, we show the implementation for the =ExampleService= class. The service is exceptionally simple: it simply counts the number of times it's been called (stored in the =msgs_recvd= variable) (line [[(count-var)]]), prints a message to standard out when it receives a service call (line [[(stdout-msg)]]), returning a formatted string to the client (line [[(reply)]]). 
+
+#+BEGIN_SRC cpp -n -r
+struct ExampleService : public quickmsg::Service
+{
+  int msgs_recvd; (ref:count-var)
+  
+  ExampleService(std::string topic, int queue_size) (ref:svc-ctor)
+    : Service(topic, queue_size), msgs_recvd(0) {}
+  virtual ~ServiceImpl() {}
+  virtual std::string service_impl(const quickmsg::Message* req) (ref:impl-override)
+  {
+    std::cout << "Got: " << req->msg << std::endl; (ref:stdout-msg)
+    msgs_recvd++; 
+    std::stringstream ss;
+    ss << "World " << msgs_recvd;
+    return ss.str(); (ref:reply)
+  }
+};
+#+END_SRC
+
+One important thing to note is that every Quickmsg constructor requires a topic string. In the case of a service, the topic is essentially the name of the service, and is used by the client to make service calls. Going back to line [[(srv-instantiation)]] in the =main()= function, we see that we call this service "hello" and give it a =queue_size= of 20 elements. 
+
+Another important item to note is the use of inheritance and virtual functions to implement the behavior of the service. Line [[(impl-override)]] demonstrates the method signature for the service_impl virtual function. Every message that is sent to the service topic (it's "hello" in this case) will end up as a parameter to this function, wrapped in the =quickmsg::Message= object. This function must return the response to the request, so spawning a thread to perform work is not useful here\footnote{This implies that the work should be done in a timely manner, or other requests may not be processed quickly enough. In the current implementation of Quickmsg, the implication is true (even for asynchronous spin). Future versions of Quickmsg may allow the configuration of a threadpool or asynchronous event system to handle more request in parallel. We are not sure how the interface may/may not change to accommodate it.}. 
+
