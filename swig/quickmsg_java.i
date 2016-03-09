@@ -24,17 +24,17 @@ using namespace quickmsg;
 %template(PeerVec) std::vector<quickmsg::Peer*>;
 
 // callback definitions
-%{ 
+%{
   void java_MessageCallback(const Message* msg, void* args);
   char* java_ServiceCallback(const Message* msg, void* args);
   %}
- 
+
 %typemap(jstype) quickmsg::MessageCallback cb "IMessageCallback";
 %typemap(jtype) quickmsg::MessageCallback cb "IMessageCallback";
 %typemap(jni) quickmsg::MessageCallback cb "jobject";
 %typemap(javain) quickmsg::MessageCallback cb "$javainput";
 // 4:
-%typemap(in,numinputs=1) (quickmsg::MessageCallback cb, void *args) 
+%typemap(in,numinputs=1) (quickmsg::MessageCallback cb, void *args)
 {
   // TODO: consider making java_cb_data a java class so it can be
   // garbage collected
@@ -55,7 +55,7 @@ using namespace quickmsg;
 %typemap(jni) quickmsg::ServiceCallback cb "jobject";
 %typemap(javain) quickmsg::ServiceCallback cb "$javainput";
 // 4:
-%typemap(in,numinputs=1) (quickmsg::ServiceCallback cb, void *args) 
+%typemap(in,numinputs=1) (quickmsg::ServiceCallback cb, void *args)
 {
   java_cb_data* data = (java_cb_data*)malloc(sizeof(java_cb_data));
   data->env = jenv;
