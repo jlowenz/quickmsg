@@ -11,7 +11,7 @@
 
 namespace quickmsg {
 
-
+  extern bool ok();
   // std::string
   // default_echo(const std::string& req)
   // {
@@ -99,6 +99,7 @@ namespace quickmsg {
 			   size_t queue_size)
     : owner_(owner), srv_name_(srv_name), impl_(impl), args_(args)
   {
+    assert(ok() && "quickmsg shutdown or quickmsg::init() must be called first");    
     init(queue_size);
   }
   Service::Service(const std::string& srv_name,

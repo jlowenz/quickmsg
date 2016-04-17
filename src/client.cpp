@@ -15,6 +15,7 @@ namespace quickmsg {
   Client::Client(const std::string& srv_name) : 
     srv_name_(srv_name)
   {
+    assert(ok() && "quickmsg shutdown or quickmsg::init() must be called first");
     message_received_ = false;
     // create the group node
     std::string name("C/");
@@ -69,6 +70,7 @@ namespace quickmsg {
   void 
   Client::handle_response(const Message* resp)
   {
+    BOOST_LOG_TRIVIAL(debug) << "Client::handle_response" << resp << std::endl;
     assert(resp);
     if (resp->msg != "") {
       BOOST_LOG_TRIVIAL(debug) << "received response\n" << resp->msg << std::endl;

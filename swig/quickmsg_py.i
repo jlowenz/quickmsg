@@ -22,4 +22,3 @@ using namespace quickmsg;
 %include "quickmsg/subscriber.hpp"
 %include "quickmsg/service.hpp"
 %include "quickmsg/client.hpp"
-

@@ -4,9 +4,12 @@
 
 namespace quickmsg {
 
+  extern bool ok();
+
   Publisher::Publisher(const std::string& topic, bool wait)
     : topic_(topic)
   {
+    assert(ok() && "quickmsg shutdown or quickmsg::init() must be called first");
     // create the group node
     std::string name("P/");
     node_ = new GroupNode(name + topic);

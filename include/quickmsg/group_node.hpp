@@ -95,7 +95,7 @@ namespace quickmsg {
     // TODO: should probably rename this to async_join()
     void join();
 
-    static std::string name();    
+    static std::string name();
 
     static std::string iface();
     

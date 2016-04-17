@@ -12,6 +12,8 @@
 
 namespace quickmsg {
 
+  extern bool ok();
+
   void
   default_cb(const Message* msg, void*)
   {
@@ -65,6 +67,7 @@ namespace quickmsg {
   SubscriberImpl::SubscriberImpl(const std::string& topic, size_t queue_size)
     : topic_(topic)
   {
+    assert(ok() && "quickmsg shutdown or quickmsg::init() must be called first");
     impl_=default_cb;
     init(queue_size);
   }
