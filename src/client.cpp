@@ -55,6 +55,9 @@ namespace quickmsg {
 			      [&]{ return !ok() || message_received_.load(); });
     }
     
+    if (!response_) {
+      throw InvalidResponse();
+    }
     if (!message_received_.load()) {
       throw ServiceCallTimeout();
     }
@@ -66,11 +69,17 @@ namespace quickmsg {
   void 
   Client::handle_response(const Message* resp)
   {
-    BOOST_LOG_TRIVIAL(debug) << "received response\n" << resp->msg << std::endl;
-    ServiceReplyPtr rep(new ServiceReply(*resp, true));
-    response_ = rep;
-    message_received_.store(true);
-    response_cond_.notify_one();
+    assert(resp);
+    if (resp->msg) {
+      BOOST_LOG_TRIVIAL(debug) << "received response\n" << resp->msg << std::endl;
+      ServiceReplyPtr rep(new ServiceReply(*resp, true));
+      response_ = rep;
+      message_received_.store(true);
+      response_cond_.notify_one();
+    } else {
+      message_received_.store(false);
+      response_cond_.notify_one();
+    }
   }
 
 

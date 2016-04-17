@@ -18,6 +18,7 @@ The following components have initial implementations:
 - [[https://github.com/google/glog.git][Google logging]], from source or pkg-manager
 - [[http://www.swig.org/][Swig 3.0]]
 - Python 2.7
+- TBB (Intel Threading Building Blocks)
 - Boost libraries
 
 ** SWIG Wrapping

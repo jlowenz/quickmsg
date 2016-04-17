@@ -86,6 +86,8 @@ namespace quickmsg {
 
   void init(const std::string& name, const std::string& iface)
   {
+    // if the function has already been called, just return.
+    if (GroupNode::running_.load()) return;
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
     GroupNode::control_ = name + "/CTL";

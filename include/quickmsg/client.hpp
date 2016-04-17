@@ -24,6 +24,18 @@ namespace quickmsg {
 #endif // _WIN32
   };
 
+  class InvalidResponse : public std::runtime_error {
+  public:
+    InvalidResponse() : std::runtime_error("InvalidResponse") {}
+    InvalidResponse(const std::string& msg) : std::runtime_error(std::string("InvalidResponse: ") + msg) {}
+    virtual ~InvalidResponse() {}
+#if _WIN32
+    const char* what() const { return std::runtime_error::what(); }
+#else
+    const char* what() const noexcept{ return std::runtime_error::what(); }
+#endif // _WIN32
+  };
+
   
   class GroupNode;
   class Client
@@ -33,13 +45,8 @@ namespace quickmsg {
     Client(const std::string& srv_name);
     virtual ~Client();
     
-#if _WIN32
     ServiceReplyPtr call(const std::string& msg, int timeout_s = DEFAULT_TIMEOUT);
     std::string calls(const std::string& req, int timeout_s = DEFAULT_TIMEOUT);
-#else
-    ServiceReplyPtr call(const std::string& msg, int timeout_s=DEFAULT_TIMEOUT) throw(ServiceCallTimeout);
-    std::string calls(const std::string& req, int timeout_s=DEFAULT_TIMEOUT) throw(ServiceCallTimeout);
-#endif
 
   protected:
     virtual void handle_response(const Message* resp);
