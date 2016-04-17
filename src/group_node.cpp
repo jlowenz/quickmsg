@@ -180,7 +180,7 @@ namespace quickmsg {
     // create the zyre node
     node_ = zyre_new(node_name_.c_str());
     // verbose output
-    zyre_set_verbose(node_);
+    //zyre_set_verbose(node_);
     // set the interface to use, otherwise zyre just guesses (default "")    
     zyre_set_interface(node_, node_iface_.c_str());
     // set the headers
