@@ -95,7 +95,7 @@ namespace quickmsg {
     zsys_init();
     //zsys_handler_set(NULL);
     boost::log::core::get()
-      ->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+      ->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
     
     BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
 #if _WIN32
