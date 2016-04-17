@@ -36,14 +36,14 @@ namespace quickmsg {
 
 
   std::string
-  Client::calls(const std::string& msg, int timeout_s) throw(ServiceCallTimeout)
+  Client::calls(const std::string& msg, int timeout_s)
   {
     ServiceReplyPtr resp = call(msg, timeout_s);    
     return resp->msg;
   }
   
   ServiceReplyPtr
-  Client::call(const std::string& req, int timeout_s) throw(ServiceCallTimeout)
+  Client::call(const std::string& req, int timeout_s)
   {
     message_received_.store(false);
     response_.reset();
@@ -70,7 +70,7 @@ namespace quickmsg {
   Client::handle_response(const Message* resp)
   {
     assert(resp);
-    if (resp->msg) {
+    if (resp->msg != "") {
       BOOST_LOG_TRIVIAL(debug) << "received response\n" << resp->msg << std::endl;
       ServiceReplyPtr rep(new ServiceReply(*resp, true));
       response_ = rep;
