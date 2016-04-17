@@ -483,7 +483,7 @@ namespace quickmsg {
       const char* s = zyre_event_name(e_);
       assert(s != NULL);
       std::string str(s);
-      printf("peer_name %s", str.c_str());
+      //printf("peer_name %s", str.c_str());
       return str;
     }
     
