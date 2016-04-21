@@ -4,11 +4,17 @@
 #include <functional>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <pthread.h>
 #include <signal.h>
 #include <zyre.h>
+
 #include <tbb/concurrent_unordered_map.h>
+
 #include <boost/log/trivial.hpp>
+#include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
@@ -16,6 +22,16 @@
 #define DEBUG
 
 namespace quickmsg {
+
+  void parse_string_csv(const std::string& csv, std::vector<std::string>& v)
+  {
+    std::vector<std::string> nums;
+    boost::split(nums, csv, boost::is_any_of(", "), boost::token_compress_on);
+    BOOST_FOREACH (std::string& s, nums) {
+      v.push_back(s);
+    }
+  }
+
 
   // static_assert(std::is_trivially_copyable<std::string>::value, 
   // 		"std::atomic<std::string> requires std::string to be trivially copyable");
@@ -174,40 +190,57 @@ namespace quickmsg {
     : event_thread_(NULL), prom_thread_(NULL), promiscuous_(promiscuous), stopped_(false)
   {							
     node_name_ = GroupNode::name() + "/" + desc;
-    node_iface_ = GroupNode::iface();
+    std::vector<std::string> node_ifaces_;
+    parse_string_csv(GroupNode::iface(), node_ifaces_);
+    size_t ifaces_to_try = (GroupNode::iface().empty()) ? 0 : node_ifaces_.size();
     node_desc_ = desc;
     control_group_ = GroupNode::control_;
-    // create the zyre node
-    node_ = zyre_new(node_name_.c_str());
-    // verbose output
-    //zyre_set_verbose(node_);
-    // set the interface to use, otherwise zyre just guesses (default "")    
-    try {
-      zyre_set_interface(node_, node_iface_.c_str());    
-    } catch (const std::runtime_error& e) {
-      BOOST_LOG_TRIVIAL(warning) << "Error setting broadcast interface: " << node_iface_ << std::endl;
-      BOOST_LOG_TRIVIAL(info) << "Falling back to * interfaces" << std::endl;
-      zyre_set_interface(node_, "*");
-    }
 
-    // set the headers
-    zyre_set_header(node_, "desc", "%s", node_desc_.c_str());
-    // access our uuid
-    std::string uuid = zyre_uuid(node_);
-    // access our name
-    node_name_ = zyre_name(node_);
     // start the node
-    if (zyre_start(node_)) {
-      throw std::runtime_error("Could not start the zyre node");
-    }
+    size_t interface = 0;
+    do {
+      if (ifaces_to_try > 0 && interface >= node_ifaces_.size()) {
+	std::ostringstream ss;
+	ss << "Could not start zyre node. Possibly due to bad broadcast interface (" << GroupNode::iface() << ")";
+	throw std::runtime_error(ss.str());
+      }
+      if (interface > 0) {
+	BOOST_LOG_TRIVIAL(warning) << "Zyre node failed to start with interface: " << node_iface_ << std::endl;
+	BOOST_LOG_TRIVIAL(warning) << "  Trying again with: " << node_ifaces_[interface] << std::endl;
+	zyre_destroy(&node_);
+      }
+      // create the zyre node
+      node_ = zyre_new(node_name_.c_str());
+      // verbose output
+      // zyre_set_verbose(node_);
+      // set the headers
+      zyre_set_header(node_, "desc", "%s", node_desc_.c_str());
+      // access our uuid
+      std::string uuid = zyre_uuid(node_);
+      // create our self peer
+      self_.reset(new Peer(uuid, node_desc_));
+      // access our name
+      node_name_ = zyre_name(node_);
+
+      // set the interface to use, otherwise zyre just guesses (default "")
+      if (node_ifaces_.size() > 0) {
+	zyre_set_interface(node_, node_ifaces_[interface].c_str());
+	node_iface_ = node_ifaces_[interface];
+      } else {
+	// this seems to be the only reasonable default, 
+	// despite the documentation for zsys_set_interface()
+	zyre_set_interface(node_, "");
+	node_iface_ = "";
+      }
+
+      interface++;
+    } while (zyre_start(node_) != 0 && (interface < node_ifaces_.size()));
 
     // join the control group - too heavy
     if (zyre_join(node_, control_group_.c_str())) {
       throw std::runtime_error("Error joining CONTROL group");
     }
 
-    // create our self peer
-    self_.reset(new Peer(uuid, node_desc_));
 
     /* we want to minimize the groups joined and messages sent -
        especially by other non-promiscuous components; in order to do
