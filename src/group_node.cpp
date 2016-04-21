@@ -182,7 +182,14 @@ namespace quickmsg {
     // verbose output
     //zyre_set_verbose(node_);
     // set the interface to use, otherwise zyre just guesses (default "")    
-    zyre_set_interface(node_, node_iface_.c_str());
+    try {
+      zyre_set_interface(node_, node_iface_.c_str());    
+    } catch (const std::runtime_error& e) {
+      BOOST_LOG_TRIVIAL(warning) << "Error setting broadcast interface: " << node_iface_ << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "Falling back to * interfaces" << std::endl;
+      zyre_set_interface(node_, "*");
+    }
+
     // set the headers
     zyre_set_header(node_, "desc", "%s", node_desc_.c_str());
     // access our uuid
