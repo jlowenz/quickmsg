@@ -217,6 +217,7 @@ namespace quickmsg {
       zyre_set_header(node_, "desc", "%s", node_desc_.c_str());
       // access our uuid
       std::string uuid = zyre_uuid(node_);
+      BOOST_LOG_TRIVIAL(info) << "Node UUID: " << uuid << std::endl;
       // create our self peer
       self_.reset(new Peer(uuid, node_desc_));
       // access our name
@@ -259,14 +260,19 @@ namespace quickmsg {
   GroupNodeImpl::~GroupNodeImpl()
   {    
     if (!stopped_) {
+      stopped_ = true;
       zyre_stop(node_);
     }
     if (prom_thread_) {
-      prom_thread_->join();
+      if (prom_thread_->joinable()) {
+	prom_thread_->join();
+      }
       delete prom_thread_;
     }
     if (event_thread_) {
-      event_thread_->join();
+      if (event_thread_->joinable()) {
+	event_thread_->join();
+      }
       delete event_thread_;
     }
     BOOST_LOG_TRIVIAL(debug) << "destroying zyre node..." << std::endl;
@@ -442,8 +448,10 @@ namespace quickmsg {
   void 
   GroupNodeImpl::stop()
   {
-    zyre_stop(node_);
-    stopped_ = true;
+    if (!stopped_) {
+      stopped_ = true;
+      zyre_stop(node_);
+    }
   }
   void
   GroupNode::stop()
@@ -599,14 +607,14 @@ namespace quickmsg {
 	}}
         break;
       case ZYRE_EVENT_EXIT: {
-	if (e.peer_name() == node_name_) {
-	  stopped_ = true;
+	if (e.peer_uuid() == self_->uuid()) {
+	  stop();
 	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " exits | " << node_name_ << std::endl; }
         break;
       case ZYRE_EVENT_STOP: {
-	if (e.peer_name() == node_name_) {
-	  stopped_ = true;
+	if (e.peer_uuid() == self_->uuid()) {
+	  stop();
 	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " stops | " << node_name_ << std::endl; }
         return false;
