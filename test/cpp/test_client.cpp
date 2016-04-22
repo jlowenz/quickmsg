@@ -15,11 +15,11 @@ main(int argc, char** argv)
   qm::Client client("hello");
 
   std::string req("Hello");
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 25; ++i) {
     if (!qm::ok()) break;    
     std::cout << "client request\n" << req << std::endl;
     std::string resp = client.calls(req);
-    std::cout << "server response: " << resp << std::endl;
+    std::cout << i << " server response: " << resp << std::endl;
     sleep(1);
   }
   
