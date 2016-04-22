@@ -26,7 +26,7 @@ namespace quickmsg {
   void parse_string_csv(const std::string& csv, std::vector<std::string>& v)
   {
     std::vector<std::string> nums;
-    boost::split(nums, csv, boost::is_any_of(", "), boost::token_compress_on);
+    boost::split(nums, csv, boost::is_any_of(","), boost::token_compress_on);
     BOOST_FOREACH (std::string& s, nums) {
       v.push_back(s);
     }
@@ -234,7 +234,7 @@ namespace quickmsg {
       }
 
       interface++;
-    } while (zyre_start(node_) != 0 && (interface < node_ifaces_.size()));
+    } while (zyre_start(node_) != 0);
 
     // join the control group - too heavy
     if (zyre_join(node_, control_group_.c_str())) {
