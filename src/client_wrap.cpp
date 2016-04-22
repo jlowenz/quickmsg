@@ -11,7 +11,15 @@ extern "C" {
   qm_client_new (const char* srv_name) 
   {
     BOOST_LOG_TRIVIAL(debug) << " Creating client to service "<<srv_name<<std::endl;
-    Client* client = new Client(srv_name);
+    Client* client = new Client(srv_name, true);
+    return reinterpret_cast<qm_client_t>(client);
+  } 
+
+  qm_client_t
+  qm_client_new_nowait (const char* srv_name) 
+  {
+    BOOST_LOG_TRIVIAL(debug) << " Creating client to service "<<srv_name<<std::endl;
+    Client* client = new Client(srv_name, false);
     return reinterpret_cast<qm_client_t>(client);
   } 
 

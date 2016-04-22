@@ -1,37 +1,49 @@
 #include <boost/log/trivial.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <quickmsg/group_node.hpp>
 #include <quickmsg/client.hpp>
 #include <quickmsg/quickmsg.hpp>
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 namespace quickmsg {
 
+  using namespace boost::uuids;
+  
   void client_handler(const Message* msg, void* args)
   {
     static_cast<Client*>(args)->handle_response(msg);
   }
 
-  Client::Client(const std::string& srv_name) : 
+  Client::Client(const std::string& srv_name, bool wait) : 
     srv_name_(srv_name)
   {
     assert(ok() && "quickmsg shutdown or quickmsg::init() must be called first");
     message_received_ = false;
     // create the group node
+    uuid cid = random_generator()();
     std::string name("C/");
-    node_ = new GroupNode(name + srv_name);
+    node_ = new GroupNode(name + to_string(cid) + "/" + srv_name);
     node_->register_whispers(&client_handler, (void*)this);
-    node_->join(srv_name_);
     node_->async_spin();
-    BOOST_LOG_TRIVIAL(debug) << "waiting for server" << std::endl;
-    node_->wait_join(srv_name_); // wait for service
-    BOOST_LOG_TRIVIAL(debug) << "server joined group" << std::endl;
+
+    if (wait) {
+      BOOST_LOG_TRIVIAL(debug) << "waiting for server" << std::endl;
+      node_->wait_join(srv_name_); // wait for service
+      BOOST_LOG_TRIVIAL(debug) << "server joined group" << std::endl;
+    } else {
+      node_->join(srv_name_);      
+    }
   }
 
   Client::~Client()
   {    
+    std::cerr << "client destroyed" << std::endl;
     node_->leave(srv_name_);
-    node_->stop();
+    //node_->stop();
     delete node_;
   }
 
@@ -56,11 +68,11 @@ namespace quickmsg {
 			      [&]{ return !ok() || message_received_.load(); });
     }
     
-    if (!response_) {
-      throw InvalidResponse();
-    }
     if (!message_received_.load()) {
       throw ServiceCallTimeout();
+    }
+    if (!response_) {
+      throw InvalidResponse();
     }
 
     return response_;

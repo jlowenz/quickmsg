@@ -42,7 +42,7 @@ namespace quickmsg {
   {
     friend void client_handler(const Message*,void*);
   public:
-    Client(const std::string& srv_name);
+    Client(const std::string& srv_name, bool wait_for_service = true);
     virtual ~Client();
     
     ServiceReplyPtr call(const std::string& msg, int timeout_s = DEFAULT_TIMEOUT);
