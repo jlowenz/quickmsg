@@ -22,7 +22,7 @@ namespace quickmsg {
   Publisher::~Publisher()
   {
     node_->leave(topic_);
-    node_->stop();
+    //node_->stop();
     delete node_;
   }
 

@@ -142,7 +142,7 @@ namespace quickmsg {
   ServiceImpl::~ServiceImpl()
   {
     node_->leave(srv_name_);
-    node_->stop();
+    //node_->stop();
     delete node_;
   }
   Service::~Service()

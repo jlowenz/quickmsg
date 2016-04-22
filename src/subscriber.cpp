@@ -95,7 +95,7 @@ namespace quickmsg {
   SubscriberImpl::~SubscriberImpl()
   {
     node_->leave(topic_);
-    node_->stop();
+    //node_->stop();
     delete node_;
   }
   Subscriber::~Subscriber()
@@ -184,7 +184,7 @@ namespace quickmsg {
   AsyncSubscriber::~AsyncSubscriber()
   {
     node_->leave(topic_);
-    node_->stop();
+    //node_->stop();
     delete node_;
   }
 
