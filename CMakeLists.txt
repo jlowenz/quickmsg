@@ -127,7 +127,7 @@ include(${SWIG_USE_FILE})
 find_package(PythonLibs 2)
 include_directories(${PYTHON_INCLUDE_PATH})
 
-set(CMAKE_SWIG_FLAGS "-threads")
+set(CMAKE_SWIG_FLAGS "-threads" "-builtin")
 
 # function for setting source properties
 function(swig_cpp files)
