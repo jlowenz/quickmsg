@@ -41,7 +41,6 @@ namespace quickmsg {
 
   Client::~Client()
   {    
-    std::cerr << "client destroyed" << std::endl;
     node_->leave(srv_name_);
     //node_->stop();
     delete node_;
