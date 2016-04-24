@@ -56,7 +56,7 @@ namespace quickmsg {
   class AsyncSubscriber
   {
   public:
-    AsyncSubscriber(const std::string& topic, MessageCallback impl, void* args=NULL);
+    AsyncSubscriber(const std::string& topic, MessageCallback cb, void* args);
     AsyncSubscriber(const std::string& topic);
     virtual ~AsyncSubscriber();
 

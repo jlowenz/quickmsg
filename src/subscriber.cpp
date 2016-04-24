@@ -155,9 +155,9 @@ namespace quickmsg {
   }
 
   AsyncSubscriber::AsyncSubscriber(const std::string& topic, 
-				   MessageCallback impl, 
+				   MessageCallback cb, 
 				   void* args)
-    : topic_(topic), impl_(impl), args_(args)
+    : topic_(topic), impl_(cb), args_(args)
   {
     init();
   }
