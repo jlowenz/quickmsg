@@ -67,6 +67,7 @@ add_library(${PROJECT_NAME} SHARED
   src/group_node.cpp 
   src/publisher.cpp
   src/subscriber.cpp
+  src/clock_sync.cpp
   src/client.cpp
   src/service.cpp
   src/quickmsg.cpp)
