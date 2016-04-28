@@ -4,6 +4,8 @@
 #pragma once
 
 #include "udp_server.hpp"
+#include <cmath>
+#include <boost/asio/deadline_timer.hpp>
 
 class ClockSync
 {
@@ -18,6 +20,7 @@ private:
 
 const uint32_t SYNC_PORT = 41337;
 const uint32_t NUM_THREADS = 4;
+const uint32_t REQUEST_TIMEOUT = 400;
 
 typedef int64_t cs_time_t;
 
@@ -37,11 +40,12 @@ struct sync_message_t
   cs_time_t t2;
   cs_time_t t3;
   cs_time_t t4;
+  uint32_t valid;
 
   sync_message_t() : 
-    id(0), t1(0), t2(0), t3(0), t4(0) {}
+    id(0), t1(0), t2(0), t3(0), t4(0), valid(0) {}
   sync_message_t(uint32_t i) : 
-    id(i), t1(0), t2(0), t3(0), t4(0) {}
+    id(i), t1(0), t2(0), t3(0), t4(0), valid(0) {}
 };
 
 class SyncServer : public UDPServer<sync_message_t>
@@ -69,20 +73,28 @@ public:
   ~SyncClient() {}
   void run();
   
+  // Offset and delta in seconds.
+  static double offset();
+  static double delay();
+
 protected:
+  void check_deadline();
   double get_offset(const sync_message_t::ptr& msg);
   double get_delay(const sync_message_t::ptr& msg);
-  sync_message_t::ptr req_sync_message();
+  sync_message_t::ptr req_sync_message(sys::error_code& ec);
 
 private:
+  asio::io_service io_;
   std::string hostname_;
   std::atomic<bool> ok_;
-  std::atomic<int> id_;
-  asio::io_service io_;
+  int id_;
   udp::endpoint svc_;
   udp_sock_ptr sock_;
-  static std::atomic<int32_t> offset_; // in microseconds
-  static std::atomic<int32_t> delay_;  // in microseconds
+  asio::deadline_timer deadline_;
+  
+  // for 
+  static std::atomic<double> offset_; // in microseconds
+  static std::atomic<double> delay_;  // in microseconds
 };
 
 #endif

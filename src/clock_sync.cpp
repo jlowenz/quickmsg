@@ -4,6 +4,7 @@
 #include <chrono>
 #include <string>
 
+namespace pt = boost::posix_time;
 
 int get_time(cs_time_t& ts)
 {
@@ -52,13 +53,29 @@ void run_sync_service()
 }
 
 SyncClient::SyncClient(std::string hostname)
-  : hostname_(hostname)
+  : hostname_(hostname), id_(0), deadline_(io_)
 {
   udp::resolver::query q(udp::v4(), hostname_, std::to_string(SYNC_PORT));
   udp::resolver resolver(io_);
   auto iter = resolver.resolve(q);
   svc_ = iter->endpoint();
   sock_.reset(new udp::socket(io_, udp::v4()));
+  deadline_.expires_at(boost::posix_time::pos_infin);
+  check_deadline();
+}
+
+void 
+SyncClient::check_deadline()
+{
+  if (deadline_.expires_at() <= asio::deadline_timer::traits_type::now()) {
+    // cancel may have portability issues on Windows!
+    // TODO: look into this
+    sock_->cancel();
+    // do nothing until another deadline is set
+    deadline_.expires_at(boost::posix_time::pos_infin);
+  }
+  // Put the actor back to sleep.
+  deadline_.async_wait(boost::bind(&SyncClient::check_deadline, this));
 }
 
 void 
@@ -66,14 +83,19 @@ SyncClient::run() {
   ok_.store(true);
   while (ok_.load()) {
     auto start = std::chrono::high_resolution_clock::now();
-    sync_message_t::ptr msg = req_sync_message();
-    BOOST_LOG_TRIVIAL(debug) << "Server queried:";
-    BOOST_LOG_TRIVIAL(debug) << "      t1: " << msg->t1;
-    BOOST_LOG_TRIVIAL(debug) << "      t2: " << msg->t2;
-    BOOST_LOG_TRIVIAL(debug) << "      t3: " << msg->t3;
-    BOOST_LOG_TRIVIAL(debug) << "      t4: " << msg->t4;
-    BOOST_LOG_TRIVIAL(debug) << "  offset: " << get_offset(msg);
-    BOOST_LOG_TRIVIAL(debug) << "   delay: " << get_delay(msg);
+    sys::error_code ec = asio::error::would_block;
+    sync_message_t::ptr msg = req_sync_message(ec);
+    if (msg->valid != 0) {
+      BOOST_LOG_TRIVIAL(debug) << "Server queried:";
+      BOOST_LOG_TRIVIAL(debug) << "      t1: " << msg->t1;
+      BOOST_LOG_TRIVIAL(debug) << "      t2: " << msg->t2;
+      BOOST_LOG_TRIVIAL(debug) << "      t3: " << msg->t3;
+      BOOST_LOG_TRIVIAL(debug) << "      t4: " << msg->t4;
+      BOOST_LOG_TRIVIAL(debug) << "  offset: " << get_offset(msg);
+      BOOST_LOG_TRIVIAL(debug) << "   delay: " << get_delay(msg);
+    } else {
+      BOOST_LOG_TRIVIAL(debug) << "Invalid response";
+    }
     std::chrono::duration<double, std::milli> period(500);
     std::this_thread::sleep_until(start + period);
   }
@@ -98,24 +120,71 @@ SyncClient::get_delay(const sync_message_t::ptr& msg)
   double t32 = cs2double(d2);
   return t41 - t32;
 }
-  
-sync_message_t::ptr 
-SyncClient::req_sync_message()
+
+void
+client_read_handler(SyncClient* self,
+		    sync_message_t::ptr& msg,
+		    sys::error_code* out_ec,
+		    const sys::error_code& ec,
+		    size_t num_bytes)
 {
+  get_time(msg->t4);
+  *out_ec = ec;
+  if (ec) {
+    msg->valid = 0;
+    BOOST_LOG_TRIVIAL(warning) << ec.message();
+  } else {
+    BOOST_LOG_TRIVIAL(debug) << "client_read_handler";
+    msg->valid = 1;
+  }
+}
+  
+std::ostream& operator<<(std::ostream& out, const sync_message_t::ptr& sm)
+{
+  out << "SyncMessage[" << sm->valid << "," << sm->id << "," << sm->t1 << "," << sm->t2 << "," <<
+    sm->t3 << "," << sm->t4 << "]";
+  return out;
+}
+
+sync_message_t::ptr 
+SyncClient::req_sync_message(sys::error_code& ec)
+{
+  pt::time_duration timeout = pt::milliseconds(REQUEST_TIMEOUT);
   uint32_t id = id_++;
   sync_message_t::ptr msg(new sync_message_t(id));
   // what about return values?
   get_time(msg->t1);
   sock_->send_to(asio::buffer(msg.get(), 
 			      sizeof(sync_message_t)), svc_);
-  sock_->receive_from(asio::buffer(msg.get(), 
-				   sizeof(sync_message_t)), svc_);
-  get_time(msg->t4);
+
+  // start the timer
+  deadline_.expires_from_now(timeout);
+  // receive
+  auto buf = asio::buffer(msg.get(), sizeof(sync_message_t));
+  sock_->async_receive_from(buf, svc_, 
+			    boost::bind(client_read_handler, this,
+					msg, &ec, ::_1, ::_2));
+  // block
+  do io_.run_one(); while (ec == asio::error::would_block);
   if (id != msg->id) {
-    std::cerr << "bogus message" << std::endl;
+    BOOST_LOG_TRIVIAL(warning) << "message id out of sync";
+    msg->valid = 0;
   }
+  BOOST_LOG_TRIVIAL(debug) << msg;
   return msg;
 }
 
-std::atomic<int32_t> SyncClient::offset_(0);
-std::atomic<int32_t> SyncClient::delay_(0);
+std::atomic<double> SyncClient::offset_(0);
+std::atomic<double> SyncClient::delay_(0);
+
+double
+SyncClient::offset()
+{
+  return SyncClient::offset_.load();
+}
+
+double
+SyncClient::delay()
+{
+  return SyncClient::delay_.load();
+}
