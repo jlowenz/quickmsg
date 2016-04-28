@@ -27,7 +27,9 @@ SyncServer::~SyncServer() {}
 void 
 SyncServer::after_recv(msg_ptr& msg) 
 {
-  get_time(msg->t2);
+  if (get_time(msg->t2)) {
+    msg->valid = 0;
+  }
 }
 
 void SyncServer::respond(asio::yield_context yield,
@@ -35,7 +37,9 @@ void SyncServer::respond(asio::yield_context yield,
 			 udp_sock_ptr sock,
 			 udp::endpoint peer) 
 {
-  get_time(msg->t3);
+  if (get_time(msg->t3)) {
+    msg->valid = 0;
+  }
   sock->send_to(asio::buffer(msg.get(),sizeof(sync_message_t)), peer);
   msg->valid = msg->id = msg->t1 = msg->t2 = msg->t3 = msg->t4 = 0;
   delete_msg(msg.get());
@@ -132,7 +136,9 @@ client_read_handler(SyncClient* self,
 		    const sys::error_code& ec,
 		    size_t num_bytes)
 {
-  get_time(msg->t4);
+  if (get_time(msg->t4)) {
+    msg->valid = 0;
+  }
   *out_ec = ec;
   if (ec) {
     msg->valid = 0;
@@ -157,7 +163,9 @@ SyncClient::req_sync_message(sys::error_code& ec)
   uint32_t id = id_++;
   sync_message_t::ptr msg(new sync_message_t(id));
   // what about return values?
-  get_time(msg->t1);
+  if (get_time(msg->t1)) {
+    msg->valid = 0;
+  }
   sock_->send_to(asio::buffer(msg.get(), 
 			      sizeof(sync_message_t)), svc_);
 
