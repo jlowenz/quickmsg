@@ -65,10 +65,12 @@ void UDPServer<T>::run(asio::yield_context yield) {
   udp::endpoint remote_peer;
   sys::error_code ec;
   while (ok_.load()) {
-    msg_ptr msg = new_msg();
-    size_t size = sock_->async_receive_from(asio::buffer(msg.get(),
-							 sizeof(T)),
-					    remote_peer, yield[ec]);
+    msg_ptr msg(new_msg(), [](T*){});
+    before_recv(msg);
+    sock_->async_receive_from(asio::buffer(msg.get(),
+					   sizeof(T)),
+			      remote_peer, yield[ec]);
+    after_recv(msg);
     if (!ec) {
       asio::spawn(io_, boost::bind(&UDPServer::respond, this, ::_1, 
 				   msg, sock_, remote_peer));

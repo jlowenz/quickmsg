@@ -34,7 +34,7 @@ else()
   pkg_check_modules(TBB "tbb")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS date_time system thread log)
+find_package(Boost REQUIRED COMPONENTS date_time system thread log coroutine)
 find_package(Java COMPONENTS Runtime Development)
 find_package(JNI)
 
@@ -74,6 +74,11 @@ add_library(${PROJECT_NAME} SHARED
 target_compile_options(${PROJECT_NAME} PRIVATE "-DBOOST_LOG_DYN_LINK")
 # TODO: hmmm should tbb/zyre/czmq be in variables?
 target_link_libraries(${PROJECT_NAME} tbb zyre czmq ${LIB_GLOG_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(clk_service_test src/clk_service_test.cpp)
+target_link_libraries(clk_service_test ${PROJECT_NAME})
+add_executable(clk_client_test src/clk_client_test.cpp)
+target_link_libraries(clk_client_test ${PROJECT_NAME})
 
 add_library("${PROJECT_NAME}-c" SHARED
   src/quickmsg_wrap.cpp
