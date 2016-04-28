@@ -20,6 +20,7 @@ int get_time(cs_time_t& ts)
 SyncServer::SyncServer(asio::io_service& service)
   : UDPServer(service, SYNC_PORT)
 {
+  srand(time(NULL));
 }
 SyncServer::~SyncServer() {}
 
@@ -36,6 +37,8 @@ void SyncServer::respond(asio::yield_context yield,
 {
   get_time(msg->t3);
   sock->send_to(asio::buffer(msg.get(),sizeof(sync_message_t)), peer);
+  msg->valid = msg->id = msg->t1 = msg->t2 = msg->t3 = msg->t4 = 0;
+  delete_msg(msg.get());
 }
 
 void run_sync_service()
@@ -91,8 +94,9 @@ SyncClient::run() {
       BOOST_LOG_TRIVIAL(debug) << "      t2: " << msg->t2;
       BOOST_LOG_TRIVIAL(debug) << "      t3: " << msg->t3;
       BOOST_LOG_TRIVIAL(debug) << "      t4: " << msg->t4;
-      BOOST_LOG_TRIVIAL(debug) << "  offset: " << get_offset(msg);
-      BOOST_LOG_TRIVIAL(debug) << "   delay: " << get_delay(msg);
+      double delay = get_delay(msg);
+      BOOST_LOG_TRIVIAL(debug) << "   delay: " << delay;
+      BOOST_LOG_TRIVIAL(debug) << "  offset: " << get_offset(msg, delay);
     } else {
       BOOST_LOG_TRIVIAL(debug) << "Invalid response";
     }
@@ -102,13 +106,13 @@ SyncClient::run() {
 }
   
 double
-SyncClient::get_offset(const sync_message_t::ptr& msg)
+SyncClient::get_offset(const sync_message_t::ptr& msg, double delay)
 {
   cs_time_t d1 = (msg->t2 - msg->t1);
   cs_time_t d2 = (msg->t3 - msg->t4);
   double t21 = cs2double(d1);
   double t34 = cs2double(d2);
-  return (t21 + t34) / 2.0;
+  return (t21 + t34 - delay) / 2.0;
 }
 
 double

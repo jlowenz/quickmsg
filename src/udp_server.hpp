@@ -39,10 +39,10 @@ public:
 		       udp::endpoint peer) = 0;
 
   void run(asio::yield_context yield);
-private:
+
   T* new_msg();
   void delete_msg(T* msg);
-  
+private: 
   asio::io_service& io_;
   uint32_t port_;
   udp_sock_ptr sock_;

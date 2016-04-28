@@ -79,7 +79,7 @@ public:
 
 protected:
   void check_deadline();
-  double get_offset(const sync_message_t::ptr& msg);
+  double get_offset(const sync_message_t::ptr& msg, double delay);
   double get_delay(const sync_message_t::ptr& msg);
   sync_message_t::ptr req_sync_message(sys::error_code& ec);
 
