@@ -6,7 +6,7 @@ namespace pt = boost::posix_time;
 inline cs_time_t 
 correct_time(const cs_time_t& t)
 {
-  double offset = SyncClient::offset();
+  double offset = SyncClient::offset();  
   bool is_neg = offset < 0;
   uint64_t soff = is_neg ? (uint32_t)std::trunc(-offset) : (uint32_t)std::trunc(offset);
   double dnoff, dint;
@@ -15,6 +15,7 @@ correct_time(const cs_time_t& t)
   cs_time_t csoff = (soff << 32) | noff;
   if (is_neg) csoff = ~csoff + 1;
   cs_time_t newt = (t + csoff);
+  BOOST_LOG_TRIVIAL(debug) << "offset: " << offset;
   BOOST_LOG_TRIVIAL(debug) << "correcting time " << t << " -> " << newt;
   return newt;
 }
@@ -127,7 +128,9 @@ SyncClient::run() {
       } else {
 	double o = offset_.load();
 	double d = delay_.load();
-	offset_.store(0.9*o + 0.1*(o+offset));
+	//offset_.store(0.9*o + 0.1*(o+offset));
+	//offset_.store(0.1*o + 0.9*(o+offset));
+	offset_.store(o+offset);
 	delay_.store(d);
       }
     } else {
