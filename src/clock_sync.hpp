@@ -6,6 +6,10 @@
 #include "udp_server.hpp"
 #include <cmath>
 #include <boost/asio/deadline_timer.hpp>
+#include <time.h>
+#include <thread>
+#include <chrono>
+#include <string>
 
 class ClockSync
 {
@@ -22,14 +26,23 @@ const uint32_t SYNC_PORT = 41337;
 const uint32_t NUM_THREADS = 4;
 const uint32_t REQUEST_TIMEOUT = 400;
 
-typedef int64_t cs_time_t;
+typedef uint64_t cs_time_t;
+//typedef timespec cs_time_t;
+
 
 inline double cs2double(const cs_time_t& t)
-{
+{ 
   bool is_neg = t < 0;
   cs_time_t cs = is_neg ? (~t + 1) : t;
   double d = ldexp((double)cs, -32);
   return is_neg ? -d : d;
+}
+
+inline double cs2double2(const cs_time_t& t)
+{
+  uint32_t s = t >> 32;
+  uint32_t n = (uint32_t)(t & 0xffffffff);
+  return (double)(s + n / 1.0e9);
 }
 
 struct sync_message_t
@@ -79,7 +92,7 @@ public:
 
 protected:
   void check_deadline();
-  double get_offset(const sync_message_t::ptr& msg, double delay);
+  double get_offset(const sync_message_t::ptr& msg);
   double get_delay(const sync_message_t::ptr& msg);
   sync_message_t::ptr req_sync_message(sys::error_code& ec);
 

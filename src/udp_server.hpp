@@ -63,13 +63,13 @@ UDPServer<T>::UDPServer(asio::io_service& service, uint32_t port)
 template<typename T>
 void UDPServer<T>::run(asio::yield_context yield) {
   udp::endpoint remote_peer;
-  sys::error_code ec;
+  sys::error_code ec = asio::error::would_block;
   while (ok_.load()) {
-    msg_ptr msg(new_msg(), [](T*){});
+    msg_ptr msg(new T);
     before_recv(msg);
     sock_->async_receive_from(asio::buffer(msg.get(),
 					   sizeof(T)),
-			      remote_peer, yield[ec]);
+			      remote_peer, yield[ec]);    
     after_recv(msg);
     if (!ec) {
       asio::spawn(io_, boost::bind(&UDPServer::respond, this, ::_1, 

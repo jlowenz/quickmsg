@@ -1,21 +1,37 @@
 #include "clock_sync.hpp"
-#include <time.h>
-#include <thread>
-#include <chrono>
-#include <string>
+#include <limits>
 
 namespace pt = boost::posix_time;
 
-int get_time(cs_time_t& ts)
+inline cs_time_t 
+correct_time(const cs_time_t& t)
+{
+  double offset = SyncClient::offset();
+  bool is_neg = offset < 0;
+  uint64_t soff = is_neg ? (uint32_t)std::trunc(-offset) : (uint32_t)std::trunc(offset);
+  double dnoff, dint;
+  dnoff = std::modf(offset, &dint);
+  uint64_t noff = is_neg ? (uint32_t)(-dnoff * 1e9) : (uint32_t)(dnoff * 1e9);
+  cs_time_t csoff = (soff << 32) | noff;
+  if (is_neg) csoff = ~csoff + 1;
+  cs_time_t newt = (t + csoff);
+  BOOST_LOG_TRIVIAL(debug) << "correcting time " << t << " -> " << newt;
+  return newt;
+}
+
+int get_time(cs_time_t& ts, bool client = false)
 {
   struct timespec time;
   if (clock_gettime(CLOCK_REALTIME, &time)) {
     return -1;
   }
+  //BOOST_LOG_TRIVIAL(debug) << sizeof(time.tv_sec) << "," << sizeof(time.tv_nsec);
+  //BOOST_LOG_TRIVIAL(debug) << time.tv_sec << "," << time.tv_nsec;
   ts = (time.tv_sec << 32) | time.tv_nsec;
+  if (client)
+    ts = correct_time(ts);
   return 0;
 }
-
 
 SyncServer::SyncServer(asio::io_service& service)
   : UDPServer(service, SYNC_PORT)
@@ -30,6 +46,7 @@ SyncServer::after_recv(msg_ptr& msg)
   if (get_time(msg->t2)) {
     msg->valid = 0;
   }
+  //BOOST_LOG_TRIVIAL(debug) << "after_recv";
 }
 
 void SyncServer::respond(asio::yield_context yield,
@@ -41,8 +58,8 @@ void SyncServer::respond(asio::yield_context yield,
     msg->valid = 0;
   }
   sock->send_to(asio::buffer(msg.get(),sizeof(sync_message_t)), peer);
-  msg->valid = msg->id = msg->t1 = msg->t2 = msg->t3 = msg->t4 = 0;
-  delete_msg(msg.get());
+  //msg->valid = msg->id = msg->t1 = msg->t2 = msg->t3 = msg->t4 = 0;
+  //delete_msg(msg.get());
 }
 
 void run_sync_service()
@@ -100,7 +117,18 @@ SyncClient::run() {
       BOOST_LOG_TRIVIAL(debug) << "      t4: " << msg->t4;
       double delay = get_delay(msg);
       BOOST_LOG_TRIVIAL(debug) << "   delay: " << delay;
-      BOOST_LOG_TRIVIAL(debug) << "  offset: " << get_offset(msg, delay);
+      double offset = get_offset(msg);
+      BOOST_LOG_TRIVIAL(debug) << "  offset: " << offset;
+
+      if (offset_.load() == 0.0) {
+	offset_.store(offset);
+	delay_.store(delay); // hmmm what to do with the delay
+      } else {
+	double o = offset_.load();
+	double d = delay_.load();
+	offset_.store(0.9*o + 0.1*(o+offset));
+	delay_.store(d);
+      }
     } else {
       BOOST_LOG_TRIVIAL(debug) << "Invalid response";
     }
@@ -110,22 +138,26 @@ SyncClient::run() {
 }
   
 double
-SyncClient::get_offset(const sync_message_t::ptr& msg, double delay)
+SyncClient::get_offset(const sync_message_t::ptr& msg)
 {
-  cs_time_t d1 = (msg->t2 - msg->t1);
-  cs_time_t d2 = (msg->t3 - msg->t4);
-  double t21 = cs2double(d1);
-  double t34 = cs2double(d2);
-  return (t21 + t34 - delay) / 2.0;
+  double t1 = cs2double2(msg->t1);
+  double t2 = cs2double2(msg->t2);
+  double t3 = cs2double2(msg->t3);
+  double t4 = cs2double2(msg->t4);
+  double dd1 = t2 - t1;
+  double dd2 = t3 - t4;
+  return (dd1 + dd2) / 2.0;
 }
 
 double
 SyncClient::get_delay(const sync_message_t::ptr& msg)
 {
-  cs_time_t d1 = (msg->t4 - msg->t1);
-  cs_time_t d2 = (msg->t3 - msg->t2);
-  double t41 = cs2double(d1);
-  double t32 = cs2double(d2);
+  double t1 = cs2double2(msg->t1);
+  double t2 = cs2double2(msg->t2);
+  double t3 = cs2double2(msg->t3);
+  double t4 = cs2double2(msg->t4);
+  double t41 = t4 - t1;
+  double t32 = t3 - t2;
   return t41 - t32;
 }
 
@@ -136,7 +168,7 @@ client_read_handler(SyncClient* self,
 		    const sys::error_code& ec,
 		    size_t num_bytes)
 {
-  if (get_time(msg->t4)) {
+  if (get_time(msg->t4,true)) {
     msg->valid = 0;
   }
   *out_ec = ec;
@@ -144,7 +176,6 @@ client_read_handler(SyncClient* self,
     msg->valid = 0;
     BOOST_LOG_TRIVIAL(warning) << ec.message();
   } else {
-    BOOST_LOG_TRIVIAL(debug) << "client_read_handler";
     msg->valid = 1;
   }
 }
@@ -163,7 +194,7 @@ SyncClient::req_sync_message(sys::error_code& ec)
   uint32_t id = id_++;
   sync_message_t::ptr msg(new sync_message_t(id));
   // what about return values?
-  if (get_time(msg->t1)) {
+  if (get_time(msg->t1,true)) {
     msg->valid = 0;
   }
   sock_->send_to(asio::buffer(msg.get(), 
