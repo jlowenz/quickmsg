@@ -77,7 +77,7 @@ void run_sync_service()
 }
 
 SyncClient::SyncClient(std::string hostname)
-  : hostname_(hostname), id_(0), deadline_(io_)
+  : hostname_(hostname), id_(0), deadline_(io_), first_(true)
 {
   udp::resolver::query q(udp::v4(), hostname_, std::to_string(SYNC_PORT));
   udp::resolver resolver(io_);
@@ -120,9 +120,10 @@ SyncClient::run() {
       double offset = get_offset(msg);
       BOOST_LOG_TRIVIAL(debug) << "  offset: " << offset;
 
-      if (offset_.load() == 0.0) {
+      if (first_) {
 	offset_.store(offset);
 	delay_.store(delay); // hmmm what to do with the delay
+	first_ = false;
       } else {
 	double o = offset_.load();
 	double d = delay_.load();

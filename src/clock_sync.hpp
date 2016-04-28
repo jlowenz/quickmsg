@@ -104,6 +104,7 @@ private:
   udp::endpoint svc_;
   udp_sock_ptr sock_;
   asio::deadline_timer deadline_;
+  bool first_;
   
   // for 
   static std::atomic<double> offset_; // in microseconds
