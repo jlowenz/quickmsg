@@ -3,15 +3,56 @@
 
 namespace pt = boost::posix_time;
 
+////////////////////////////////////////////////////////////////////////////////
+// Handle Mac OS X - implement a clock_gettime replacement
+#if __MACH__
+#include <mach/mach_time.h>
+#define CLOCK_REALTIME 0
+static double osx_timebase = 0.0;
+static uint64_t osx_timestart = 0;
+static struct timespec osx_timespec = {0,0};
+
+inline void normalize_timespec(struct timespec* ts)
+{
+  ts->tv_sec += ts->tv_nsec / BILLION;
+  ts->tv_nsec = ts->tv_nsec % BILLION;
+}
+
+int clock_gettime(int type, struct timespec* t) {
+  // be more careful in a multithreaded environement
+  if (!osx_timestart) {
+    mach_timebase_info_data_t tb = { 0 };
+    struct timeval tv = { 0 };
+    mach_timebase_info(&tb);
+    osx_timebase = tb.numer;
+    osx_timebase /= tb.denom;
+    osx_timestart = mach_absolute_time();
+    int rv = gettimeofday(&tv, NULL);
+    if (rv) return rv;
+    osx_timespec.tv_sec = tv.tv_sec;
+    osx_timespec.tv_nsec = tv.tv_usec * 1000;
+    cs_time_t v = (osx_timespec.tv_sec << 32) | osx_timespec.tv_nsec;
+    BOOST_LOG_TRIVIAL(debug) << "INITIAL TIMESTAMP: " << v;
+  }
+  double diff = (mach_absolute_time() - osx_timestart) * osx_timebase;
+  uint64_t secs = (uint64_t)diff*NANO;
+  uint64_t nsecs = (uint64_t)(diff - (secs*BILLION));
+  t->tv_sec = osx_timespec.tv_sec + secs;
+  t->tv_nsec = osx_timespec.tv_nsec + nsecs;
+  normalize_timespec(t);
+  return 0;
+}
+#endif
+
 inline cs_time_t 
 correct_time(const cs_time_t& t)
 {
   double offset = SyncClient::offset();  
   bool is_neg = offset < 0;
-  uint64_t soff = is_neg ? (uint32_t)std::trunc(-offset) : (uint32_t)std::trunc(offset);
   double dnoff, dint;
   dnoff = std::modf(offset, &dint);
-  uint64_t noff = is_neg ? (uint32_t)(-dnoff * 1e9) : (uint32_t)(dnoff * 1e9);
+  uint64_t soff = is_neg ? (uint64_t)-dint : (uint64_t)dint;
+  uint64_t noff = is_neg ? (uint64_t)(-dnoff * BILLION) : (uint64_t)(dnoff * BILLION);
   cs_time_t csoff = (soff << 32) | noff;
   if (is_neg) csoff = ~csoff + 1;
   cs_time_t newt = (t + csoff);
@@ -128,9 +169,9 @@ SyncClient::run() {
       } else {
 	double o = offset_.load();
 	double d = delay_.load();
-	//offset_.store(0.9*o + 0.1*(o+offset));
+	offset_.store(0.7*o + 0.3*(o+offset));
 	//offset_.store(0.1*o + 0.9*(o+offset));
-	offset_.store(o+offset);
+	//offset_.store(o+offset);
 	delay_.store(d);
       }
     } else {

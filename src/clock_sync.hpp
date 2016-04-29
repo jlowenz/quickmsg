@@ -22,6 +22,9 @@ public:
 private:
 };
 
+const uint64_t MILLION = 1000000L;
+const uint64_t BILLION = 1000000000L;
+const double NANO = 1e-9;
 const uint32_t SYNC_PORT = 41337;
 const uint32_t NUM_THREADS = 4;
 const uint32_t REQUEST_TIMEOUT = 400;
@@ -30,13 +33,13 @@ typedef uint64_t cs_time_t;
 //typedef timespec cs_time_t;
 
 
-inline double cs2double(const cs_time_t& t)
-{ 
-  bool is_neg = t < 0;
-  cs_time_t cs = is_neg ? (~t + 1) : t;
-  double d = ldexp((double)cs, -32);
-  return is_neg ? -d : d;
-}
+// inline double cs2double(const cs_time_t& t)
+// { 
+//   bool is_neg = t < 0;
+//   cs_time_t cs = is_neg ? (~t + 1) : t;
+//   double d = ldexp((double)cs, -32);
+//   return is_neg ? -d : d;
+// }
 
 inline double cs2double2(const cs_time_t& t)
 {
