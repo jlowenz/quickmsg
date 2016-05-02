@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <pthread.h>
 #include <signal.h>
 #include <zyre.h>
 
@@ -18,6 +17,12 @@
 
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
+
+#ifndef _WIN32
+#  include <pthread.h>
+#else
+#  undef interface
+#endif
 
 #define DEBUG
 

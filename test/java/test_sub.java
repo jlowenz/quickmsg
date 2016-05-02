@@ -28,6 +28,7 @@ public class test_sub {
         try {
             System.loadLibrary(lib_name);
         } catch (UnsatisfiedLinkError e) {
+	    e.printStackTrace();
             System.err.println("Could not find "+lib_name+". Check Library Search Path");
             System.exit(1);
         }
@@ -50,6 +51,7 @@ public class test_sub {
         AsyncSubscriberImpl sub = new AsyncSubscriberImpl("chatter");
 	sub.spin();
 	sub.delete();
+	quickmsg_java.shutdown("");
         // AsyncSubscriberImpl asub = new AsyncSubscriberImpl("chatter");
         // asub.spin();
     }

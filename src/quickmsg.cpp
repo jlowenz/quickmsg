@@ -4,34 +4,17 @@
 #include <quickmsg/quickmsg.hpp>
 #include <quickmsg/group_node.hpp>
 #include <signal.h>
-#include <pthread.h>
 #include <czmq.h>
 #include <stdlib.h>
 
 #if _WIN32
 #include <WinSock2.h>
+#define WS_VERSION_MAJOR 2
+#define WS_VERSION_MINOR 2
 #endif
 
 namespace quickmsg {
 
-//   void __sigint_handler(int param)
-//   {
-//     quickmsg::GroupNode::running_.store(false);
-// #if _WIN32
-//     signal(SIGINT, SIG_DFL);
-//     raise(SIGINT);
-// #else // __WIN32
-//     struct sigaction action;
-//     struct sigaction prev_action;
-//     action.sa_handler = SIG_DFL;
-//     action.sa_flags = 0;
-//     sigemptyset(&action.sa_mask);
-//     if (sigaction(SIGINT, &action, NULL)) {
-//       BOOST_LOG_TRIVIAL(warning) << "problem with sigaction" << std::endl;
-//     }
-//     kill(0, SIGINT);
-// #endif
-//   }
 
   void __shutdown_handler(int param)
   {
@@ -88,6 +71,19 @@ namespace quickmsg {
   {
     // if the function has already been called, just return.
     if (GroupNode::running_.load()) return;
+
+#if _WIN32
+    // try to call winsock startup on initialization to avoid
+    // czmq/windows assertion on shutdown.
+    WORD wsVersionRequested;
+    WSADATA wsadata;
+    wsVersionRequested = MAKEWORD(WS_VERSION_MAJOR,WS_VERSION_MINOR);
+    if (WSAStartup(wsVersionRequested, &wsadata)) {
+      assert("WinSock initialization failed!");
+      exit(-1);
+    }
+#endif
+
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
     GroupNode::control_ = name + "/CTL";

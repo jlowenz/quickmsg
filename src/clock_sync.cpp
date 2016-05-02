@@ -4,6 +4,13 @@
 namespace pt = boost::posix_time;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Handle Windows - implement a clock_gettime replacement
+#if _WIN32
+#define CLOCK_REALTIME 0
+#include "time_win.h"
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
 // Handle Mac OS X - implement a clock_gettime replacement
 #if __MACH__
 #include <mach/mach_time.h>

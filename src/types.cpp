@@ -1,6 +1,8 @@
 #include <quickmsg/types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#define MILLION 1000000
+
 namespace quickmsg {
   using namespace boost::posix_time;
 
@@ -22,7 +24,7 @@ namespace quickmsg {
     std::chrono::high_resolution_clock::duration d = t.time_since_epoch();
     secs_ = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(d).count());
     uint64_t micros = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
-    uint64_t secs = 1e6*secs_;
+    uint64_t secs = MILLION*secs_;
     msecs_ = micros - secs;
   }
   Time::Time(const Time& t)
