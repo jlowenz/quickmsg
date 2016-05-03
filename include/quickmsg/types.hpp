@@ -26,8 +26,8 @@ namespace quickmsg {
     bool operator<(const Time& t) const;
 
     double to_secs() const;
-    uint32_t secs() const;
-    uint32_t microsecs() const;
+    uint64_t secs() const;
+    uint64_t microsecs() const;
     std::string to_string() const;
     std::string to_json() const;
     

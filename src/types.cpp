@@ -66,13 +66,13 @@ namespace quickmsg {
     return static_cast<double>((secs_+(static_cast<double>(msecs_)/1e6)));
   }
 
-  uint32_t 
+  uint64_t 
   Time::secs() const
   {
     return secs_;
   }
 
-  uint32_t 
+  uint64_t 
   Time::microsecs() const
   {
     return msecs_;
