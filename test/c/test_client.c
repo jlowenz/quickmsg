@@ -9,11 +9,8 @@ main(int argc, char** argv)
   /* No JSON to make it easier here */
   int i = 0;
   qm_client_t c;
-  struct timespec ts;
   const char* iface = ""; /* whatever iface zyre defaults to */
   const char* req = "Hello";
-  ts.tv_sec = 1;
-  ts.tv_nsec = 0;
 
   qm_init("test_c_client", iface);
   c = qm_client_new("hello");
@@ -25,7 +22,7 @@ main(int argc, char** argv)
     }
     printf("Received response: %s\n", resp);
     free(resp);
-    nanosleep(&ts, NULL);
+    sleep(1000);
   }
 
   qm_client_destroy(c);
