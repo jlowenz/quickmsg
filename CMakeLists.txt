@@ -6,9 +6,17 @@ if (CMAKE_MAJOR_VERSION EQUAL 3)
   cmake_policy(SET CMP0042 OLD)
 endif()
 
+# make useful local CMAKE modules available
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
+message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+
 # Windows build type
 if (WIN32)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Specify build configuration")
+  find_package(csharp)
+  if (CSHARP_FOUND)
+    include(${CSHARP_USE_FILE})
+  endif()
 endif()
 
 # directories
@@ -59,7 +67,7 @@ else()
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od /W3 /MTd")
   add_definitions("-D_WINVER=0x0601")
   add_definitions("-D_WIN32_WINNT=0x0601")
-  add_definitions("-D_SCL_SECURE_NO_WARNINGS -DLIBZMQ_STATIC -DLIBCZMQ_STATIC -DLIBZYRE_STATIC")
+  add_definitions("-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DLIBZMQ_STATIC -DLIBCZMQ_STATIC -DLIBZYRE_STATIC")
   file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/bin/" CACHE PATH "Install prefix" FORCE)
   set(WIN_PLATFORM "x64" CACHE STRING "Windows Architecture [x64,Win32]")
@@ -71,7 +79,6 @@ else()
   message("-- BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
   message("-- WIN_MODE:   ${WIN_MODE}")
   set(WIN_VS_VERSION "v120" CACHE STRING "Visual Studio Version [v120]")
-  set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
   set(TBB_ROOT_DIR "${PROJECT_SOURCE_DIR}/../tbb" CACHE PATH "Root directory for Threading Building Blocks")
   set(TBB_LIBRARY "${TBB_ROOT_DIR}/lib/intel64/vc12/")
   set(PC_LIBZMQ_LIBRARY_HINTS
@@ -96,6 +103,7 @@ else()
   find_package(TBB REQUIRED)
   include_directories(${TBB_INCLUDE_DIRS})
 
+  set(CMAKE_DEBUG_POSTFIX "_d")
   # Switching on BUILD_TYPE is ineffective for "multi-configuration" generators like MSVC!
 endif()
 
@@ -147,14 +155,13 @@ set(QM_C_FILES
   src/service_wrap.cpp)
 
 # we need to fix the other library paths
-set(QM_DEPENDS_LIBS
-  optimized 
+set(QM_DEPENDS_LIBS_RELEASE
   ${ZYRE_LIBRARIES}
   ${CZMQ_LIBRARIES}
   ${LIBZMQ_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${TBB_tbb_LIBRARY_RELEASE}
-  debug
+  ${TBB_tbb_LIBRARY_RELEASE})
+set(QM_DEPENDS_LIBS_DEBUG
   ${ZYRE_LIBRARIES}
   ${CZMQ_LIBRARIES}
   ${LIBZMQ_LIBRARIES}
@@ -170,7 +177,9 @@ else()
   # Windows cannot easily generate DLLs with C++ code
   add_library(${PROJECT_NAME} STATIC ${QM_CPP_FILES})
 endif()
-target_link_libraries(${PROJECT_NAME} ${QM_DEPENDS_LIBS})
+target_link_libraries(${PROJECT_NAME}
+  optimized ${QM_DEPENDS_LIBS_RELEASE}
+  debug ${QM_DEPENDS_LIBS_DEBUG})
 
 ################################################################################
 # Clock executables (for testing)
@@ -185,7 +194,9 @@ add_library("${PROJECT_NAME}-c" SHARED ${QM_CPP_FILES} ${QM_C_FILES})
 if (!WIN32)
   target_compile_options("${PROJECT_NAME}-c" PRIVATE "-DBOOST_LOG_DYN_LINK")
 endif()
-target_link_libraries("${PROJECT_NAME}-c" ${QM_DEPENDS_LIBS})
+target_link_libraries("${PROJECT_NAME}-c"
+  optimized ${QM_DEPENDS_LIBS_RELEASE}
+  debug ${QM_DEPENDS_LIBS_DEBUG})
 
 ################################################################################
 # Test Executables
@@ -201,9 +212,9 @@ if (LIB_JSONCPP_FOUND)
   add_executable(test_client test/cpp/test_client.cpp)
   target_link_libraries(test_client ${PROJECT_NAME} ${LIB_JSONCPP_LIBRARIES})
 else()
-  message("-- jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' or 'git clone https://github.com/open-source-parsers/jsoncpp' to install")
-  message("-- C++ service test code will not be built.")
-  message("-- This is NOT an error, you only need jsoncpp to build C++ test code")
+  message(STATUS "-- jsoncpp NOT found. Run 'apt-get install libjsoncpp-dev' or 'git clone https://github.com/open-source-parsers/jsoncpp' to install")
+  message(STATUS "-- C++ service test code will not be built.")
+  message(STATUS "-- This is NOT an error, you only need jsoncpp to build C++ test code")
 endif()
 
 add_executable(test_pub test/cpp/test_pub.cpp)
@@ -245,11 +256,13 @@ endfunction(swig_cpp)
 #   COMMAND ${CMAKE_COMMAND} remove_directory ${CMAKE_CURRENT_BINARY_DIR}/swig
 #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/swig)
 
-set(SWIG_FILES swig/swig_interfaces.i swig/quickmsg_py.i swig/quickmsg_java.i)
+set(SWIG_FILES swig/swig_interfaces.i swig/quickmsg_py.i swig/quickmsg_java.i swig/quickmsg_csharp.i)
 swig_cpp("${SWIG_FILES}")
 
 swig_add_module(quickmsg_py python swig/quickmsg_py.i)
-swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME} ${QM_DEPENDS_LIBS})
+swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME}
+  optimized ${QM_DEPENDS_LIBS_RELEASE}
+  debug ${QM_DEPENDS_LIBS_RELEASE})
 
 function(java_jar_native jar_file native_dir)
   set(JAVA_INSTALL_DIR "file://${CMAKE_INSTALL_PREFIX}/share/java")
@@ -306,7 +319,9 @@ if (JAVA_FOUND AND JNI_FOUND)
 
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
   #link_directories(/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64)
-  swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME} ${QM_DEPENDS_LIBS})
+  swig_link_libraries(quickmsg_java ${JNI_LIBRARIES} ${PROJECT_NAME}
+    optimized ${QM_DEPENDS_LIBS_RELEASE}
+    debug ${QM_DEPENDS_LIBS_DEBUG})
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
 
@@ -356,6 +371,40 @@ else()
   message("Java not found...")
 endif()
 
+################################################################################
+# C# Windows Module
+if (WIN32 AND CSHARP_FOUND)
+  message(STATUS "Building C# Modules")
+  # Build C# native wrapper
+  set(CMAKE_SWIG_FLAGS "-namespace" "quickmsg")
+  swig_add_module(quickmsg_csharp csharp swig/quickmsg_csharp.i)
+  swig_link_libraries(quickmsg_csharp ${PROJECT_NAME})
+
+  set(TARGET_QM_CS "quickmsg_cs.dll")
+  set(TARGET_QM_CSHARP "quickmsg_csharp.dll")
+  
+  # Build C# interface  
+  file(GLOB CSHARP_SRC ${CMAKE_CURRENT_BINARY_DIR}/swig/*.cs)
+  set(CSHARP_SRC "${PROJECT_SOURCE_DIR}/swig/nosourceyet.cs" ${CSHARP_SRC})
+  message(STATUS "C# Source: ${CSHARP_SRC}")
+  csharp_add_library(quickmsg_cs ${CSHARP_SRC})
+
+  set(CS_REFS "${TARGET_QM_CS};System.Core.dll;System.Data.dll;System.Xml.dll")
+  csharp_add_executable(test_sub_cs
+    "${CS_REFS}"
+    "${PROJECT_SOURCE_DIR}/test/c-sharp/test_sub_cs.cs")
+  csharp_add_executable(test_pub_cs
+    "${CS_REFS}"
+    "${PROJECT_SOURCE_DIR}/test/c-sharp/test_pub_cs.cs")
+  csharp_add_executable(test_client_cs
+    "${CS_REFS}"
+    "${PROJECT_SOURCE_DIR}/test/c-sharp/test_client_cs.cs")
+  csharp_add_executable(test_service_cs
+    "${CS_REFS}"
+    "${PROJECT_SOURCE_DIR}/test/c-sharp/test_service_cs.cs")
+
+endif()
+  
 if (!WIN32) 
   # installation
   install(TARGETS ${PROJECT_NAME} "${PROJECT_NAME}-c" "${PROJECT_NAME}_java" LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}

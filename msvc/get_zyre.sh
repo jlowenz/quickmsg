@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-ZYRE_VERSION=tags/v1.2.0
-CZMQ_VERSION=0d6d9e4cda37364a5bbafece63052a0233c8a42f
+ZYRE_VERSION=tags/v1.1.0
+CZMQ_VERSION=tags/v3.0.2
 
 if [[ ! -e libsodium ]]; then
     git clone --depth 1 -b stable https://github.com/jedisct1/libsodium.git
