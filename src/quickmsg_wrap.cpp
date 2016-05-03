@@ -93,5 +93,18 @@ extern "C" {
   VEC_IMPL_OF(quickmsg::Peer,qm_peer_t) // qm_vec_qm_peer_t
   VEC_IMPL_OF(quickmsg::Message,qm_message_t) // qm_vec_qm_message_t
 
-
+#ifdef _WIN32
+  #include <windows.h>
+  void sleep(long milliseconds) {
+    Sleep(milliseconds);
+  }
+#else
+  #include <time.h>
+  void sleep(long milliseconds) {
+    struct timespec ts = {0};
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+  }
+#endif
 }

@@ -60,7 +60,7 @@ clock_gettime(int X, struct timespec *tv)
 
     t.QuadPart -= offset.QuadPart;
     microseconds = (double)t.QuadPart / frequencyToNanoseconds;
-    t.QuadPart = microseconds;
+    t.QuadPart = (LONGLONG)floor(microseconds);
     tv->tv_sec = t.QuadPart / BILLION;
     tv->tv_nsec = t.QuadPart % BILLION;
     return (0);

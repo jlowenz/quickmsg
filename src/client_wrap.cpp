@@ -39,7 +39,7 @@ extern "C" {
       *c_resp = (char*)malloc(resp.length() + 1);
       memcpy(*c_resp, resp.c_str(), resp.length() + 1);
       return 0;
-    } catch (ServiceCallTimeout& to) {
+    } catch (ServiceCallTimeout& /*to*/) {
       // can't let exceptions escape from the C interface
       *c_resp = NULL;
       return -1;

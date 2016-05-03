@@ -85,7 +85,7 @@ int get_time(cs_time_t& ts, bool client = false)
 SyncServer::SyncServer(asio::io_service& service)
   : UDPServer(service, SYNC_PORT)
 {
-  srand(time(NULL));
+  srand((unsigned int)time(NULL));
 }
 SyncServer::~SyncServer() {}
 
