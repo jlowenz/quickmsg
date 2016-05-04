@@ -22,8 +22,8 @@ public:
 private:
 };
 
-const uint64_t MILLION = 1000000L;
-const uint64_t BILLION = 1000000000L;
+const uint64_t MILLION = 1000000LL;
+const uint64_t BILLION = 1000000000LL;
 const double NANO = 1e-9;
 const uint32_t SYNC_PORT = 41337;
 const uint32_t NUM_THREADS = 4;
