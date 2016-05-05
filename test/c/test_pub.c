@@ -17,7 +17,7 @@ main(int argc, char** argv)
   for (i = 0; i < 10; ++i) {
     sprintf(msg, "Hello World %d", i);
     qm_publish(p, msg);
-    sleep(500);
+    msleep(500);
   }
   qm_publisher_destroy(p);
   qm_shutdown("done");

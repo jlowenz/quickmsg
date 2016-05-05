@@ -3,12 +3,11 @@
 #  Read the zproject/README.md for information about making permanent changes. #
 ################################################################################
 
+set(LIBNAME libzmq)
+
 if (NOT MSVC)
     include(FindPkgConfig)
-    pkg_check_modules(PC_LIBZMQ "libzmq")
-    if (NOT PC_LIBZMQ_FOUND)
-        pkg_check_modules(PC_LIBZMQ "libzmq")
-    endif (NOT PC_LIBZMQ_FOUND)
+    pkg_check_modules(PC_LIBZMQ ${LIBNAME})
     if (PC_LIBZMQ_FOUND)
         # some libraries install the headers is a subdirectory of the include dir
         # returned by pkg-config, so use a wildcard match to improve chances of finding
@@ -24,11 +23,13 @@ find_path (
     HINTS ${PC_LIBZMQ_INCLUDE_HINTS}
 )
 
+message("Search for libraries: ${PC_LIBZMQ_LIBRARY_HINTS}")
 find_library (
     LIBZMQ_LIBRARIES
-    NAMES libzmq
-    HINTS ${PC_LIBZMQ_LIBRARY_HINTS}
+    NAMES ${LIBNAME} zmq
+#    HINTS ${PC_LIBZMQ_LIBRARY_HINTS}
 )
+message("LIBZMQ_LIBRARIES: ${LIBZMQ_LIBRARIES}")
 
 include(FindPackageHandleStandardArgs)
 

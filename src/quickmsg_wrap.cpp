@@ -88,19 +88,24 @@ extern "C" {
     return reinterpret_cast<C_TYPE>((*v)[elem]); }			\
   inline void qm_vec_##C_TYPE##_destroy(qm_vec_##C_TYPE o) {		\
     std::vector<PTR(CPP_TYPE)>* v = reinterpret_cast<std::vector<PTR(CPP_TYPE) >*>(o); \
-    delete v; }
+    size_t SZ = qm_vec_##C_TYPE##_size(o);				\
+      for (size_t i = 0; i < SZ; ++i) {					\
+	PTR(CPP_TYPE) m = v->operator[](i);				\
+	delete m;						        \
+      }									\
+      delete v; }
   
   VEC_IMPL_OF(quickmsg::Peer,qm_peer_t) // qm_vec_qm_peer_t
   VEC_IMPL_OF(quickmsg::Message,qm_message_t) // qm_vec_qm_message_t
 
 #ifdef _WIN32
   #include <windows.h>
-  void sleep(long milliseconds) {
+  void msleep(long milliseconds) {
     Sleep(milliseconds);
   }
 #else
   #include <time.h>
-  void sleep(long milliseconds) {
+  void msleep(long milliseconds) {
     struct timespec ts = {0};
     ts.tv_sec = milliseconds / 1000;
     ts.tv_nsec = (milliseconds % 1000) * 1000000;

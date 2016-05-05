@@ -43,7 +43,7 @@ extern "C" {
   qm_free_string(char* str);
 
   QM_EXPORT void
-  sleep(long milliseconds);
+  msleep(long milliseconds);
   
 #ifdef __cplusplus
 }

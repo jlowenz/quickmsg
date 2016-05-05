@@ -22,7 +22,7 @@ main(int argc, char** argv)
     }
     printf("Received response: %s\n", resp);
     free(resp);
-    sleep(1000);
+    msleep(1000);
   }
 
   qm_client_destroy(c);

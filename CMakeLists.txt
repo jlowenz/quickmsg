@@ -48,14 +48,21 @@ include(${SWIG_USE_FILE})
 find_package(PythonLibs 2)
 include_directories(${PYTHON_INCLUDE_PATH})
 
-if (!WIN32) 
+if (NOT WIN32) 
   include(FindPkgConfig)
-  pkg_check_modules(LIB_ZMQ "libzmq")
-  pkg_check_modules(LIB_CZMQ "libczmq")
-  pkg_check_modules(LIB_ZYRE "libzyre")
+  find_package(libzmq)
+  find_package(czmq)
+  find_package(zyre)
+  #pkg_check_modules(LIB_ZMQ "libzmq")
+  #pkg_check_modules(LIB_CZMQ "libczmq")
+  #pkg_check_modules(LIB_ZYRE "libzyre")
   pkg_check_modules(LIB_JSONCPP "jsoncpp")
   find_package(TBB REQUIRED)
   include_directories(${TBB_INCLUDE_DIRS})
+
+  set(TBB_tbb_LIBRARY_RELEASE ${TBB_LIBRARIES})
+  set(TBB_tbb_LIBRARY_DEBUG ${TBB_LIBRARIES})
+  set(Boost_LIBRARIES_DEBUG ${Boost_LIBRARIES})
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
@@ -93,7 +100,8 @@ else()
     "${PROJECT_SOURCE_DIR}/../zyre/bin/${WIN_PLATFORM}/${WIN_MODE}/${WIN_VS_VERSION}/static/")
   set(PC_ZYRE_INCLUDE_HINTS
     "${PROJECT_SOURCE_DIR}/../zyre/include")
-  
+
+  message("Finding ZeroMQ package (Windows)")
   find_package(libzmq)
   find_package(czmq)
   find_package(zyre)
@@ -170,7 +178,7 @@ set(QM_DEPENDS_LIBS_DEBUG
 
 ################################################################################
 # BUILD THE C++ library
-if (!WIN32)
+if (NOT WIN32)
   add_library(${PROJECT_NAME} SHARED ${QM_CPP_FILES})
   target_compile_options(${PROJECT_NAME} PRIVATE "-DBOOST_LOG_DYN_LINK")
 else()
@@ -191,7 +199,7 @@ target_link_libraries(clk_client_test ${PROJECT_NAME})
 ################################################################################
 # Build the C Library
 add_library("${PROJECT_NAME}-c" SHARED ${QM_CPP_FILES} ${QM_C_FILES})
-if (!WIN32)
+if (NOT WIN32)
   target_compile_options("${PROJECT_NAME}-c" PRIVATE "-DBOOST_LOG_DYN_LINK")
 endif()
 target_link_libraries("${PROJECT_NAME}-c"
@@ -264,11 +272,30 @@ swig_link_libraries(quickmsg_py ${PYTHON_LIBRARIES} ${PROJECT_NAME}
   optimized ${QM_DEPENDS_LIBS_RELEASE}
   debug ${QM_DEPENDS_LIBS_RELEASE})
 
+if (JAVA_FOUND AND JNI_FOUND)
+  SET(JAVA_RUNTIME2  ${Java_JAVA_EXECUTABLE})
+  SET(JAVA_ARCHIVE2  ${Java_JAR_EXECUTABLE})
+  SET(JAVA_COMPILE2  ${Java_JAVAC_EXECUTABLE})
+  # check to see if maven is installed
+  find_program(MVN_BIN NAMES mvn PATHS /usr/bin)
+  message("Maven: ${MVN_BIN}")
+
+  include(UseJava)
+endif()  
+
+if (MSVC)
+  set(COPYCMD "xcopy")
+  set(MVNCMD "call ${MVN_BIN}")
+else()
+  set(COPYCMD "cp")
+  set(MVNCMD "${MVN_BIN}")
+endif()
+
 function(java_jar_native jar_file native_dir)
   set(JAVA_INSTALL_DIR "file://${CMAKE_INSTALL_PREFIX}/share/java")
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
-    COMMAND cmake -E echo "Creating native jar file... (${jar_file}) in ${native_dir}"
+    COMMAND cmake -E echo "Creating native jar file... ${jar_file} in ${native_dir}"
     COMMAND cmake -E make_directory ${native_dir}
     COMMAND cmake -E copy $<TARGET_FILE:quickmsg_java> ${native_dir}
     #COMMAND cmake -E copy $<TARGET_FILE:quickmsg> ${native_dir}
@@ -277,11 +304,11 @@ function(java_jar_native jar_file native_dir)
     add_custom_command(TARGET quickmsg_java
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E echo "Installing maven repo local/quickmsg etc in repo"
-      COMMAND call ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar)
+      COMMAND ${MVNCMD} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar)
     add_custom_command(TARGET quickmsg_java
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E echo "Installing maven repo local/quickmsg etc in repo WTF"
-      COMMAND call ${MVN_BIN} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
+      COMMAND ${MVNCMD} deploy:deploy-file -Durl=${JAVA_INSTALL_DIR} -DgroupId=jlowenz -DartifactId=quickmsg-native -Dversion=1.0 -Dpackaging=jar -Dfile=${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar)
     # Add local maven repo to clean list if it exists
     set(M2_HOME_REPO "$ENV{M2_HOME}/repository/jlowenz")
     if(EXISTS ${M2_HOME_REPO})
@@ -301,20 +328,13 @@ function(java_jar_native jar_file native_dir)
   endif ()
 endfunction(java_jar_native)
 
+
 if (JAVA_FOUND AND JNI_FOUND)
   message("Java found. Running SWIG and building interfaces")
   #SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
   #SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
   #SET(JAVA_COMPILE2  $ENV{JAVA_HOME}/bin/javac)
   # HRRM - fix this junk up
-  SET(JAVA_RUNTIME2  ${Java_JAVA_EXECUTABLE})
-  SET(JAVA_ARCHIVE2  ${Java_JAR_EXECUTABLE})
-  SET(JAVA_COMPILE2  ${Java_JAVAC_EXECUTABLE})
-  # check to see if maven is installed
-  find_program(MVN_BIN NAMES mvn PATHS /usr/bin)
-  message("Maven: ${MVN_BIN}")
-
-  include(UseJava)
   set(CMAKE_SWIG_FLAGS "-package" "quickmsg")
 
   swig_add_module(quickmsg_java java swig/quickmsg_java.i src/quickmsg_java.cpp)
@@ -334,7 +354,7 @@ if (JAVA_FOUND AND JNI_FOUND)
     COMMAND cmake -E echo "Compiling Java files..."
     #COMMAND ${CMAKE_COMMAND} make_directory ${CMAKE_CURRENT_BINARY_DIR}/quickmsg
     #COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_SOURCE_DIR}/swig/quickmsg
-    COMMAND ${CMAKE_COMMAND} -E copy ${PRE_JAVA_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/swig
+    COMMAND ${COPYCMD} ${PRE_JAVA_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/swig
     #COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND "${JAVA_COMPILE2}" ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java -d ${CMAKE_CURRENT_BINARY_DIR}/
     COMMAND cmake -E echo "Creating jar file..."
@@ -405,7 +425,7 @@ if (WIN32 AND CSHARP_FOUND)
 
 endif()
   
-if (!WIN32) 
+if (NOT WIN32) 
   # installation
   install(TARGETS ${PROJECT_NAME} "${PROJECT_NAME}-c" "${PROJECT_NAME}_java" LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
 
