@@ -285,7 +285,7 @@ endif()
 
 if (MSVC)
   set(COPYCMD "xcopy")
-  set(MVNCMD "call ${MVN_BIN}")
+  set(MVNCMD "${MVN_BIN}.cmd")
 else()
   set(COPYCMD "cp")
   set(MVNCMD "${MVN_BIN}")
@@ -345,17 +345,18 @@ if (JAVA_FOUND AND JNI_FOUND)
   # build the Java jars 
   set(CMAKE_JAVA_TARGET_OUTPUT_NAME quickmsg.jar)
 
-  #file(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/swig/quickmsg/ JAVA_SRC_DIR)
-  #file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/swig SWIG_OUT_DIR)
   # THIS IS RIDICULOUS: we should not have to do this!
   file(GLOB PRE_JAVA_SOURCE ${PROJECT_SOURCE_DIR}/swig/quickmsg/*.java)
+  # Until CMAKE > 3.0 is available on Ubuntu, I think this is the most portable (though ugly)
+  foreach(java_file ${PRE_JAVA_SOURCE})
+    add_custom_command(TARGET quickmsg_java
+      POST_BUILD
+      COMMAND cmake -E echo "Copy Java file ${java_file}..."
+      COMMAND ${CMAKE_COMMAND} -E copy ${java_file} ${CMAKE_CURRENT_BINARY_DIR}/swig)
+  endforeach()
   add_custom_command(TARGET quickmsg_java
     POST_BUILD
-    COMMAND cmake -E echo "Compiling Java files..."
-    #COMMAND ${CMAKE_COMMAND} make_directory ${CMAKE_CURRENT_BINARY_DIR}/quickmsg
-    #COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_SOURCE_DIR}/swig/quickmsg
-    COMMAND ${COPYCMD} ${PRE_JAVA_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/swig
-    #COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND cmake -E echo "Compiling Java file..."
     COMMAND "${JAVA_COMPILE2}" ${CMAKE_CURRENT_BINARY_DIR}/swig/*.java -d ${CMAKE_CURRENT_BINARY_DIR}/
     COMMAND cmake -E echo "Creating jar file..."
     COMMAND "${JAVA_ARCHIVE2}" cvf quickmsg.jar quickmsg)
@@ -402,27 +403,33 @@ if (WIN32 AND CSHARP_FOUND)
 
   set(TARGET_QM_CS "quickmsg_cs.dll")
   set(TARGET_QM_CSHARP "quickmsg_csharp.dll")
-  
-  # Build C# interface  
-  file(GLOB CSHARP_SRC ${CMAKE_CURRENT_BINARY_DIR}/swig/*.cs)
-  set(CSHARP_SRC "${PROJECT_SOURCE_DIR}/swig/nosourceyet.cs" ${CSHARP_SRC})
+
+  set(CSHARP_SRC "${PROJECT_SOURCE_DIR}/swig/nosourceyet.cs;${CMAKE_CURRENT_BINARY_DIR}/swig/*.cs")
   message(STATUS "C# Source: ${CSHARP_SRC}")
   csharp_add_library(quickmsg_cs ${CSHARP_SRC})
+  add_dependencies(quickmsg_cs quickmsg_csharp)
 
   set(CS_REFS "${TARGET_QM_CS};System.Core.dll;System.Data.dll;System.Xml.dll")
   csharp_add_executable(test_sub_cs
     "${CS_REFS}"
     "${PROJECT_SOURCE_DIR}/test/c-sharp/test_sub_cs.cs")
+  add_dependencies(test_sub_cs quickmsg_cs)
   csharp_add_executable(test_pub_cs
     "${CS_REFS}"
     "${PROJECT_SOURCE_DIR}/test/c-sharp/test_pub_cs.cs")
+  add_dependencies(test_pub_cs quickmsg_cs)
   csharp_add_executable(test_client_cs
     "${CS_REFS}"
     "${PROJECT_SOURCE_DIR}/test/c-sharp/test_client_cs.cs")
+  add_dependencies(test_client_cs quickmsg_cs)
   csharp_add_executable(test_service_cs
     "${CS_REFS}"
     "${PROJECT_SOURCE_DIR}/test/c-sharp/test_service_cs.cs")
-
+  add_dependencies(test_service_cs quickmsg_cs)
+  # add_custom_command(TARGET quickmsg_csharp
+  #   POST_BUILD
+  #   COMMAND ${CMAKE_COMMAND} -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR} -DTARGET_QM_CS=${TARGET_QM_CS} -P ${PROJECT_SOURCE_DIR}/cmake/build_csharp.cmake)
+  
 endif()
   
 if (NOT WIN32) 

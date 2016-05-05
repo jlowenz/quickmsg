@@ -12,4 +12,4 @@
 message( STATUS "Using .NET compiler version ${CSHARP_DOTNET_VERSION}" )
 
 # Define the location of the .NET libraries
-#set( CSHARP_LIBRARY_PATH "c:/Windows/Microsoft.NET/Framework64/${CSHARP_VERSION}" CACHE PATH "")
+set( CSHARP_LIBRARY_PATH "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "")

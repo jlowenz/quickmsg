@@ -104,7 +104,7 @@ macro( CSHARP_ADD_PROJECT type name )
     COMMENT "Compiling C# ${type} ${name}: '${CSHARP_COMPILER} /t:${type} /out:${name}.${output} /platform:${CSHARP_PLATFORM} ${CSHARP_SDK} ${refs} ${sources}'"
     OUTPUT ${CSHARP_BINARY_DIRECTORY}/${name}.${output}
     COMMAND ${CSHARP_COMPILER}
-    ARGS /t:${type} /out:${name}.${output} /platform:${CSHARP_PLATFORM} ${CSHARP_SDK} ${library_paths} ${refs} ${sources}
+    ARGS /t:${type} /out:${name}.${output} /platform:${CSHARP_PLATFORM} ${CSHARP_SDK} /lib:${library_paths} ${refs} ${sources}
     WORKING_DIRECTORY ${CSHARP_BINARY_DIRECTORY}
     DEPENDS ${sources_dep}
   )

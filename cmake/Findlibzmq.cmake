@@ -27,7 +27,7 @@ message("Search for libraries: ${PC_LIBZMQ_LIBRARY_HINTS}")
 find_library (
     LIBZMQ_LIBRARIES
     NAMES ${LIBNAME} zmq
-#    HINTS ${PC_LIBZMQ_LIBRARY_HINTS}
+    HINTS ${PC_LIBZMQ_LIBRARY_HINTS}
 )
 message("LIBZMQ_LIBRARIES: ${LIBZMQ_LIBRARIES}")
 
