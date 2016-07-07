@@ -234,6 +234,9 @@ target_link_libraries(cli_load ${PROJECT_NAME})
 add_executable(cli_load2 test/cpp/cli_load2.cpp)
 target_link_libraries(cli_load2 ${PROJECT_NAME})
 
+add_executable(svc_pub_alloc test/cpp/svc_pub_alloc.cpp)
+target_link_libraries(svc_pub_alloc ${PROJECT_NAME})
+
 add_executable(test_pub test/cpp/test_pub.cpp)
 target_link_libraries(test_pub ${PROJECT_NAME})
 
