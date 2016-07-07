@@ -3,8 +3,8 @@
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
-#include <zyre.h>
-#include "add_n_ints.hpp"
+#include <thread>
+#include <chrono>
 
 namespace qm = quickmsg;
 
@@ -20,7 +20,7 @@ main(int argc, char** argv)
     std::cout << "client request\n" << req << std::endl;
     std::string resp = client.calls(req);
     std::cout << i << " server response: " << resp << std::endl;
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   
   return 0;
