@@ -37,8 +37,8 @@ void java_MessageCallback(const quickmsg::Message* msg, void* args)
   jint ret = JNI_GetCreatedJavaVMs(vms, 3, &num_vms);
   assert(ret == JNI_OK);
   assert(num_vms >= 1);
-  //vms[0]->AttachCurrentThreadAsDaemon((void**)&data->env, NULL);
-  vms[0]->AttachCurrentThread((void**)&data->env, NULL);
+  vms[0]->AttachCurrentThreadAsDaemon((void**)&data->env, NULL);
+  //vms[0]->AttachCurrentThread((void**)&data->env, NULL);
 
   if (!data->init_thread) {
     std::string name("handleMessage(JNI)");
@@ -100,8 +100,8 @@ char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
   jint ret = JNI_GetCreatedJavaVMs(vms, 3, &num_vms);
   assert(ret == JNI_OK);
   assert(num_vms >= 1);
-  //vms[0]->AttachCurrentThreadAsDaemon((void**)&data->env, NULL);
-  vms[0]->AttachCurrentThread((void**)&data->env, NULL);
+  vms[0]->AttachCurrentThreadAsDaemon((void**)&data->env, NULL);
+  //vms[0]->AttachCurrentThread((void**)&data->env, NULL);
 
   // get the callback interface method
   const jclass cbIfaceClass = (data->env)->
@@ -133,6 +133,7 @@ char* java_ServiceCallback(const quickmsg::Message* msg, void* args)
   //------------------------------------------------------------
   
   check_for_exception(data, "IServiceCallback.handleMessage()");
+  //vms[0]->DetachCurrentThread();
  
   // parse the string, extract the data (don't leak memory in the JVM)
   jboolean is_copy;

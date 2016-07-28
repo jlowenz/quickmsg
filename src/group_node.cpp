@@ -68,9 +68,8 @@ namespace quickmsg {
   {
     GroupNode node("_interrupter_");
     node.join(GroupNode::control_);
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		node.leave(GroupNode::control_);
-		node.stop();
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    node.leave(GroupNode::control_);
   }
 
   //--------------------------------------------------------------------------------
@@ -181,6 +180,8 @@ namespace quickmsg {
   std::string GroupNode::control_("");
   std::atomic_bool GroupNode::running_;
 
+  const int MAX_RESTARTS = 10;
+
   std::string GroupNode::name()
   {
     return GroupNode::name_;
@@ -199,7 +200,7 @@ namespace quickmsg {
     parse_string_csv(GroupNode::iface(), node_ifaces_);
     size_t ifaces_to_try = (GroupNode::iface().empty()) ? 0 : node_ifaces_.size();
     node_desc_ = desc;
-    control_group_ = GroupNode::control_;
+    control_group_ = GroupNode::control_;    
 
     // start the node
     size_t interface = 0;
@@ -240,7 +241,8 @@ namespace quickmsg {
       }
 
       interface++;
-    } while (zyre_start(node_) != 0);
+      BOOST_LOG_TRIVIAL(info) << "Node starting: " << node_name_ << std::endl;
+    } while (zyre_start(node_) != 0 && interface < MAX_RESTARTS);   
 
     // join the control group - too heavy
     if (zyre_join(node_, control_group_.c_str())) {
@@ -256,6 +258,7 @@ namespace quickmsg {
       prom_thread_ = new std::thread(&GroupNodeImpl::update_groups, this);
       BOOST_LOG_TRIVIAL(debug) << "Started promiscuous group thread..." << std::endl;
     }
+    BOOST_LOG_TRIVIAL(debug) << "Node started: " << node_name_ << std::endl;
   }
   GroupNode::GroupNode(const std::string& desc, bool prom)
     : self(new GroupNodeImpl(desc, prom))
@@ -264,6 +267,7 @@ namespace quickmsg {
   
   GroupNodeImpl::~GroupNodeImpl()
   {    
+    BOOST_LOG_TRIVIAL(debug) << "Node dying: " << node_name_ << std::endl;
     if (!stopped_) {
       stopped_ = true;
       zyre_stop(node_);
@@ -280,8 +284,8 @@ namespace quickmsg {
       }
       delete event_thread_;
     }
-    BOOST_LOG_TRIVIAL(debug) << "destroying zyre node..." << std::endl;
     zyre_destroy(&node_);
+    BOOST_LOG_TRIVIAL(debug) << "Node destroyed: " << node_name_ << std::endl;
   }
   GroupNode::~GroupNode()
   {

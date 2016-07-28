@@ -20,6 +20,7 @@ namespace quickmsg {
   {
     quickmsg::GroupNode::running_.store(false);
     quickmsg::GroupNode::notify_interrupt();
+    shutdown("");
   }
 
 #if _WIN32
