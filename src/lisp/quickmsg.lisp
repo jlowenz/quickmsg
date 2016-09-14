@@ -14,6 +14,7 @@
 	   async-subscriber-spin
 	   async-subscriber-destroy
            client-new
+	   client-new-nowait
            client-destroy
            call-srv
 	   service-call-timeout
@@ -112,6 +113,9 @@ startup."
 (cffi:defcfun ("qm_client_new" client-new) :pointer
   (topic :string))
 
+(cffi:defcfun ("qm_client_new_nowait" client-new-nowait) :pointer
+  (topic :string))
+
 (cffi:defcfun ("qm_client_destroy" client-destroy) :void
   (self_p :pointer))
 
@@ -121,6 +125,7 @@ startup."
 
 (defun call-srv (self-p request)
   "Call the service with the given request string"  
+  (assert self-p self-p)
   (let ((resp-ptr (cffi:foreign-alloc :pointer)))
     (cffi:with-foreign-string (req-str request)      
       (let* ((ret (cffi:foreign-funcall "qm_call_srv" 

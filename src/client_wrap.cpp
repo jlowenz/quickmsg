@@ -16,7 +16,7 @@ extern "C" {
   } 
 
   qm_client_t
-  qm_client_new_nowait (const char* srv_name) 
+  qm_client_new_nowait (const char* srv_name)
   {
     BOOST_LOG_TRIVIAL(debug) << " Creating client to service "<<srv_name<<std::endl;
     Client* client = new Client(srv_name, false);
@@ -27,6 +27,7 @@ extern "C" {
   qm_client_destroy(qm_client_t self_p)
   {
     Client* client = reinterpret_cast<Client*>(self_p);
+    if (client == NULL) return;
     delete client;
   }
 
@@ -34,14 +35,17 @@ extern "C" {
   qm_call_srv(qm_client_t self_p, const char* req, char** c_resp)
   {
     Client* client = reinterpret_cast<Client*>(self_p);
+    assert(client != NULL); // ensure the client is NOT null
     try {
       std::string resp = client->calls(req);
       *c_resp = (char*)malloc(resp.length() + 1);
       memcpy(*c_resp, resp.c_str(), resp.length() + 1);
       return 0;
-    } catch (ServiceCallTimeout& /*to*/) {
+    } catch (const ServiceCallTimeout& /*to*/) {
       // can't let exceptions escape from the C interface
       *c_resp = NULL;
+      return -1;
+    } catch (const InvalidResponse& /*to*/) {
       return -1;
     }
   }
