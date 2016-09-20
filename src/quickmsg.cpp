@@ -70,6 +70,7 @@ namespace quickmsg {
 
   void init(const std::string& name, const std::string& iface)
   {
+    GroupNode::ref_count_++;
     // if the function has already been called, just return.
     if (GroupNode::running_.load()) return;
 
@@ -113,9 +114,12 @@ namespace quickmsg {
 
   void shutdown(const std::string& reason)
   {
-    //GroupNode::running_.store(false);
-    //GroupNode::notify_interrupt();
-    zsys_shutdown(); // use a sledgehammer
+    GroupNode::ref_count_--;    
+    if (GroupNode::ref_count_.load() <= 0) {
+      //GroupNode::running_.store(false);
+      //GroupNode::notify_interrupt();
+      zsys_shutdown(); // use a sledgehammer
+    }
   }
 
   bool ok()

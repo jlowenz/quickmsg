@@ -179,6 +179,7 @@ namespace quickmsg {
   std::string GroupNode::iface_("");
   std::string GroupNode::control_("");
   std::atomic_bool GroupNode::running_;
+  std::atomic_int GroupNode::ref_count_;
 
   const int MAX_RESTARTS = 10;
 
