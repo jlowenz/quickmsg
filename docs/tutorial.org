@@ -146,6 +146,8 @@ We assume you have created a development directory for your source code and libr
 
 NOTE: Although CMake produces a multi-configuration build setup, some values are only set in the build configuration step (thus, the CMAKE_BUILD_TYPE definition). This probably needs to be fixed somehow in the future.
 
+NOTE: At the moment, Quickmsg depends on Intel's Threading Building Blocks (tbb.dll), and this ALSO must be in your PATH (preferrably alongside the quickmsg-c.dll) in order for the quickmsg-c.dll to load. The debug DLL for TBB must likewise be present in the path for the quickmsg_c-d.dll also.
+
 *** Installing Binaries
 ...
 * Footnotes
