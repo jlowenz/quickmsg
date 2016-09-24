@@ -628,8 +628,9 @@ namespace quickmsg {
 	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " stops | " << node_name_ << std::endl; }
         return false;
-      default:
+      default:	
 	BOOST_LOG_TRIVIAL(debug) << "got an unexpected event" << std::endl;
+	BOOST_LOG_TRIVIAL(error) << "Got unexpected event [" << t << "]" << std::endl;
       }
     } else {
       BOOST_LOG_TRIVIAL(debug) << "No event" << std::endl;
