@@ -10,6 +10,9 @@
            subscriber-new
 	   subscriber-get-messages
            subscriber-destroy
+	   msgvec-size
+	   msgvec-get
+	   msgvec-destroy
 	   async-subscriber-new
 	   async-subscriber-spin
 	   async-subscriber-destroy
@@ -74,6 +77,21 @@ startup."
 
 (cffi:defcfun ("qm_subscriber_destroy" subscriber-destroy) :void
   (self_p :pointer))
+
+;; Message Vector
+
+(cffi:defcfun ("qm_vec_qm_message_t_size" msgvec-size) :int
+  "Return the number of messages in the vector"
+  (vec-p :pointer))
+
+(cffi:defcfun ("qm_vec_qm_message_t_get" msgvec-get) :pointer
+  "Return the message at the specified index"
+  (vec-p :pointer)
+  (index :int))
+
+(cffi:defcfun ("qm_vec_qm_message_t_destroy" msgvec-destroy) :pointer
+  "Destroy and clean up the message vector"
+  (vec-p :pointer))
 
 ;; (cffi:defcfun ("qm_async_subscriber_new" async-subscriber-new) :pointer
 ;;   (topic :string)
