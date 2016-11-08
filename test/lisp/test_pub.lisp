@@ -8,11 +8,11 @@
 (defun main ()
   ;; default network iface name is "". Should be set based on network configuration
   (qm:init "test_pub" "")
-  (let ((pub (qm:publisher-new "chatter")))
+  (let ((pub (qm:publisher-new "chatter" :wait)))
     (iterate:iterate (iterate:while (qm:ok))
 	     (for i from 1 to 10)
 	     (qm:publish pub (format nil "Hello World ~d~%" i))
-	     (sleep 1))
+	     (sleep 0.5))
     (qm:publisher-destroy pub)))
 
 (main)

@@ -57,7 +57,7 @@ startup."
   (cffi:with-foreign-string (ftopic topic)
     (cffi::foreign-funcall "qm_publisher_new" 
 			   :pointer ftopic
-			   :int (cffi::foreign-enum-value wait-mode)
+			   :int (cffi::foreign-enum-value 'wait_mode_t wait-mode)
 			   :pointer)))
 
 (cffi:defcfun ("qm_publisher_destroy" publisher-destroy) :void
@@ -143,7 +143,7 @@ startup."
 
 (defun call-srv (self-p request)
   "Call the service with the given request string"  
-  (assert self-p self-p)
+  (assert self-p)
   (let ((resp-ptr (cffi:foreign-alloc :pointer)))
     (cffi:with-foreign-string (req-str request)      
       (let* ((ret (cffi:foreign-funcall "qm_call_srv" 
