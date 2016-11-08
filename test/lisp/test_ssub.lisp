@@ -22,6 +22,7 @@
 	 (if (> sz 0)
 	     (loop for i from 0 to (- sz 1) do
 		  (echo-msg (qm:msgvec-get v i))))
+	 (qm:msgvec-destroy v)
 	 (sleep 1)))
     (qm:subscriber-destroy sub)))
 
