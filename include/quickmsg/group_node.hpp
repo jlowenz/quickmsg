@@ -103,6 +103,7 @@ namespace quickmsg {
     static std::string name_;
     static std::string iface_;
     static std::string control_;
+    static std::atomic_int ref_count_;
     static std::atomic_bool running_;
     static void notify_interrupt();
 

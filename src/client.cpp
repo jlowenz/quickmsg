@@ -67,10 +67,10 @@ namespace quickmsg {
 			      [&]{ return !ok() || message_received_.load(); });
     }
     
-    if (!message_received_.load()) {
+    if (!message_received_.load() && ok()) {
       throw ServiceCallTimeout();
     }
-    if (!response_) {
+    if (!response_ && ok()) {
       throw InvalidResponse();
     }
 
