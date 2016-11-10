@@ -69,6 +69,7 @@ using namespace quickmsg;
 /* { */
 /*   free($2); */
 /* } */
+
 // Handle exceptions
 %typemap(throws, throws="quickmsg.ServiceCallTimeout") quickmsg::ServiceCallTimeout %{
   jclass excep = jenv->FindClass("quickmsg/ServiceCallTimeout");
@@ -79,6 +80,20 @@ using namespace quickmsg;
 %}
 %typemap(javabase) quickmsg::ServiceCallTimeout "java.lang.Exception";
 %typemap(javacode) quickmsg::ServiceCallTimeout %{
+  public String getMessage() {
+    return what();
+  }
+%}
+
+%typemap(throws, throws="quickmsg.InvalidResponse") quickmsg::InvalidResponse %{
+  jclass excep = jenv->FindClass("quickmsg/InvalidResponse");
+  if (excep) {
+    jenv->ThrowNew(excep, $1.what());
+  }
+  return $null;
+%}
+%typemap(javabase) quickmsg::InvalidResponse "java.lang.Exception";
+%typemap(javacode) quickmsg::InvalidResponse %{
   public String getMessage() {
     return what();
   }

@@ -17,6 +17,7 @@ main(int argc, char** argv)
 
   for (i = 0; i < 10; ++i) {
     char* resp = NULL;
+    if (!qm_ok()) break;
     if (qm_call_srv(c, req, &resp)) {
       printf("ERROR: problem calling service");
     }
@@ -26,5 +27,6 @@ main(int argc, char** argv)
   }
 
   qm_client_destroy(c);
+  /*qm_shutdown("");*/
   return 0;
 }

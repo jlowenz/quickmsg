@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <czmq.h>
 #include <stdlib.h>
+#include <iostream>
 
 #if _WIN32
 #include <WinSock2.h>
@@ -18,9 +19,7 @@ namespace quickmsg {
 
   void __shutdown_handler(int param)
   {
-    quickmsg::GroupNode::running_.store(false);
-    quickmsg::GroupNode::notify_interrupt();
-    shutdown("");
+    shutdown(": interrupt triggered");
   }
 
 #if _WIN32
@@ -70,6 +69,7 @@ namespace quickmsg {
 
   void init(const std::string& name, const std::string& iface)
   {
+    GroupNode::ref_count_++;
     // if the function has already been called, just return.
     if (GroupNode::running_.load()) return;
 
@@ -92,7 +92,7 @@ namespace quickmsg {
     zsys_init();
     //zsys_handler_set(NULL);
     boost::log::core::get()
-      ->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
+      ->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
     zsys_set_logstream(NULL);
     
     BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
@@ -113,9 +113,13 @@ namespace quickmsg {
 
   void shutdown(const std::string& reason)
   {
-    //GroupNode::running_.store(false);
-    //GroupNode::notify_interrupt();
-    zsys_shutdown(); // use a sledgehammer
+    GroupNode::ref_count_--;    
+    if (GroupNode::ref_count_.load() <= 0) {
+      std::cout << "Quickmsg shutdown" << reason << std::endl;
+      GroupNode::running_.store(false);
+      GroupNode::notify_interrupt();
+      //zsys_shutdown(); // use a sledgehammer
+    }
   }
 
   bool ok()

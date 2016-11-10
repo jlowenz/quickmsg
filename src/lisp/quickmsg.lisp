@@ -10,6 +10,9 @@
            subscriber-new
 	   subscriber-get-messages
            subscriber-destroy
+	   msgvec-size
+	   msgvec-get
+	   msgvec-destroy
 	   async-subscriber-new
 	   async-subscriber-spin
 	   async-subscriber-destroy
@@ -54,7 +57,7 @@ startup."
   (cffi:with-foreign-string (ftopic topic)
     (cffi::foreign-funcall "qm_publisher_new" 
 			   :pointer ftopic
-			   :int (cffi::foreign-enum-value wait-mode)
+			   :int (cffi::foreign-enum-value 'wait_mode_t wait-mode)
 			   :pointer)))
 
 (cffi:defcfun ("qm_publisher_destroy" publisher-destroy) :void
@@ -74,6 +77,21 @@ startup."
 
 (cffi:defcfun ("qm_subscriber_destroy" subscriber-destroy) :void
   (self_p :pointer))
+
+;; Message Vector
+
+(cffi:defcfun ("qm_vec_qm_message_t_size" msgvec-size) :int
+  "Return the number of messages in the vector"
+  (vec-p :pointer))
+
+(cffi:defcfun ("qm_vec_qm_message_t_get" msgvec-get) :pointer
+  "Return the message at the specified index"
+  (vec-p :pointer)
+  (index :int))
+
+(cffi:defcfun ("qm_vec_qm_message_t_destroy" msgvec-destroy) :pointer
+  "Destroy and clean up the message vector"
+  (vec-p :pointer))
 
 ;; (cffi:defcfun ("qm_async_subscriber_new" async-subscriber-new) :pointer
 ;;   (topic :string)
@@ -125,7 +143,7 @@ startup."
 
 (defun call-srv (self-p request)
   "Call the service with the given request string"  
-  (assert self-p self-p)
+  (assert self-p)
   (let ((resp-ptr (cffi:foreign-alloc :pointer)))
     (cffi:with-foreign-string (req-str request)      
       (let* ((ret (cffi:foreign-funcall "qm_call_srv" 

@@ -25,6 +25,5 @@ main(int argc, char** argv)
   qm_service_spin(svc);
   qm_service_destroy(svc);
 
-
   return 0;
 }
