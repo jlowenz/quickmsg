@@ -138,10 +138,10 @@ We assume you have created a development directory for your source code and libr
 **** Building Quickmsg
 
 - Configure Quickmsg
-  - Create a =qmbuild= directory in the =dev= directory
+  - Create a =qmbuild= directory in the =dev= directory, and change to it
   - run ~cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_BUILD_TYPE=Release ../quickmsg~
 - Build Quickmsg
-  - Change to =qmbuild= directory
+  - Change to =qmbuild= directory (if you are not in it already)
   - run ~msbuild /m /property:Configuration=Release ALL_BUILD.vcxproj~
 
 NOTE: Although CMake produces a multi-configuration build setup, some values are only set in the build configuration step (thus, the CMAKE_BUILD_TYPE definition). This probably needs to be fixed somehow in the future.
