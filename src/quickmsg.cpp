@@ -130,7 +130,9 @@ namespace quickmsg {
       std::cout << "Quickmsg shutdown" << reason << std::endl;
       GroupNode::running_.store(false);
       GroupNode::notify_interrupt();
-      //zsys_shutdown(); // use a sledgehammer
+#if _WIN32
+      zsys_shutdown(); // use a sledgehammer
+#endif
     }
   }
 
