@@ -37,6 +37,8 @@ endif()
 find_package(Boost REQUIRED COMPONENTS date_time system thread log coroutine)
 include_directories(${Boost_INCLUDE_DIRS})
 
+message("Boost LIBRARIES: ${Boost_LIBRARIES}")
+
 find_package(Java COMPONENTS Runtime Development)
 find_package(JNI)
 
