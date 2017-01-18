@@ -24,6 +24,7 @@ main(int argc, char** argv)
   svc = qm_service_new("hello", service_handler, NULL);
   qm_service_spin(svc);
   qm_service_destroy(svc);
-
+  qm_shutdown(": done");
+  
   return 0;
 }

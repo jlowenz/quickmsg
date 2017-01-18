@@ -25,12 +25,20 @@ handler(const qm::Message* msg, void* args)
   std::cout << "Message received: " << msg->msg << std::endl;
 }
 
+// void qmshutdown()
+// {
+//   qm::shutdown(": done");
+// }
+
 int
 main(int argc, char** argv)
 {
+  //std::atexit(qmshutdown);
   qm::init("test_cpp_sub");
-  qm::AsyncSubscriber async_sub("chatter", handler, NULL);  
-  async_sub.spin();
+  qm::AsyncSubscriber* async_sub = new qm::AsyncSubscriber("chatter", handler, NULL);
+  async_sub->spin();
+  delete async_sub;
+  qm::shutdown(": done");
   //  qm::Subscriber sub("chatter", 20);
   // SubImpl sub("chatter");
   // while (qm::ok())

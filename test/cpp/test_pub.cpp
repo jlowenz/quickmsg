@@ -8,9 +8,15 @@
 
 namespace qm = quickmsg;
 
+void qmshutdown()
+{
+  qm::shutdown(": done");
+}
+
 int
 main(int argc, char** argv)
 {
+  std::atexit(qmshutdown);
   qm::init("test_cpp_pub");
   
   qm::Publisher pub("chatter", true);
@@ -23,5 +29,6 @@ main(int argc, char** argv)
     std::cout << ss.str();
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
+  
   return 0;
 }

@@ -101,6 +101,7 @@ We assume you have created a development directory for your source code and libr
 
 - Install 7z or your favorite zip program
 - Install Git for Windows (https://git-scm.com/download/win)
+  - This should install a "Git Bash" link that runs a small bash prompt to do command line git.
 - Install CMake (https://cmake.org/download)
   - Be sure to add cmake to the system path
 - Download Boost 1.58 or later, unpack into =dev=
@@ -133,15 +134,16 @@ We assume you have created a development directory for your source code and libr
 - Build the Zyre dependencies
   - Launch a Visual Studio cmd prompt
   - Change to the =dev= directory
-  - run ~quickmsg/msvc/build_zyre.bat~
+  - run ~quickmsg\msvc\build_zyre.bat~
 
 **** Building Quickmsg
 
 - Configure Quickmsg
-  - Create a =qmbuild= directory in the =dev= directory
+  - Create a =qmbuild= directory in the =dev= directory, and change to it
   - run ~cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_BUILD_TYPE=Release ../quickmsg~
 - Build Quickmsg
-  - Change to =qmbuild= directory
+  - Launch/switch to a Visual Studio cmd prompt
+  - Change to =qmbuild= directory (if you are not in it already)
   - run ~msbuild /m /property:Configuration=Release ALL_BUILD.vcxproj~
 
 NOTE: Although CMake produces a multi-configuration build setup, some values are only set in the build configuration step (thus, the CMAKE_BUILD_TYPE definition). This probably needs to be fixed somehow in the future.

@@ -27,6 +27,6 @@ main(int argc, char** argv)
   }
 
   qm_client_destroy(c);
-  /*qm_shutdown("");*/
+  qm_shutdown(": done");
   return 0;
 }

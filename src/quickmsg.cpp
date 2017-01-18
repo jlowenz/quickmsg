@@ -7,6 +7,7 @@
 #include <czmq.h>
 #include <stdlib.h>
 #include <iostream>
+#include <cstdlib>
 
 #if _WIN32
 #include <WinSock2.h>
@@ -63,8 +64,8 @@ namespace quickmsg {
 	return FALSE;
       }
   }
-#endif
-
+#endif  
+  
   //static void (*prev_handler)(int);
 
   void init(const std::string& name, const std::string& iface)
@@ -85,14 +86,25 @@ namespace quickmsg {
     }
 #endif
 
+    bool logging = false;
+    char *log_env = std::getenv("QUICKMSG_ENABLE_LOG");
+    if (log_env) {
+      logging = true;
+    }
+    
     GroupNode::running_.store(true);
     GroupNode::name_ = name;
     GroupNode::control_ = name + "/CTL";
     GroupNode::iface_ = iface;
     zsys_init();
     //zsys_handler_set(NULL);
-    boost::log::core::get()
-      ->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+    if (logging) {
+      boost::log::core::get()
+	->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+    } else {
+      boost::log::core::get()
+	->set_filter(boost::log::trivial::severity >= boost::log::trivial::fatal);
+    }
     zsys_set_logstream(NULL);
     
     BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
@@ -118,7 +130,9 @@ namespace quickmsg {
       std::cout << "Quickmsg shutdown" << reason << std::endl;
       GroupNode::running_.store(false);
       GroupNode::notify_interrupt();
-      //zsys_shutdown(); // use a sledgehammer
+#if _WIN32
+      zsys_shutdown(); // use a sledgehammer
+#endif
     }
   }
 
