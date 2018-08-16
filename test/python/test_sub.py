@@ -18,7 +18,7 @@ class SubscriberImpl(quickmsg_py.AsyncSubscriber):
         print 'got message', msg.msg
 
 if __name__=='__main__':
-    quickmsg_py.init("test_py_sub")
+    quickmsg_py.init("test_py_sub", "", True)
     s = SubscriberImpl('chatter')
     s.spin()
     

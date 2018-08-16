@@ -2,6 +2,7 @@
 #include <quickmsg/quickmsg_wrap.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdbool.h>
 
 int
 main(int argc, char** argv)
@@ -11,8 +12,8 @@ main(int argc, char** argv)
   qm_client_t c;
   const char* iface = ""; /* whatever iface zyre defaults to */
   const char* req = "Hello";
-
-  qm_init("test_c_client", iface);
+  bool handle_sig = true;
+  qm_init("test_c_client", iface, handle_sig);
   c = qm_client_new("hello");
 
   for (i = 0; i < 10; ++i) {

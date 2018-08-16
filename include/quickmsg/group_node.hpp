@@ -110,7 +110,7 @@ namespace quickmsg {
     GroupNodeImpl* self;
 
     friend class GroupNodeImpl;
-    friend void init(const std::string&, const std::string&);
+    friend void init(const std::string&, const std::string&, bool);
     friend void shutdown(const std::string&);
     friend bool ok();
     friend void __shutdown_handler(int);
