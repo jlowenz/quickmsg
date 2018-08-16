@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
 int
 main(int argc, char** argv)
@@ -11,8 +12,8 @@ main(int argc, char** argv)
   char msg[256];
   qm_publisher_t p;
   const char* iface = ""; /* whatever iface zyre defaults to */
-
-  qm_init("test_c_pub", iface);
+  bool handle_sig = true;
+  qm_init("test_c_pub", iface, handle_sig);
   p = qm_publisher_new("chatter", qm_wait);
   for (i = 0; i < 10; ++i) {
     sprintf(msg, "Hello World %d", i);

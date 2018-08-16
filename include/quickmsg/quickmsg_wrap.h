@@ -2,6 +2,7 @@
 #define __QUICKMSG_WRAP_H_INCLUDED__
 
 #include <quickmsg/ctypes.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,7 +10,7 @@ extern "C" {
 
 
   QM_EXPORT void
-  qm_init(const char* name, const char* iface);
+  qm_init(const char* name, const char* iface, bool handle_signals);
 
   QM_EXPORT void
   qm_shutdown(const char* reason);
