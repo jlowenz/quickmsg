@@ -68,7 +68,7 @@ namespace quickmsg {
   
   //static void (*prev_handler)(int);
 
-  void init(const std::string& name, const std::string& iface)
+  void init(const std::string& name, const std::string& iface, bool handle_signals)
   {
     GroupNode::ref_count_++;
     // if the function has already been called, just return.
@@ -97,7 +97,6 @@ namespace quickmsg {
     GroupNode::control_ = name + "/CTL";
     GroupNode::iface_ = iface;
     zsys_init();
-    //zsys_handler_set(NULL);
     if (logging) {
       boost::log::core::get()
 	->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
@@ -107,20 +106,22 @@ namespace quickmsg {
     }
     zsys_set_logstream(NULL);
     
-    BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
+    if (handle_signals) {
+      BOOST_LOG_TRIVIAL(debug) << "installing sig handler" << std::endl;
 #if _WIN32
-    SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE);
+      SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE);
 #else
-    struct sigaction action;
-    //struct sigaction prev_action;
-    action.sa_handler = __shutdown_handler;
-    action.sa_flags = 0;
-    sigemptyset(&action.sa_mask);
-    if (sigaction(SIGINT, &action, NULL)) {
-      BOOST_LOG_TRIVIAL(warning) << "problem with sigaction" << std::endl;
-    }
+      struct sigaction action;
+      //struct sigaction prev_action;
+      action.sa_handler = __shutdown_handler;
+      action.sa_flags = 0;
+      sigemptyset(&action.sa_mask);
+      if (sigaction(SIGINT, &action, NULL)) {
+        BOOST_LOG_TRIVIAL(warning) << "problem with sigaction" << std::endl;
+      }
 #endif
-
+    }
+    else zsys_handler_set(NULL);
   }
 
   void shutdown(const std::string& reason)
