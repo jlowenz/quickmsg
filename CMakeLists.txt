@@ -132,7 +132,9 @@ if (APPLE)
 else()
 endif()
 
-include_directories(${JNI_INCLUDE_DIRS})
+if (JNI_FOUND)
+  include_directories(${JNI_INCLUDE_DIRS})
+endif()
 include_directories(${LIB_ZYRE_INCLUDE_DIRS})
 
 
@@ -448,7 +450,7 @@ endif()
   
 if (NOT WIN32) 
   # installation
-  install(TARGETS ${PROJECT_NAME} "${PROJECT_NAME}-c" "${PROJECT_NAME}_java" LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
+  install(TARGETS ${PROJECT_NAME} "${PROJECT_NAME}-c" LIBRARY DESTINATION lib) # relative to ${CMAKE_INSTALL_PREFIX}
 
   install(DIRECTORY include/${PROJECT_NAME}
     DESTINATION include
@@ -462,11 +464,14 @@ if (NOT WIN32)
     ${CMAKE_CURRENT_BINARY_DIR}/swig/quickmsg_py.py
     DESTINATION lib/python2.7/dist-packages)
 
-  # install Java components
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
-    ${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar
-    DESTINATION share/java)
+  if (JAVA_FOUND AND JNI_FOUND)
+    # install Java components
+    install(TARGETS "${PROJECT_NAME}_java" LIBRARY DESTINATION lib)
+    install(FILES
+      ${CMAKE_CURRENT_BINARY_DIR}/quickmsg.jar
+      ${CMAKE_CURRENT_BINARY_DIR}/quickmsg-native.jar
+      DESTINATION share/java)
+  endif()
 endif()
 
 # install Common Lisp components
