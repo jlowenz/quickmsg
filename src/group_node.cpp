@@ -527,18 +527,18 @@ namespace quickmsg {
       return e_ != NULL;
     }
 
-    zyre_event_type_t type() const {
+    std::string type() const {
       return zyre_event_type(e_);
     }
 
     std::string peer_uuid() const {
-      const char* s = zyre_event_sender(e_);
+      const char* s = zyre_event_peer_uuid(e_);
       assert(s != NULL);
       return std::string(s);
     }
 
     std::string peer_name() const {
-      const char* s = zyre_event_name(e_);
+      const char* s = zyre_event_peer_name(e_);
       assert(s != NULL);
       std::string str(s);
       //printf("peer_name %s", str.c_str());
@@ -574,17 +574,15 @@ namespace quickmsg {
     // will be destroyed at the end of the function
     if (e.valid() && ok()) {
       BOOST_LOG_TRIVIAL(debug) << "got event" << std::endl;
-      zyre_event_type_t t = e.type();
-      switch (t) {
-      case ZYRE_EVENT_WHISPER: {
+      std::string t = e.type();
+      if (t == "WHISPER") {
         std::string name = e.peer_name();
         BOOST_LOG_TRIVIAL(debug) << name << " whispers -> " << node_name_ << std::endl;
         std::string peer_uuid = e.peer_uuid();
         BOOST_LOG_TRIVIAL(debug) << " peer id " << peer_uuid << std::endl;
         zmsg_t* msg = e.message();
         handle_whisper(peer_uuid, msg); }
-        break;
-      case ZYRE_EVENT_SHOUT: {
+      else if (t == "SHOUT") {
         std::string group_id = e.group();
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " " << group_id 
 		   << " shouts ->" << node_name_ << std::endl;
@@ -592,12 +590,10 @@ namespace quickmsg {
         BOOST_LOG_TRIVIAL(debug) << " peer id " << peer_uuid << std::endl;
         zmsg_t* msg = e.message();
         handle_shout(group_id, peer_uuid, msg); }
-        break;
-      case ZYRE_EVENT_ENTER: {
+      else if (t == "ENTER") {
         std::string name = e.peer_name();
         BOOST_LOG_TRIVIAL(debug) << name << " enters | " << node_name_ << std::endl; }
-        break;
-      case ZYRE_EVENT_JOIN: {
+      else if (t == "JOIN") {
         std::string group_id = e.group();
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " joins " << group_id << " | " 
 		   << node_name_ << std::endl;
@@ -606,8 +602,7 @@ namespace quickmsg {
           joins_[group_id]++; 
         }
         join_cond_.notify_all(); }
-        break; 
-      case ZYRE_EVENT_LEAVE: {
+      else if (t == "LEAVE") {
         std::string group_id = e.group();
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " leaves " << group_id << " | " 
 		   << node_name_ << std::endl;
@@ -615,20 +610,17 @@ namespace quickmsg {
 	  basic_lock lk(join_mutex_);
 	  joins_[group_id]--; 
 	}}
-        break;
-      case ZYRE_EVENT_EXIT: {
+      else if (t == "EXIT") {
 	if (e.peer_uuid() == self_->uuid()) {
 	  stop();
 	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " exits | " << node_name_ << std::endl; }
-        break;
-      case ZYRE_EVENT_STOP: {
+      else if (t == "STOP") {
 	if (e.peer_uuid() == self_->uuid()) {
 	  stop();
 	}
         BOOST_LOG_TRIVIAL(debug) << e.peer_name() << " stops | " << node_name_ << std::endl; }
-        return false;
-      default:	
+      else {
 	BOOST_LOG_TRIVIAL(debug) << "got an unexpected event" << std::endl;
 	BOOST_LOG_TRIVIAL(error) << "Got unexpected event [" << t << "]" << std::endl;
       }
@@ -637,7 +629,7 @@ namespace quickmsg {
       join_cond_.notify_all();
       return false;
     }
-    return true;    
+    return true;
   }
 
   void
